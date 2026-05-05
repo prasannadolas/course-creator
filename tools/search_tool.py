@@ -1,5 +1,9 @@
+import logging
 from duckduckgo_search import DDGS
-from utils.logger import app_logger
+
+# Setup a local logger for the tool to avoid import path issues
+logging.basicConfig(level=logging.INFO)
+app_logger = logging.getLogger("SearchTool")
 
 def perform_research(query: str, max_results=3):
     """
@@ -8,7 +12,10 @@ def perform_research(query: str, max_results=3):
     app_logger.info(f"🔍 Researching: {query}")
     
     try:
-        results = DDGS().text(query, max_results=max_results)
+        # Use a context manager for older versions of DDGS
+        with DDGS() as ddgs:
+            # list() is used to consume the generator
+            results = list(ddgs.text(query, max_results=max_results))
         
         if not results:
             return "No results found."
@@ -17,9 +24,9 @@ def perform_research(query: str, max_results=3):
         formatted_results = ""
         for i, res in enumerate(results, 1):
             formatted_results += f"\n--- Source {i} ---\n"
-            formatted_results += f"Title: {res['title']}\n"
-            formatted_results += f"URL: {res['href']}\n"
-            formatted_results += f"Summary: {res['body']}\n"
+            formatted_results += f"Title: {res.get('title', 'No Title')}\n"
+            formatted_results += f"URL: {res.get('href', 'No URL')}\n"
+            formatted_results += f"Summary: {res.get('body', 'No Summary')}\n"
             
         return formatted_results
 
@@ -29,4 +36,4 @@ def perform_research(query: str, max_results=3):
 
 if __name__ == "__main__":
     # Test the tool directly
-    print(perform_research("Latest trends in AI 2025"))
+    print(perform_research("Latest trends in AI 2026"))

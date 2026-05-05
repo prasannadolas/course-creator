@@ -15,7 +15,7 @@ def get_gemini_model():
 
     # You can easily switch models here
     return Gemini(
-        model="gemini-1.5-flash",
+        model="gemini-2.5-flash",
         api_key=api_key,
         # temperature=0.7 control creativity
     )
