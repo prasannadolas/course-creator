@@ -183,4 +183,3 @@ uvicorn server:app --reload
 The **Autonomous AI Course Creator** proves that complex, knowledge-intensive tasks like instructional design can be effectively automated through a sophisticated multi-agent system architecture. By grounding the AI with real-time search data and implementing adversarial feedback loops, we have built a system that balances the speed of AI with the quality control of human oversight.
 
 For Learning & Development (L&D) teams, educators, and EdTech platforms, this tool transforms content creation from a slow, expensive bottleneck into a scalable utility. It offers a significant acceleration in speed-to-market and democratizes access to rapid, high-quality curriculum development.
-```
