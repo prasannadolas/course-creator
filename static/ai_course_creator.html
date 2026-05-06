@@ -529,25 +529,65 @@
   .lesson-expand-btn:hover { background: var(--surface2); }
 
   /* Quiz column */
-  .quiz-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 14px 16px;
-    margin-bottom: 14px;
-    animation: fadeIn 0.4s ease;
+ /* ── INTERACTIVE MCQ QUIZ ── */
+  .mcq-question {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .mcq-question:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
   }
 
-  .quiz-card-title {
-    font-size: 12px;
+  .mcq-question-text {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  .mcq-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 14px;
+    margin: 8px 0;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: var(--text-secondary);
+  }
+
+  .mcq-option:hover:not(:disabled) {
+    background: var(--surface2);
+    border-color: var(--text-muted);
+  }
+
+  .mcq-option.correct {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .mcq-option.wrong {
+    background: var(--warn-light);
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  .mcq-feedback {
+    font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    margin-top: 8px;
+    display: none;
   }
 
   /* ── PROGRESS GLOBAL ── */
@@ -627,7 +667,7 @@
   <main class="main">
     <!-- TOP BAR -->
     <div class="topbar">
-      <span class="topbar-title" id="topbar-title">CourseGen AI</span>
+      <span class="topbar-title" id="topbar-title">AI COURSE CREATOR</span>
       <div class="topbar-actions">
         <button class="btn btn-primary" onclick="window.location.reload();">
           + NEW COURSE
@@ -839,7 +879,11 @@ function startGeneration() {
   });
   
   eventSource.onerror = () => { 
-    setProgress(0, '❌ Connection error. Is the server running?'); 
+    // Only show connection error if the text isn't already showing a caught backend error
+    const currentLabel = document.getElementById('progress-label').textContent;
+    if (!currentLabel.includes('❌')) {
+        setProgress(0, '❌ Connection error. Is the server running?'); 
+    }
     eventSource.close(); 
     setBadge(false);
   };
@@ -931,11 +975,34 @@ function handleLessonDone(d) {
 }
 
 function handleQuizDone(d) {
-  // Basic markdown rendering for quiz
-  let htmlQuiz = d.content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br>');
+  // 1. Attempt to parse the AI's markdown into structured MCQ data
+  const questions = parseQuiz(d.content);
+  let htmlQuiz = '';
 
+  // 2. Check if parsing was successful
+  if (questions.length === 0) {
+    // Fallback: If AI formatting was weird, just render standard text
+    htmlQuiz = d.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  } else {
+    // 3. Render the Interactive MCQ UI
+    questions.forEach((q) => {
+      htmlQuiz += `<div class="mcq-question">`;
+      htmlQuiz += `<div class="mcq-question-text">${q.num}. ${q.text}</div>`;
+
+      q.options.forEach(opt => {
+        // Pass whether this option is the correct one to the click handler
+        const isCorrect = opt.letter === q.correct;
+        htmlQuiz += `<button class="mcq-option" onclick="checkAnswer(this, ${isCorrect})">
+            <strong>${opt.letter.toUpperCase()})</strong> ${opt.text}
+        </button>`;
+      });
+      
+      htmlQuiz += `<div class="mcq-feedback"></div>`;
+      htmlQuiz += `</div>`;
+    });
+  }
+
+  // 4. Inject into the DOM
   document.getElementById('quizzes-col').innerHTML += `
     <div class="quiz-card">
       <div class="quiz-card-title">Module ${d.index + 1} Quiz</div>
@@ -943,6 +1010,92 @@ function handleQuizDone(d) {
         ${htmlQuiz}
       </div>
     </div>`;
+}
+
+// ── NEW HELPER: MCQ Click Handler ──
+function checkAnswer(btn, isCorrect) {
+  const parent = btn.parentElement;
+  const feedback = parent.querySelector('.mcq-feedback');
+  const buttons = parent.querySelectorAll('.mcq-option');
+
+  // Disable all buttons in this question once an answer is clicked
+  buttons.forEach(b => {
+      b.disabled = true;
+      b.style.cursor = 'default';
+  });
+
+  if (isCorrect) {
+      btn.classList.add('correct');
+      feedback.textContent = '✅ Correct!';
+      feedback.style.color = 'var(--accent)';
+  } else {
+      btn.classList.add('wrong');
+      feedback.textContent = '❌ Incorrect.';
+      feedback.style.color = 'var(--warn)';
+
+      // Auto-highlight the correct answer so the user learns from their mistake
+      buttons.forEach(b => {
+          if(b.getAttribute('onclick').includes('true')) {
+              b.classList.add('correct');
+          }
+      });
+  }
+  feedback.style.display = 'block';
+}
+
+// ── NEW HELPER: AI Markdown to MCQ Parser ──
+function parseQuiz(text) {
+  let questions = [];
+  
+  // Split the text to isolate the Answer Key
+  const parts = text.split(/(?:###|##|\*\*|---\n|\n---)\s*(?:Answer Key|Answers|Correct Answers)/i);
+  const quizBody = parts[0];
+  const answerKeyBody = parts.length > 1 ? parts[1] : "";
+
+  // Extract the correct answers into a dictionary (e.g., {"1": "c", "2": "b"})
+  let answers = {};
+  if (answerKeyBody) {
+      const ansRegex = /(\d+)[\.\:\-\)]\s*(?:\*\*)?([a-d])/gi;
+      let match;
+      while ((match = ansRegex.exec(answerKeyBody)) !== null) {
+          answers[match[1]] = match[2].toLowerCase();
+      }
+  }
+
+  // Extract the questions and options
+  const qRegex = /(?:^|\n)\s*\*?\*?(\d+)[\.\)]\s*\*?\*?([\s\S]*?)(?=(?:\n\s*\*?\*?\d+[\.\)]|$))/g;
+  let qMatch;
+  while ((qMatch = qRegex.exec(quizBody)) !== null) {
+      let qNum = qMatch[1];
+      let qBlock = qMatch[2].trim();
+
+      // Find all options (a, b, c, d) within this question block
+      const optRegex = /(?:^|\n)\s*([a-d])[\.\)]\s*(.*?)(?=(?:\n\s*[a-d][\.\)]|$))/gi;
+      let options = [];
+      let optMatch;
+      let firstOptIndex = qBlock.length;
+
+      while ((optMatch = optRegex.exec(qBlock)) !== null) {
+          if(options.length === 0) firstOptIndex = optMatch.index;
+          options.push({
+              letter: optMatch[1].toLowerCase(),
+              text: optMatch[2].trim().replace(/\*\*/g, '') 
+          });
+      }
+
+      // The question text is everything before the first option
+      let qText = qBlock.substring(0, firstOptIndex).trim().replace(/\*\*/g, '');
+
+      if (options.length > 0) {
+          questions.push({
+              num: qNum,
+              text: qText,
+              options: options,
+              correct: answers[qNum] || null
+          });
+      }
+  }
+  return questions;
 }
 
 function handleDone(d) {

@@ -1,4 +1,3 @@
-
 import asyncio
 import json
 import traceback
@@ -8,6 +7,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
 from types import SimpleNamespace
+
+# Import errors for Exception Handling
+from google.genai import errors
 
 # ADK imports
 from google.adk.runners import Runner
@@ -101,7 +103,7 @@ async def run_pipeline_stream(topic: str, audience: str):
             yield sse_event("lesson_status", {"index": i, "status": "reviewing"})
             yield sse_event("progress",      {"pct": base_pct + 5, "label": f"Dean: reviewing {module_title}..."})
 
-            await asyncio.sleep(5) # small cool-down
+            await asyncio.sleep(5) # small cool-down to help prevent rate limits
 
             # ── Dean (Reviewer) ────────────────────────────────────────────────
             yield sse_event("stage", {"stage": 2, "status": "active"})
@@ -136,8 +138,8 @@ async def run_pipeline_stream(topic: str, audience: str):
             full_content += f"\n### Quiz: {module_title}\n{quiz_text}\n\n"
 
             if i < len(modules) - 1:
-                yield sse_event("progress", {"pct": base_pct + 12, "label": "Cooling down (API rate limit)..."})
-                await asyncio.sleep(15)  # Gemini rate-limit pause between modules
+                yield sse_event("progress", {"pct": base_pct + 12, "label": "Cooling down API limits..."})
+                await asyncio.sleep(15)  # Extended 15-second cool down between modules
 
         # ── DONE ──────────────────────────────────────────────────────────────
         for s in range(4):
@@ -145,11 +147,22 @@ async def run_pipeline_stream(topic: str, audience: str):
 
         yield sse_event("progress", {"pct": 100, "label": "Course complete!"})
         yield sse_event("done",     {"full_content": full_content})
+
+    # ── ERROR HANDLING ────────────────────────────────────────────────────────
+    except errors.ServerError as e:
+        # Catches the 503 Server Overloaded error
+        print(f"Caught 503 Error: {e}")
+        yield sse_event("progress", {"pct": 0, "label": "❌ Google's servers are overloaded. Please try again in a minute."})
         
+    except errors.ClientError as e:
+        # Catches the 429 Rate Limit error
+        print(f"Caught 429 Error: {e}")
+        yield sse_event("progress", {"pct": 0, "label": "❌ API rate limit reached. Please wait 30 seconds."})
+
     except Exception as e:
+        # Catches any other random crashes
         error_details = traceback.format_exc()
         print(f"\n❌ PIPELINE CRASHED:\n{error_details}")
-        # This will now display the exact error on your web interface!
         yield sse_event("progress", {"pct": 0, "label": f"❌ Server Error: {str(e)}"})
 
 
@@ -165,7 +178,6 @@ def _parse_modules(syllabus_text: str) -> list[str]:
         "Module 3: Application",  "Module 4: Advanced Topics",
         "Module 5: Conclusion"
     ]
-
 
 
 # ── ROUTES ─────────────────────────────────────────────────────────────────
