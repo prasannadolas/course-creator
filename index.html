@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Course Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0eee9;
+    --surface3: #ebe8e1;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.14);
+    --text-primary: #1a1917;
+    --text-secondary: #6b6860;
+    --text-muted: #9c9a94;
+    --accent: #1a6b4a;
+    --accent-light: #e8f4ee;
+    --accent2: #7c5cbf;
+    --accent2-light: #f0ebfb;
+    --warn: #c86b1a;
+    --warn-light: #fbf0e8;
+    --danger: #b42318;
+    --danger-light: #fdecec;
+    --success: #157f52;
+    --success-light: #e8f7ef;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    --radius-full: 999px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-card: 0 2px 14px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background:
+      radial-gradient(circle at top left, rgba(124, 92, 191, 0.08), transparent 30%),
+      radial-gradient(circle at top right, rgba(26, 107, 74, 0.06), transparent 28%),
+      var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button, input, textarea, select { font: inherit; }
+
+  .app { display: flex; min-height: 100vh; }
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .topbar {
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--accent), #2a8b61);
+    color: white;
+    box-shadow: 0 10px 24px rgba(26,107,74,0.18);
+    flex-shrink: 0;
+  }
+  .brand-copy { min-width: 0; }
+  .topbar-title {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+    line-height: 1.1;
+  }
+  .topbar-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-strong);
+    background: rgba(255,255,255,0.6);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+    user-select: none;
+  }
+  .btn:hover { background: var(--surface2); border-color: rgba(0,0,0,0.2); transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+  .btn-primary {
+    background: var(--text-primary);
+    color: white;
+    border-color: transparent;
+    box-shadow: var(--shadow);
+  }
+  .btn-primary:hover { background: #333; }
+  .btn-secondary { background: var(--surface); }
+  .btn-ghost { background: transparent; }
+  .btn-danger {
+    background: var(--danger-light);
+    color: var(--danger);
+    border-color: rgba(180,35,24,0.16);
+  }
+
+  .content {
+    flex: 1;
+    padding: 28px 28px 40px;
+    max-width: 1240px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .hero {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 20px;
+    align-items: stretch;
+    margin-top: 6px;
+  }
+
+  .hero-card, .side-card, .empty-state, .summary-card, .filter-card, .course-card, .lesson-card, .quiz-card, .stage-card, .global-progress, .error-banner {
+    background: rgba(255,255,255,0.92);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+  }
+
+  .hero-card {
+    padding: 28px;
+    overflow: hidden;
+    position: relative;
+  }
+  .hero-card::after {
+    content: "";
+    position: absolute;
+    inset: auto -40px -30px auto;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,92,191,0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-sparkles { display: flex; gap: 4px; margin-bottom: 14px; }
+  .sparkle {
+    width: 10px; height: 10px; background: var(--accent2);
+    clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+    animation: twinkle 2s ease-in-out infinite;
+  }
+  .sparkle:nth-child(2) { animation-delay: .35s; transform: scale(.8); }
+  .sparkle:nth-child(3) { animation-delay: .7s; transform: scale(1.1); }
+  @keyframes twinkle { 0%,100%{opacity:.5; transform:scale(1);} 50%{opacity:1; transform:scale(1.25);} }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 46px);
+    line-height: 1.04;
+    letter-spacing: -0.6px;
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  .hero-title em { font-style: italic; color: var(--accent2); }
+  .hero-sub {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 22px;
+
+  /* Force single line layout */
+  max-width: none;      /* Removes the character limit */
+  white-space: nowrap;  /* Prevents the text from ever wrapping */
+  
+  /* Centering */
+  text-align: center;
+  margin-inline: auto;
+}
+
+
+  .quick-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .pill {
+    padding: 8px 12px;
+    border-radius: var(--radius-full);
+    background: var(--surface2);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .create-card {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-xl);
+    padding: 18px;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+  }
+  .create-card:focus-within {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1), 0 0 0 3px rgba(124,92,191,0.15);
+    border-color: rgba(124,92,191,0.3);
+  }
+  .create-textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--text-primary);
+    background: transparent;
+    resize: vertical;
+    min-height: 98px;
+    max-height: 220px;
+    line-height: 1.6;
+  }
+  .create-textarea::placeholder { color: var(--text-muted); }
+
+  .create-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .create-actions-left, .create-actions-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .audience-select, .format-select {
+    font-size: 13.5px;
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-primary);
+    outline: none;
+    cursor: pointer;
+  }
+
+  .counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+
+  .submit-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), #2a8b61);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    box-shadow: 0 10px 24px rgba(26,107,74,0.24);
+  }
+  .submit-btn:hover { transform: translateY(-2px) scale(1.03); }
+  .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+  .submit-btn svg { width: 18px; height: 18px; }
+
+  .side-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .side-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.12;
+    letter-spacing: -0.4px;
+    margin-bottom: 10px;
+  }
+  .side-copy { color: var(--text-secondary); font-size: 14px; }
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .mini-stat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+  }
+  .mini-stat-value { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+  .mini-stat-label { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: var(--radius-full);
+    padding: 8px 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    width: fit-content;
+  }
+  .status-ready { background: var(--accent-light); color: var(--accent); }
+  .status-working { background: var(--warn-light); color: var(--warn); }
+  .status-error { background: var(--danger-light); color: var(--danger); }
+
+  .quick-topics {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--border);
+  }
+  .quick-topics-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 7px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    background: var(--surface);
+    transition: all var(--transition);
+  }
+  .chip:hover { background: var(--text-primary); color: white; border-color: transparent; }
+
+  .error-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    margin-top: 18px;
+    background: linear-gradient(180deg, rgba(253,236,236,0.95), rgba(255,255,255,0.92));
+    border-color: rgba(180,35,24,0.16);
+  }
+  .error-banner.visible { display: flex; }
+  .error-copy { min-width: 0; }
+  .error-title { font-weight: 700; color: var(--danger); margin-bottom: 2px; }
+  .error-sub { color: var(--text-secondary); font-size: 13px; }
+  .error-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .pipeline-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .pipeline-back {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--border); background: white; color: var(--text-secondary);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all var(--transition); flex-shrink: 0;
+  }
+  .pipeline-back:hover { background: var(--surface2); }
+  .pipeline-title-block { flex: 1; min-width: 0; }
+  .pipeline-course-title {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 2.4vw, 30px);
+    font-weight: 400;
+    letter-spacing: -0.4px;
+    margin-bottom: 2px;
+  }
+  .pipeline-subtitle { font-size: 13px; color: var(--text-muted); }
+  .pipeline-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .meta-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 10px; border-radius: var(--radius-full);
+    font-size: 12px; font-weight: 700;
+    border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text-secondary);
+  }
+  .pipeline-badge {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-radius: var(--radius-full);
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .pipeline-badge.running { background: var(--accent-light); color: var(--accent); }
+  .pipeline-badge.done { background: var(--surface2); color: var(--text-secondary); }
+  .pipeline-badge.stopped { background: var(--warn-light); color: var(--warn); }
+  .pipeline-badge.error { background: var(--danger-light); color: var(--danger); }
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(.72);} }
+
+  .global-progress {
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .global-progress-info { flex: 1; min-width: 0; }
+  .global-progress-label { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+  .global-progress-bar { height: 7px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
+  .global-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #2a8b61); border-radius: 999px; transition: width 0.45s ease; }
+  .global-progress-pct { font-size: 22px; font-weight: 700; color: var(--accent); font-family: var(--font-display); }
+
+  .stages-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .stage-card {
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition);
+    min-height: 112px;
+  }
+  .stage-card.active { border-color: var(--accent); box-shadow: 0 10px 24px rgba(26,107,74,0.08); }
+  .stage-card.done { border-color: rgba(26,107,74,0.18); }
+  .stage-card.pending { opacity: .72; }
+  .stage-indicator {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; margin-bottom: 10px;
+    transition: all var(--transition);
+  }
+  .stage-indicator.pending-ind { background: var(--surface2); color: var(--text-muted); }
+  .stage-indicator.active-ind { background: var(--accent); color: white; }
+  .stage-indicator.done-ind { background: var(--accent-light); color: var(--accent); }
+  .stage-name { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+  .stage-desc { font-size: 12px; color: var(--text-muted); line-height: 1.45; }
+  .stage-shimmer {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+    transform: translateX(-100%); animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { to { transform: translateX(100%); } }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: rgba(255,255,255,0.72);
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow);
+  }
+  .tab-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: var(--radius-full);
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    transition: all var(--transition);
+  }
+  .tab-btn.active {
+    background: var(--text-primary);
+    color: white;
+  }
+
+  .toolbar-right { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .summary-card {
+    padding: 16px;
+    min-height: 116px;
+  }
+  .summary-icon {
+    width: 36px; height: 36px; border-radius: 12px;
+    display: grid; place-items: center;
+    background: var(--surface2);
+    margin-bottom: 12px;
+    color: var(--text-primary);
+  }
+  .summary-value { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; }
+  .summary-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .summary-note { font-size: 13px; color: var(--text-secondary); margin-top: 8px; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .course-card {
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .course-card-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .course-card-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .course-card-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .course-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .syllabus-module {
+    display: flex;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+    animation: fadeIn 0.35s ease;
+  }
+  .syllabus-module:last-child { border-bottom: none; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .module-num {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: var(--text-muted); flex-shrink: 0;
+  }
+  .module-num.done { background: var(--accent-light); color: var(--accent); }
+  .module-num.active { background: var(--accent); color: white; }
+  .module-title { font-size: 13.5px; font-weight: 700; color: var(--text-primary); line-height: 1.45; }
+  .module-text { flex: 1; }
+
+  .lesson-card, .quiz-card { overflow: hidden; margin-bottom: 14px; }
+  .lesson-card-header, .quiz-card-head {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .lesson-card-title, .quiz-card-title {
+    font-size: 14px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;
+  }
+  .lesson-status-badge {
+    font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: var(--radius-full);
+  }
+  .lesson-status-badge.generating { background: var(--warn-light); color: var(--warn); }
+  .lesson-status-badge.reviewing { background: var(--accent2-light); color: var(--accent2); }
+  .lesson-status-badge.done { background: var(--accent-light); color: var(--accent); }
+  .lesson-card-body, .quiz-card-body {
+    padding: 14px 16px;
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    position: relative;
+    max-height: 220px;
+    overflow: hidden;
+  }
+  .lesson-card-body.expanded { max-height: none; }
+  .lesson-card-body.expanded::after { display: none; }
+  .lesson-card-body::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 50px;
+    background: linear-gradient(transparent, var(--surface));
+  }
+  .lesson-expand-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px; font-size: 12px; color: var(--text-muted); cursor: pointer;
+    border-top: 1px solid var(--border); background: none; border: none; width: 100%;
+    font-weight: 700;
+  }
+  .lesson-expand-btn:hover { background: var(--surface2); }
+
+  .quiz-card-body { max-height: none; }
+  .mcq-question {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mcq-question:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .mcq-question-text {
+    font-weight: 800; color: var(--text-primary); margin-bottom: 12px; font-size: 14px;
+  }
+  .mcq-option {
+    display: block; width: 100%; text-align: left;
+    padding: 10px 14px; margin: 8px 0;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+    background: var(--surface); cursor: pointer; transition: all var(--transition);
+    font-size: 13.5px; color: var(--text-secondary);
+  }
+  .mcq-option:hover:not(:disabled) { background: var(--surface2); border-color: var(--text-muted); }
+  .mcq-option.correct { background: var(--accent-light); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+  .mcq-option.wrong { background: var(--warn-light); border-color: var(--warn); color: var(--warn); }
+  .mcq-feedback { font-size: 13px; font-weight: 800; margin-top: 8px; display: none; }
+
+  .global-state-card {
+    padding: 24px;
+    text-align: center;
+  }
+  .empty-state {
+    padding: 34px 22px;
+    text-align: center;
+    background: rgba(255,255,255,0.8);
+  }
+  .empty-icon {
+    width: 62px; height: 62px; border-radius: 22px;
+    display: grid; place-items: center;
+    background: var(--surface2);
+    margin: 0 auto 14px;
+    color: var(--accent2);
+  }
+  .empty-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+  .empty-copy { color: var(--text-secondary); font-size: 14px; max-width: 52ch; margin: 0 auto 16px; }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface2) 25%, #e8e6e0 50%, var(--surface2) 75%);
+    background-size: 200% 100%; animation: skeleton-wave 1.5s infinite; border-radius: 4px;
+  }
+  @keyframes skeleton-wave { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .small-text { font-size: 12px; color: var(--text-muted); }
+  .hidden { display: none !important; }
+
+  .footer-note {
+    margin-top: 16px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .pdf-capture {
+    pointer-events: none;
+    overflow: visible !important;
+  }
+
+  @media (max-width: 1100px) {
+    .hero { grid-template-columns: 1fr; }
+    .overview-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .stages-row { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+
+  @media (max-width: 900px) {
+    .pipeline-columns { grid-template-columns: 1fr; }
+    .content { padding: 20px 16px 32px; }
+    .topbar { padding: 0 16px; height: auto; min-height: 68px; }
+    .topbar-actions { justify-content: flex-end; }
+  }
+
+  @media (max-width: 640px) {
+    .topbar { align-items: flex-start; padding-top: 12px; padding-bottom: 12px; gap: 12px; flex-direction: column; }
+    .brand { width: 100%; }
+    .topbar-actions { width: 100%; justify-content: space-between; }
+    .overview-grid, .stages-row { grid-template-columns: 1fr; }
+    .global-progress { flex-direction: column; align-items: stretch; }
+    .pipeline-header, .toolbar { align-items: flex-start; flex-direction: column; }
+    .toolbar-right { width: 100%; }
+    .tabs { width: 100%; justify-content: space-between; }
+    .tab-btn { flex: 1; }
+    .course-card-head { flex-direction: column; align-items: flex-start; }
+    .create-actions { flex-direction: column; align-items: stretch; }
+    .create-actions-right, .create-actions-left { width: 100%; }
+    .create-actions-right .btn, .create-actions-right .submit-btn { width: 100%; }
+    .create-actions-left select { width: 100%; }
+    .error-banner { flex-direction: column; align-items: flex-start; }
+  }
+
+  /* --- screenshot-matched home page overrides --- */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .topbar-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; }
+  .content { flex: 1; padding: 40px 32px; max-width: 1100px; margin: 0 auto; width: 100%; }
+  .create-hero {
+    text-align: center;
+    padding: 48px 0 40px;
+  }
+  .hero-sparkles {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  .sparkle {
+    width: 10px;
+    height: 10px;
+    background: var(--accent2);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    animation: twinkle 2s ease-in-out infinite;
+  }
+  .sparkle:nth-child(1) { animation-delay: 0s; transform: scale(1.4); }
+  .sparkle:nth-child(2) { animation-delay: 0.4s; transform: scale(0.8); }
+  .sparkle:nth-child(3) { animation-delay: 0.8s; transform: scale(1.1); }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+  .hero-title em { font-style: italic; color: var(--accent2); }
+  .hero-sub {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+  .create-card {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+    max-width: 680px;
+    margin: 0 auto 20px;
+    transition: box-shadow var(--transition);
+  }
+  .create-card:focus-within {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1), 0 0 0 3px rgba(124,92,191,0.15);
+    border-color: rgba(124,92,191,0.3);
+  }
+  .create-textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--text-primary);
+    background: transparent;
+    resize: none;
+    min-height: 80px;
+    line-height: 1.6;
+  }
+  .create-textarea::placeholder { color: var(--text-muted); }
+  .create-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .create-actions-left { display: flex; align-items: center; gap: 8px; }
+  .audience-select {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-primary);
+    cursor: pointer;
+    outline: none;
+  }
+  .create-actions-right { display: flex; align-items: center; gap: 8px; }
+  .submit-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    box-shadow: 0 2px 8px rgba(26,107,74,0.3);
+  }
+  .submit-btn:hover { background: #155a3c; transform: scale(1.05); }
+  .submit-btn svg { width: 18px; height: 18px; }
+  .quick-topics {
+    max-width: 680px;
+    margin: 0 auto 48px;
+    text-align: center;
+  }
+  .quick-topics-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .chip {
+    padding: 6px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    background: var(--surface);
+    transition: all var(--transition);
+  }
+  .chip:hover { background: var(--text-primary); color: white; border-color: transparent; }
+  .error-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    margin-top: 18px;
+    background: linear-gradient(180deg, rgba(253,236,236,0.95), rgba(255,255,255,0.92));
+    border-color: rgba(180,35,24,0.16);
+  }
+  .error-banner.visible { display: flex; }
+  .error-copy { min-width: 0; }
+  .error-title { font-weight: 700; color: var(--danger); margin-bottom: 2px; }
+  .error-sub { color: var(--text-secondary); font-size: 13px; }
+  .error-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hidden-compat { display: none; }
+  @media (max-width: 900px) {
+    .content { padding: 20px 16px 32px; }
+    .topbar { padding: 0 16px; height: auto; min-height: 68px; }
+  }
+  @media (max-width: 640px) {
+    .topbar { align-items: flex-start; padding-top: 12px; padding-bottom: 12px; gap: 12px; }
+    .topbar-actions { width: 100%; justify-content: flex-end; }
+    .create-actions { flex-direction: column; align-items: stretch; }
+    .create-actions-right, .create-actions-left { width: 100%; }
+    .create-actions-right .submit-btn, .create-actions-left select { width: 100%; }
+    .error-banner { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="topbar-title">AI COURSE CREATOR</span>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="window.location.reload();">+ NEW COURSE</button>
+      </div>
+    </div>
+<div class="content">
+      <div class="panel active" id="panel-home">
+        <div class="create-hero">
+          <div class="hero-sparkles">
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+          </div>
+          <h1 class="hero-title">Create course with <em>AI</em></h1>
+          <p class="hero-sub">Describe a topic and four specialized agents will build a complete course for you.</p>
+
+          <div class="create-card" id="create-card">
+            <textarea class="create-textarea" id="topic-input" rows="4" maxlength="180" placeholder="Describe the course you would like to create..."></textarea>
+            <div class="create-actions">
+              <div class="create-actions-left">
+                <select class="audience-select" id="audience-select">
+                  <option value="Beginners">For Beginners</option>
+                  <option value="Intermediate">For Intermediate</option>
+                  <option value="Advanced">For Advanced</option>
+                </select>
+              </div>
+              <div class="create-actions-right">
+                <button class="submit-btn" id="submit-btn" onclick="startGeneration()" aria-label="Generate course">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="quick-topics">
+            <div class="quick-topics-label">Popular topics</div>
+            <div class="chips">
+              <div class="chip" onclick="setTopicAndGo('Machine Learning Fundamentals')">Machine Learning</div>
+              <div class="chip" onclick="setTopicAndGo('Full-Stack MERN Development')">MERN Stack</div>
+              <div class="chip" onclick="setTopicAndGo('Introduction to LLMs and RAG')">LLMs &amp; RAG</div>
+              <div class="chip" onclick="setTopicAndGo('Building Agentic Workflows')">Agentic Workflows</div>
+              <div class="chip" onclick="setTopicAndGo('FastAPI for Backend Development')">FastAPI</div>
+              <div class="chip" onclick="setTopicAndGo('Data Science Foundations')">Data Science</div>
+              <div class="chip" onclick="setTopicAndGo('Cybersecurity Essentials')">Cybersecurity</div>
+              <div class="chip" onclick="setTopicAndGo('AWS Architecture Fundamentals')">AWS Architecture</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hidden-compat">
+          <button id="demo-fill-btn" type="button">Sample Topic</button>
+          <button id="clear-btn" type="button" onclick="resetAll()">Clear</button>
+          <select id="format-select">
+            <option value="course" selected>Course</option>
+            <option value="bootcamp">Bootcamp</option>
+            <option value="roadmap">Roadmap</option>
+            <option value="workshop">Workshop</option>
+          </select>
+          <span id="char-counter"></span>
+          <div class="status-chip status-ready" id="home-status">Ready to generate</div>
+        </div>
+
+        <div class="error-banner" id="error-banner" role="alert" aria-live="polite">
+          <div class="error-copy">
+            <div class="error-title" id="error-title">Something went wrong</div>
+            <div class="error-sub" id="error-sub">Please try again.</div>
+          </div>
+          <div class="error-actions">
+            <button class="btn btn-secondary" onclick="dismissError()">Dismiss</button>
+            <button class="btn btn-primary" onclick="retryLast()">Retry</button>
+          </div>
+        </div>
+      </div>
+<div class="panel" id="panel-pipeline">
+        <div class="pipeline-header">
+          <button class="pipeline-back" onclick="showPanel('home')" aria-label="Back to home">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+          </button>
+          <div class="pipeline-title-block">
+            <div class="pipeline-course-title" id="pipeline-course-title">Generating course…</div>
+            <div class="pipeline-subtitle" id="pipeline-subtitle">Multi-agent pipeline running</div>
+            <div class="pipeline-meta">
+              <span class="meta-badge" id="meta-audience">Audience: Beginners</span>
+              <span class="meta-badge" id="meta-format">Format: Course</span>
+              <span class="meta-badge" id="meta-mode">Mode: Mock simulation</span>
+            </div>
+          </div>
+          <div class="pipeline-badge running" id="pipeline-badge">
+            <div class="pulse-dot" id="pulse-dot"></div>
+            <span id="badge-text">Running</span>
+          </div>
+        </div>
+
+        <div class="global-progress">
+          <div class="global-progress-info">
+            <div class="global-progress-label" id="progress-label">Initializing mock agents...</div>
+            <div class="global-progress-bar"><div class="global-progress-fill" id="progress-fill" style="width:0%"></div></div>
+          </div>
+          <div class="global-progress-pct" id="progress-pct">0%</div>
+        </div>
+
+        <div class="stages-row">
+          <div class="stage-card pending" id="stage-0">
+            <div class="stage-indicator pending-ind" id="stage-ind-0">1</div>
+            <div class="stage-name">Curriculum Architect</div>
+            <div class="stage-desc">Designing syllabus with guided research</div>
+          </div>
+          <div class="stage-card pending" id="stage-1">
+            <div class="stage-indicator pending-ind" id="stage-ind-1">2</div>
+            <div class="stage-name">Professor</div>
+            <div class="stage-desc">Writing structured lesson content</div>
+          </div>
+          <div class="stage-card pending" id="stage-2">
+            <div class="stage-indicator pending-ind" id="stage-ind-2">3</div>
+            <div class="stage-name">The Dean</div>
+            <div class="stage-desc">Reviewing and polishing lessons</div>
+          </div>
+          <div class="stage-card pending" id="stage-3">
+            <div class="stage-indicator pending-ind" id="stage-ind-3">4</div>
+            <div class="stage-name">Exam Setter</div>
+            <div class="stage-desc">Crafting quizzes and assessments</div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="tabs" role="tablist" aria-label="Course views">
+            <button class="tab-btn active" onclick="setView('overview')">Overview</button>
+            <button class="tab-btn" onclick="setView('syllabus')">Syllabus</button>
+            <button class="tab-btn" onclick="setView('lessons')">Lessons</button>
+            <button class="tab-btn" onclick="setView('quizzes')">Quizzes</button>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-secondary" id="regenerate-btn" onclick="regenerateCourse()">Regenerate</button>
+            <button class="btn btn-secondary" id="download-btn" onclick="downloadPDF()">Download PDF</button>
+            <button class="btn btn-danger" id="stop-btn" onclick="stopGeneration()" disabled>Stop</button>
+          </div>
+        </div>
+
+        <div id="view-overview" class="view active">
+          <div class="overview-grid">
+            <div class="summary-card">
+              <div class="summary-icon">📚</div>
+              <div class="summary-value" id="summary-modules">2</div>
+              <div class="summary-label">Modules</div>
+              <div class="summary-note">Generated based on the topic and audience.</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon">⏱️</div>
+              <div class="summary-value" id="summary-duration">6h</div>
+              <div class="summary-label">Estimated duration</div>
+              <div class="summary-note">Useful as a quick preview metric.</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon">🧪</div>
+              <div class="summary-value" id="summary-quizzes">2</div>
+              <div class="summary-label">Quizzes</div>
+              <div class="summary-note">One quiz per module in the mock flow.</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon">✅</div>
+              <div class="summary-value" id="summary-status">100%</div>
+              <div class="summary-label">Completion</div>
+              <div class="summary-note">Updates live during generation.</div>
+            </div>
+          </div>
+
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12 2l2.39 6.95H21l-5.7 4.13L17.7 20 12 15.87 6.3 20l2.4-6.92L3 8.95h6.61L12 2z"/></svg>
+            </div>
+            <div class="empty-title">No generated content yet</div>
+            <div class="empty-copy">Enter a topic and start generation to fill the syllabus, lessons, and quiz panels.</div>
+            <button class="btn btn-primary" onclick="document.getElementById('topic-input').focus()">Start here</button>
+          </div>
+        </div>
+
+        <div id="view-syllabus" class="view">
+          <div class="section-title">Structure</div>
+          <div class="course-card">
+            <div class="course-card-head">
+              <div>
+                <div class="course-card-title">Syllabus outline</div>
+                <div class="course-card-sub">Clear module hierarchy for the topic.</div>
+              </div>
+            </div>
+            <div id="syllabus-col"></div>
+          </div>
+        </div>
+
+        <div id="view-lessons" class="view">
+          <div class="section-title">Final Lessons</div>
+          <div id="lessons-col"></div>
+        </div>
+
+        <div id="view-quizzes" class="view">
+          <div class="section-title">Quizzes</div>
+          <div id="quizzes-col"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+let currentView = 'overview';
+let isRunning = false;
+let isErrored = false;
+let stopRequested = false;
+let lastTopic = '';
+let lastAudience = 'Beginners';
+let lastFormat = 'Course';
+window._fullCourseContent = '';
+
+const sampleTopics = [
+  'Machine Learning Fundamentals',
+  'Full-Stack MERN Development',
+  'Introduction to LLMs and RAG',
+  'Building Agentic Workflows'
+];
+
+const $ = (id) => document.getElementById(id);
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  $("panel-" + name).classList.add('active');
+}
+
+function setView(view) {
+  currentView = view;
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  const buttons = Array.from(document.querySelectorAll('.tab-btn'));
+  const indexMap = { overview: 0, syllabus: 1, lessons: 2, quizzes: 3, export: 4 };
+  if (buttons[indexMap[view]]) buttons[indexMap[view]].classList.add('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $("view-" + view).classList.add('active');
+}
+
+function updateCharCounter() {
+  const len = $("topic-input").value.length;
+  $("char-counter").textContent = `${len} / 180`;
+  $("char-counter").style.color = len > 160 ? 'var(--warn)' : 'var(--text-muted)';
+}
+
+function fillSample() {
+  const topic = sampleTopics[Math.floor(Math.random() * sampleTopics.length)];
+  $("topic-input").value = topic;
+  updateCharCounter();
+  $("topic-input").focus();
+}
+
+function setTopicAndGo(topic) {
+  $("topic-input").value = topic;
+  updateCharCounter();
+  startGeneration();
+}
+
+function showError(title, sub) {
+  isErrored = true;
+  $("error-title").textContent = title;
+  $("error-sub").textContent = sub;
+  $("error-banner").classList.add('visible');
+  $("pipeline-badge").className = 'pipeline-badge error';
+  $("badge-text").textContent = 'Error';
+  $("pulse-dot").style.display = 'none';
+  $("home-status").className = 'status-chip status-error';
+  $("home-status").textContent = 'Generation interrupted';
+  setProgress(0, 'Generation failed');
+  isRunning = false;
+  stopRequested = false;
+  setButtonsState(false);
+}
+
+function dismissError() {
+  $("error-banner").classList.remove('visible');
+}
+
+function retryLast() {
+  dismissError();
+  if (lastTopic) {
+    $("topic-input").value = lastTopic;
+    $("audience-select").value = lastAudience;
+    $("format-select").value = lastFormat.toLowerCase();
+    updateCharCounter();
+    startGeneration();
+  }
+}
+
+function resetAll() {
+  $("topic-input").value = '';
+  $("audience-select").value = 'Beginners';
+  $("format-select").value = 'course';
+  updateCharCounter();
+  dismissError();
+  stopRequested = false;
+  window._fullCourseContent = '';
+  $("syllabus-col").innerHTML = '';
+  $("lessons-col").innerHTML = '';
+  $("quizzes-col").innerHTML = '';
+  $("empty-state").style.display = 'block';
+  setProgress(0, 'Ready to start');
+  $("summary-status").textContent = '0%';
+  $("summary-modules").textContent = '0';
+  $("summary-duration").textContent = '0h';
+  $("summary-quizzes").textContent = '0';
+  $("home-status").className = 'status-chip status-ready';
+  $("home-status").textContent = 'Ready to generate';
+  resetPipelineUI();
+  showPanel('home');
+}
+
+function resetPipelineUI() {
+  for (let i = 0; i < 4; i++) resetStage(i);
+  stopRequested = false;
+  $("pipeline-badge").className = 'pipeline-badge running';
+  $("badge-text").textContent = 'Running';
+  $("pulse-dot").style.display = 'block';
+  $("progress-fill").style.width = '0%';
+  $("progress-pct").textContent = '0%';
+  $("progress-label").textContent = 'Initializing mock agents...';
+  $("pipeline-subtitle").textContent = 'Multi-agent pipeline running';
+  $("empty-state").style.display = 'block';
+  $("summary-status").textContent = '0%';
+}
+
+function setButtonsState(running) {
+  $("submit-btn").disabled = running;
+  $("demo-fill-btn").disabled = running;
+  $("clear-btn").disabled = running;
+  const stopBtn = $("stop-btn");
+  if (stopBtn) stopBtn.disabled = !running;
+  const regenBtn = $("regenerate-btn");
+  if (regenBtn) regenBtn.disabled = running;
+  const downloadBtn = $("download-btn");
+  if (downloadBtn) downloadBtn.disabled = running;
+}
+
+async function startGeneration(forceLast = false) {
+  if (isRunning) return;
+  dismissError();
+
+  const topicInput = forceLast && lastTopic ? lastTopic : $("topic-input").value.trim();
+  const audience = forceLast && lastTopic ? lastAudience : $("audience-select").value;
+  const format = forceLast && lastTopic ? lastFormat : $("format-select").value;
+
+  if (forceLast && !lastTopic) {
+    showError('Nothing to regenerate', 'Generate a course first, then use Regenerate to run it again.');
+    return;
+  }
+  if (!topicInput) {
+    showError('Topic is required', 'Please enter a course topic before generating the demo.');
+    return;
+  }
+  if (topicInput.length < 3) {
+    showError('Topic is too short', 'Please type at least 3 characters so the demo looks intentional.');
+    return;
+  }
+  if (topicInput.length > 180) {
+    showError('Topic is too long', 'Keep the prompt within 180 characters for this mock UI.');
+    return;
+  }
+
+  isRunning = true;
+  isErrored = false;
+  stopRequested = false;
+  lastTopic = topicInput;
+  lastAudience = audience;
+  lastFormat = format;
+
+  if (forceLast) {
+    $('topic-input').value = topicInput;
+    $('audience-select').value = audience;
+    $('format-select').value = format;
+  }
+
+  showPanel('pipeline');
+  setView('overview');
+  setButtonsState(true);
+
+  $("pipeline-course-title").textContent = topicInput;
+  $("pipeline-subtitle").textContent = `Audience: ${audience} · ${capitalize(format)} · Mock simulation`;
+  $("meta-audience").textContent = `Audience: ${audience}`;
+  $("meta-format").textContent = `Format: ${capitalize(format)}`;
+  $("meta-mode").textContent = 'Mode: Mock simulation';
+
+  $("syllabus-col").innerHTML = '';
+  $("lessons-col").innerHTML = '';
+  $("quizzes-col").innerHTML = '';
+  $("empty-state").style.display = 'none';
+  $("home-status").className = 'status-chip status-working';
+  $("home-status").textContent = 'Generating course...';
+  window._fullCourseContent = '';
+
+  setProgress(0, 'Initializing mock agents...');
+  for (let i = 0; i < 4; i++) resetStage(i);
+
+  let aborted = false;
+  try {
+    await runMockPipeline(topicInput, audience, format);
+  } catch (err) {
+    if (err && err.__stopped) {
+      aborted = true;
+      handleStopped();
+    } else {
+      console.error(err);
+      showError('Generation failed', 'The mock pipeline stopped unexpectedly. Please retry.');
+    }
+  } finally {
+    if (!isErrored && !aborted) {
+      isRunning = false;
+      setButtonsState(false);
+      $("home-status").className = 'status-chip status-ready';
+      $("home-status").textContent = 'Ready to generate';
+    }
+  }
+}
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+function stoppedError() {
+  const err = new Error('Generation stopped by user');
+  err.__stopped = true;
+  return err;
+}
+
+async function waitWithStop(ms) {
+  const step = 100;
+  let elapsed = 0;
+  while (elapsed < ms) {
+    if (stopRequested) throw stoppedError();
+    await delay(Math.min(step, ms - elapsed));
+    elapsed += step;
+  }
+  if (stopRequested) throw stoppedError();
+}
+
+async function runMockPipeline(topic, audience, format) {
+  await waitWithStop(800);
+  if (topic.toLowerCase().includes('error demo')) throw new Error('Simulated failure');
+
+  handleStage({ stage: 0, status: 'active' });
+  setProgress(7, 'Curriculum Architect: researching...');
+  await waitWithStop(1200);
+
+  const moduleTitles = generateModules(topic, audience, format);
+  const mockSyllabus = moduleTitles.map((m, i) => `Module ${i + 1}: ${m}`).join('\n');
+  handleSyllabus({ text: mockSyllabus });
+  setProgress(20, 'Syllabus ready. Starting lessons...');
+  handleStage({ stage: 0, status: 'done' });
+  await waitWithStop(700);
+
+  let fullCourseOutput = `# ${topic}\n\n**Audience:** ${audience}  \n**Format:** ${capitalize(format)}\n\n`;
+  $("summary-modules").textContent = String(moduleTitles.length);
+  $("summary-quizzes").textContent = String(moduleTitles.length);
+  $("summary-duration").textContent = `${Math.max(4, moduleTitles.length * 3)}h`;
+
+  for (let i = 0; i < moduleTitles.length; i++) {
+    let basePct = 20 + Math.round((i / moduleTitles.length) * 65);
+
+    handleModuleStart({ index: i, title: `Module ${i + 1}: ${moduleTitles[i]}` });
+    handleStage({ stage: 1, status: 'active' });
+    setProgress(basePct, `Professor: drafting module ${i + 1}...`);
+    await waitWithStop(1600);
+
+    handleLessonStatus({ index: i, status: 'reviewing' });
+    handleStage({ stage: 2, status: 'active' });
+    setProgress(basePct + 5, `Dean: reviewing module ${i + 1}...`);
+    await waitWithStop(1200);
+
+    const mockLessonContent = `Welcome to **Module ${i + 1}: ${moduleTitles[i]}**.\n\nIn this lesson, we cover the essential principles for building confidence with ${topic}.\n\n### Key takeaways\n- Understand the core idea\n- See a practical example\n- Practice with a short exercise\n\n\`\`\`javascript\nconsole.log("Hello from Module ${i + 1}: ${moduleTitles[i]}!");\n\`\`\`\n\nThis text is fully editable markdown generated by the mock AI.`;
+    handleLessonDone({ index: i, title: `Module ${i + 1}: ${moduleTitles[i]}`, content: mockLessonContent });
+    fullCourseOutput += `## Module ${i + 1}: ${moduleTitles[i]}\n\n${mockLessonContent}\n\n`;
+
+    handleStage({ stage: 3, status: 'active' });
+    setProgress(basePct + 10, 'Exam Setter: writing quiz...');
+    await waitWithStop(1200);
+
+    const mockQuizContent = `1. What is the main subject of this lesson?\na) Learning about ${topic}\nb) Baking a pie\nc) Swimming\nd) None of the above\n\n2. Which outcome best fits the lesson?\na) Understand the core idea\nb) Ignore the topic\nc) Skip practice\nd) No revision needed\n\n### Answer Key\n1. a\n2. a`;
+    handleQuizDone({ index: i, title: `Module ${i + 1}: ${moduleTitles[i]}`, content: mockQuizContent });
+    fullCourseOutput += `### Quiz\n\n${mockQuizContent}\n\n`;
+    await waitWithStop(700);
+  }
+
+  handleStage({ stage: 1, status: 'done' });
+  handleStage({ stage: 2, status: 'done' });
+  handleStage({ stage: 3, status: 'done' });
+  setProgress(100, 'Course generation complete!');
+  handleDone({ full_content: fullCourseOutput });
+}
+
+function generateModules(topic, audience, format) {
+  const base = [
+    `Introduction to ${topic}`,
+    `Core Concepts and Workflow`,
+    `Practical Examples and Patterns`,
+    `Projects, Review, and Next Steps`
+  ];
+  if (audience === 'Intermediate') {
+    return [
+      `Foundations of ${topic}`,
+      `Intermediate Techniques`,
+      `Hands-on Implementation`,
+      `Practice and Assessment`
+    ];
+  }
+  if (audience === 'Advanced') {
+    return [
+      `Advanced Architecture for ${topic}`,
+      `Optimization and Best Practices`,
+      `Scaling Real-World Systems`,
+      `Capstone Review and Evaluation`
+    ];
+  }
+  if (format === 'bootcamp') {
+    return [
+      `Crash Course in ${topic}`,
+      `Guided Build Session`,
+      `Debugging and Review`,
+      `Portfolio Project and Wrap-Up`
+    ];
+  }
+  if (format === 'roadmap') {
+    return [
+      `Learn the Basics of ${topic}`,
+      `Build Key Concepts`,
+      `Create a Mini Project`,
+      `Prepare for Real Applications`
+    ];
+  }
+  return base;
+}
+
+function handleStage(d) { if (d.status === 'active') activateStage(d.stage); else if (d.status === 'done') doneStage(d.stage); }
+function handleProgress(d) { setProgress(d.pct, d.label); }
+
+function handleSyllabus(d) {
+  const col = $("syllabus-col");
+  col.innerHTML = '';
+  const lines = d.text.split('\n').filter(l => l.trim());
+  lines.forEach((line, i) => {
+    const cleanLine = line.replace(/\*\*/g, '').replace(/#/g, '').trim();
+    col.innerHTML += `
+      <div class="syllabus-module">
+        <div class="module-num" id="mnum-${i}">${i + 1}</div>
+        <div class="module-text"><div class="module-title">${escapeHtml(cleanLine)}</div></div>
+      </div>`;
+  });
+}
+
+function handleModuleStart(d) {
+  const mnum = $("mnum-" + d.index);
+  if (mnum) mnum.className = 'module-num active';
+
+  $("lessons-col").innerHTML += `
+    <div class="lesson-card" id="lesson-${d.index}">
+      <div class="lesson-card-header">
+        <div class="lesson-card-title">
+          ${escapeHtml(d.title)}
+          <span class="lesson-status-badge generating" id="lbadge-${d.index}">Drafting…</span>
+        </div>
+      </div>
+      <div class="lesson-card-body" id="lbody-${d.index}">
+        <div class="skeleton" style="height:12px;margin-bottom:8px;width:90%"></div>
+        <div class="skeleton" style="height:12px;margin-bottom:8px;width:75%"></div>
+        <div class="skeleton" style="height:12px;margin-bottom:8px;width:82%"></div>
+      </div>
+    </div>`;
+}
+
+function handleLessonStatus(d) {
+  const badge = $("lbadge-" + d.index);
+  if (badge) { badge.textContent = 'Reviewing…'; badge.className = 'lesson-status-badge reviewing'; }
+}
+
+function handleLessonDone(d) {
+  const badge = $("lbadge-" + d.index);
+  if (badge) { badge.textContent = 'Complete'; badge.className = 'lesson-status-badge done'; }
+
+  const body = $("lbody-" + d.index);
+  if (body) {
+    let htmlContent = renderMarkdownLite(d.content);
+    body.innerHTML = htmlContent;
+    const card = $("lesson-" + d.index);
+    if (card && !card.querySelector('.lesson-expand-btn')) {
+      card.innerHTML += `<button class="lesson-expand-btn" onclick="toggleExpand(this)">Show full lesson ↓</button>`;
+    }
+  }
+
+  const mnum = $("mnum-" + d.index);
+  if (mnum) mnum.className = 'module-num done';
+}
+
+function handleQuizDone(d) {
+  const questions = parseQuiz(d.content);
+  let htmlQuiz = '';
+
+  if (questions.length === 0) {
+    htmlQuiz = renderMarkdownLite(d.content);
+  } else {
+    questions.forEach((q) => {
+      htmlQuiz += `<div class="mcq-question">`;
+      htmlQuiz += `<div class="mcq-question-text">${q.num}. ${escapeHtml(q.text)}</div>`;
+
+      q.options.forEach(opt => {
+        const isCorrect = opt.letter === q.correct;
+        htmlQuiz += `<button class="mcq-option" onclick="checkAnswer(this, ${isCorrect})"><strong>${opt.letter.toUpperCase()})</strong> ${escapeHtml(opt.text)}</button>`;
+      });
+
+      htmlQuiz += `<div class="mcq-feedback"></div>`;
+      htmlQuiz += `</div>`;
+    });
+  }
+
+  $("quizzes-col").innerHTML += `
+    <div class="quiz-card course-card">
+      <div class="quiz-card-head">
+        <div class="quiz-card-title">Module ${d.index + 1} Quiz</div>
+      </div>
+      <div class="quiz-card-body">${htmlQuiz}</div>
+    </div>`;
+}
+
+function handleDone(d) {
+  setBadge(false);
+  window._fullCourseContent = d.full_content;
+  $("empty-state").style.display = 'none';
+  $("summary-status").textContent = '100%';
+  $("home-status").className = 'status-chip status-ready';
+  $("home-status").textContent = 'Ready to generate';
+  setButtonsState(false);
+  isRunning = false;
+}
+
+function checkAnswer(btn, isCorrect) {
+  const parent = btn.parentElement;
+  const feedback = parent.querySelector('.mcq-feedback');
+  const buttons = parent.querySelectorAll('.mcq-option');
+
+  buttons.forEach(b => { b.disabled = true; b.style.cursor = 'default'; });
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    feedback.textContent = '✅ Correct!';
+    feedback.style.color = 'var(--accent)';
+  } else {
+    btn.classList.add('wrong');
+    feedback.textContent = '❌ Incorrect.';
+    feedback.style.color = 'var(--warn)';
+    buttons.forEach(b => { if (b.getAttribute('onclick').includes('true')) b.classList.add('correct'); });
+  }
+  feedback.style.display = 'block';
+}
+
+function parseQuiz(text) {
+  let questions = [];
+  const parts = text.split(/(?:###|##|\*\*|---\n|\n---)\s*(?:Answer Key|Answers|Correct Answers)/i);
+  const quizBody = parts[0];
+  const answerKeyBody = parts.length > 1 ? parts[1] : '';
+
+  let answers = {};
+  if (answerKeyBody) {
+    const ansRegex = /(\d+)[\.\:\-\)]\s*(?:\*\*)?([a-d])/gi;
+    let match;
+    while ((match = ansRegex.exec(answerKeyBody)) !== null) answers[match[1]] = match[2].toLowerCase();
+  }
+
+  const qRegex = /(?:^|\n)\s*\*?\*?(\d+)[\.\)]\s*\*?\*?([\s\S]*?)(?=(?:\n\s*\*?\*?\d+[\.\)]|$))/g;
+  let qMatch;
+  while ((qMatch = qRegex.exec(quizBody)) !== null) {
+    let qNum = qMatch[1];
+    let qBlock = qMatch[2].trim();
+
+    const optRegex = /(?:^|\n)\s*([a-d])[\.\)]\s*(.*?)(?=(?:\n\s*[a-d][\.\)]|$))/gi;
+    let options = [];
+    let optMatch;
+    let firstOptIndex = qBlock.length;
+
+    while ((optMatch = optRegex.exec(qBlock)) !== null) {
+      if (options.length === 0) firstOptIndex = optMatch.index;
+      options.push({
+        letter: optMatch[1].toLowerCase(),
+        text: optMatch[2].trim().replace(/\*\*/g, '')
+      });
+    }
+
+    let qText = qBlock.substring(0, firstOptIndex).trim().replace(/\*\*/g, '');
+    if (options.length > 0) {
+      questions.push({ num: qNum, text: qText, options: options, correct: answers[qNum] || null });
+    }
+  }
+  return questions;
+}
+
+function toggleExpand(btn) {
+  const body = btn.previousElementSibling;
+  if (body.classList.contains('expanded')) {
+    body.classList.remove('expanded');
+    btn.textContent = 'Show full lesson ↓';
+  } else {
+    body.classList.add('expanded');
+    btn.textContent = 'Collapse ↑';
+  }
+}
+
+function downloadPDF() {
+  if (!window._fullCourseContent) {
+    showError('Nothing to export', 'Generate a course first before downloading the PDF file.');
+    return;
+  }
+
+  const panel = document.getElementById('panel-pipeline');
+  if (!panel) {
+    showError('Export unavailable', 'Could not find the course panel.');
+    return;
+  }
+
+  const clone = panel.cloneNode(true);
+  clone.style.display = 'block';
+  clone.style.position = 'fixed';
+  clone.style.left = '-10000px';
+  clone.style.top = '0';
+  clone.style.width = '1024px';
+  clone.style.background = '#ffffff';
+  clone.style.padding = '24px';
+  clone.style.boxSizing = 'border-box';
+  clone.classList.add('pdf-capture');
+
+  const toolbar = clone.querySelector('.toolbar');
+  if (toolbar) toolbar.remove();
+  const backBtn = clone.querySelector('.pipeline-back');
+  if (backBtn) backBtn.remove();
+
+
+  document.body.appendChild(clone);
+
+  const topic = ($("pipeline-course-title").textContent || 'course').trim();
+  const safeFilename = topic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_mock_course.pdf';
+
+  const opt = {
+    margin: 0.35,
+    filename: safeFilename,
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  html2pdf().set(opt).from(clone).save().finally(() => {
+    clone.remove();
+  });
+}
+
+function regenerateCourse() {
+  if (isRunning) return;
+  if (!lastTopic) {
+    showError('Nothing to regenerate', 'Generate a course first, then use Regenerate to run it again.');
+    return;
+  }
+  startGeneration(true);
+}
+
+function renderMarkdownLite(md) {
+  let safe = escapeHtml(md);
+  safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  safe = safe.replace(/`([^`]+)`/g, '<code style="background:var(--surface2);padding:2px 6px;border-radius:6px;">$1</code>');
+  safe = safe.replace(/\n/g, '<br>');
+  return safe;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function resetStage(i) {
+  const card = $("stage-" + i);
+  const ind = $("stage-ind-" + i);
+  card.className = 'stage-card pending';
+  ind.className = 'stage-indicator pending-ind';
+  ind.textContent = i + 1;
+  const shimmer = card.querySelector('.stage-shimmer');
+  if (shimmer) shimmer.remove();
+}
+
+function activateStage(i) {
+  const card = $("stage-" + i);
+  const ind = $("stage-ind-" + i);
+  card.className = 'stage-card active';
+  ind.className = 'stage-indicator active-ind';
+  if (!card.querySelector('.stage-shimmer')) {
+    const shimmer = document.createElement('div');
+    shimmer.className = 'stage-shimmer';
+    card.appendChild(shimmer);
+  }
+}
+
+function doneStage(i) {
+  const card = $("stage-" + i);
+  const ind = $("stage-ind-" + i);
+  card.className = 'stage-card done';
+  ind.className = 'stage-indicator done-ind';
+  ind.innerHTML = `<svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>`;
+  const shimmer = card.querySelector('.stage-shimmer');
+  if (shimmer) shimmer.remove();
+}
+
+function setProgress(pct, label) {
+  $("progress-fill").style.width = pct + '%';
+  $("progress-pct").textContent = pct + '%';
+  $("progress-label").textContent = label;
+  $("summary-status").textContent = pct + '%';
+}
+
+function setBadge(running) {
+  const badge = $("pipeline-badge");
+  const dot = $("pulse-dot");
+  const text = $("badge-text");
+  if (running) {
+    badge.className = 'pipeline-badge running';
+    dot.style.display = 'block';
+    text.textContent = 'Running';
+  } else {
+    badge.className = 'pipeline-badge done';
+    dot.style.display = 'none';
+    text.textContent = 'Complete';
+  }
+}
+
+function stopGeneration() {
+  if (!isRunning) return;
+  stopRequested = true;
+  $("progress-label").textContent = 'Stopping generation...';
+  $("home-status").className = 'status-chip status-working';
+  $("home-status").textContent = 'Stopping...';
+}
+
+function handleStopped() {
+  isRunning = false;
+  isErrored = false;
+  setButtonsState(false);
+  $("pipeline-badge").className = 'pipeline-badge stopped';
+  $("badge-text").textContent = 'Stopped';
+  $("pulse-dot").style.display = 'none';
+  $("progress-label").textContent = 'Generation stopped';
+  $("home-status").className = 'status-chip status-ready';
+  $("home-status").textContent = 'Generation stopped';
+  stopRequested = false;
+}
+
+
+function handleDoneContent(content) { window._fullCourseContent = content; }
+
+$("topic-input").addEventListener('input', updateCharCounter);
+window.addEventListener('load', () => {
+  updateCharCounter();
+  setProgress(0, 'Ready to start');
+});
+</script>
+</body>
+</html>

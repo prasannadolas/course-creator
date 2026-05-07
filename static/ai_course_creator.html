@@ -1,687 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AI Course Creator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<style>
-  :root {
-    --bg: #F5F4F0;
-    --surface: #FFFFFF;
-    --surface2: #F0EEE9;
-    --border: rgba(0,0,0,0.08);
-    --border-strong: rgba(0,0,0,0.14);
-    --text-primary: #1A1917;
-    --text-secondary: #6B6860;
-    --text-muted: #9C9A94;
-    --accent: #1A6B4A;
-    --accent-light: #E8F4EE;
-    --accent2: #7C5CBF;
-    --accent2-light: #F0EBFB;
-    --warn: #C86B1A;
-    --warn-light: #FBF0E8;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 18px;
-    --radius-xl: 24px;
-    --radius-full: 999px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
-    --shadow-card: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
-    --font-display: 'Fraunces', Georgia, serif;
-    --font-body: 'DM Sans', system-ui, sans-serif;
-    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: var(--font-body);
-    background: var(--bg);
-    color: var(--text-primary);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ── LAYOUT ── */
-  .app { display: flex; min-height: 100vh; }
-
-  /* ── MAIN ── */
-  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-
-  /* ── TOP BAR ── */
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  .topbar-title {
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-primary);
-    letter-spacing: -0.3px;
-  }
-
-  .topbar-actions { display: flex; align-items: center; gap: 8px; }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    font-size: 13.5px;
-    font-family: var(--font-body);
-    font-weight: 500;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--border-strong);
-    background: transparent;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all var(--transition);
-    white-space: nowrap;
-  }
-
-  .btn:hover { background: var(--surface2); border-color: rgba(0,0,0,0.2); }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: white;
-    border-color: transparent;
-  }
-
-  .btn-primary:hover { background: #333; border-color: transparent; }
-
-  /* ── CONTENT AREA ── */
-  .content { flex: 1; padding: 40px 32px; max-width: 1100px; margin: 0 auto; width: 100%; }
-
-  /* ── HERO / CREATE PANEL ── */
-  .create-hero {
-    text-align: center;
-    padding: 48px 0 40px;
-  }
-
-  .hero-sparkles {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    margin-bottom: 16px;
-  }
-
-  .sparkle {
-    width: 10px;
-    height: 10px;
-    background: var(--accent2);
-    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-    animation: twinkle 2s ease-in-out infinite;
-  }
-
-  .sparkle:nth-child(1) { animation-delay: 0s; transform: scale(1.4); }
-  .sparkle:nth-child(2) { animation-delay: 0.4s; transform: scale(0.8); }
-  .sparkle:nth-child(3) { animation-delay: 0.8s; transform: scale(1.1); }
-
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.5; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.3); }
-  }
-
-  .hero-title {
-    font-family: var(--font-display);
-    font-size: 38px;
-    font-weight: 400;
-    letter-spacing: -0.5px;
-    color: var(--text-primary);
-    margin-bottom: 8px;
-  }
-
-  .hero-title em { font-style: italic; color: var(--accent2); }
-
-  .hero-sub {
-    font-size: 15px;
-    color: var(--text-secondary);
-    margin-bottom: 32px;
-  }
-
-  /* ── CREATE CARD ── */
-  .create-card {
-    background: var(--surface);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-xl);
-    padding: 20px;
-    box-shadow: var(--shadow-card);
-    max-width: 680px;
-    margin: 0 auto 20px;
-    transition: box-shadow var(--transition);
-  }
-
-  .create-card:focus-within {
-    box-shadow: 0 4px 24px rgba(0,0,0,0.1), 0 0 0 3px rgba(124,92,191,0.15);
-    border-color: rgba(124,92,191,0.3);
-  }
-
-  .create-textarea {
-    width: 100%;
-    border: none;
-    outline: none;
-    font-family: var(--font-body);
-    font-size: 16px;
-    color: var(--text-primary);
-    background: transparent;
-    resize: none;
-    min-height: 80px;
-    line-height: 1.6;
-  }
-
-  .create-textarea::placeholder { color: var(--text-muted); }
-
-  .create-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-  }
-
-  .create-actions-left { display: flex; align-items: center; gap: 8px; }
-
-  .audience-select {
-    font-family: var(--font-body);
-    font-size: 13.5px;
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--text-primary);
-    cursor: pointer;
-    outline: none;
-  }
-
-  .create-actions-right { display: flex; align-items: center; gap: 8px; }
-
-  .submit-btn {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    border: none;
-    background: var(--accent);
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition);
-    box-shadow: 0 2px 8px rgba(26,107,74,0.3);
-  }
-
-  .submit-btn:hover { background: #155a3c; transform: scale(1.05); }
-  .submit-btn svg { width: 18px; height: 18px; }
-
-  /* ── QUICK TOPICS ── */
-  .quick-topics {
-    max-width: 680px;
-    margin: 0 auto 48px;
-    text-align: center;
-  }
-
-  .quick-topics-label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--text-muted);
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-  }
-
-  .chip {
-    padding: 6px 14px;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-full);
-    font-size: 13px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    background: var(--surface);
-    transition: all var(--transition);
-  }
-
-  .chip:hover { background: var(--text-primary); color: white; border-color: transparent; }
-
-  /* ── PIPELINE VIEW (shown during generation) ── */
-  .panel { display: none; }
-  .panel.active { display: block; }
-
-  .pipeline-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 28px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .pipeline-back {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition);
-    flex-shrink: 0;
-  }
-
-  .pipeline-back:hover { background: var(--surface2); }
-  .pipeline-back svg { width: 14px; height: 14px; }
-
-  .pipeline-title-block { flex: 1; }
-
-  .pipeline-course-title {
-    font-family: var(--font-display);
-    font-size: 22px;
-    font-weight: 400;
-    color: var(--text-primary);
-    letter-spacing: -0.3px;
-    margin-bottom: 2px;
-  }
-
-  .pipeline-subtitle { font-size: 13px; color: var(--text-muted); }
-
-  .pipeline-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: var(--radius-full);
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .pipeline-badge.running {
-    background: var(--accent-light);
-    color: var(--accent);
-  }
-
-  .pipeline-badge.done {
-    background: var(--surface2);
-    color: var(--text-secondary);
-  }
-
-  .pulse-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.7); }
-  }
-
-  /* ── STAGES ROW ── */
-  .stages-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 28px;
-  }
-
-  .stage-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-    transition: all var(--transition);
-  }
-
-  .stage-card.active { border-color: var(--accent); }
-  .stage-card.done { border-color: var(--border); }
-  .stage-card.pending { opacity: 0.5; }
-
-  .stage-indicator {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 10px;
-    transition: all var(--transition);
-  }
-
-  .stage-indicator.pending-ind { background: var(--surface2); color: var(--text-muted); }
-  .stage-indicator.active-ind { background: var(--accent); color: white; }
-  .stage-indicator.done-ind { background: var(--accent-light); color: var(--accent); }
-
-  .stage-name { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
-  .stage-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
-
-  .stage-shimmer {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
-    transform: translateX(-100%);
-    animation: shimmer 1.5s infinite;
-  }
-
-  @keyframes shimmer { to { transform: translateX(100%); } }
-
-  /* ── 3-COL PIPELINE OUTPUT ── */
-  .pipeline-columns {
-    display: grid;
-    grid-template-columns: 240px 1fr 240px;
-    gap: 16px;
-    align-items: start;
-  }
-
-  .col-header {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 14px;
-  }
-
-  /* Syllabus column */
-  .syllabus-module {
-    display: flex;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    animation: fadeIn 0.4s ease;
-  }
-
-  .syllabus-module:last-child { border-bottom: none; }
-
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  .module-num {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--surface2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .module-num.done { background: var(--accent-light); color: var(--accent); }
-  .module-num.active { background: var(--accent); color: white; }
-
-  .module-text { flex: 1; }
-  .module-title { font-size: 13px; font-weight: 500; color: var(--text-primary); line-height: 1.4; }
-
-  /* Lesson column */
-  .lesson-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    margin-bottom: 14px;
-    animation: fadeIn 0.4s ease;
-  }
-
-  .lesson-card-header {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .lesson-card-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .lesson-status-badge {
-    font-size: 11px;
-    font-weight: 500;
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-  }
-
-  .lesson-status-badge.generating { background: var(--warn-light); color: var(--warn); }
-  .lesson-status-badge.reviewing { background: var(--accent2-light); color: var(--accent2); }
-  .lesson-status-badge.done { background: var(--accent-light); color: var(--accent); }
-
-  .lesson-card-body {
-    padding: 14px 16px;
-    font-size: 13.5px;
-    color: var(--text-secondary);
-    line-height: 1.7;
-    max-height: 200px;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .lesson-card-body.expanded { max-height: none; }
-  .lesson-card-body.expanded::after { display: none; }
-
-  .lesson-card-body::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 48px;
-    background: linear-gradient(transparent, var(--surface));
-  }
-
-  .lesson-expand-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 10px;
-    font-size: 12px;
-    color: var(--text-muted);
-    cursor: pointer;
-    border-top: 1px solid var(--border);
-    background: none;
-    border-left: none;
-    border-right: none;
-    border-bottom: none;
-    width: 100%;
-    font-family: var(--font-body);
-    transition: background var(--transition);
-  }
-
-  .lesson-expand-btn:hover { background: var(--surface2); }
-
-  /* Quiz column */
- /* ── INTERACTIVE MCQ QUIZ ── */
-  .mcq-question {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Course Creator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   
-  .mcq-question:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-  }
-
-  .mcq-question-text {
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 12px;
-    font-size: 14px;
-  }
-
-  .mcq-option {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 10px 14px;
-    margin: 8px 0;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    cursor: pointer;
-    transition: all var(--transition);
-    font-family: var(--font-body);
-    font-size: 13.5px;
-    color: var(--text-secondary);
-  }
-
-  .mcq-option:hover:not(:disabled) {
-    background: var(--surface2);
-    border-color: var(--text-muted);
-  }
-
-  .mcq-option.correct {
-    background: var(--accent-light);
-    border-color: var(--accent);
-    color: var(--accent);
-    font-weight: 500;
-  }
-
-  .mcq-option.wrong {
-    background: var(--warn-light);
-    border-color: var(--warn);
-    color: var(--warn);
-  }
-
-  .mcq-feedback {
-    font-size: 13px;
-    font-weight: 600;
-    margin-top: 8px;
-    display: none;
-  }
-
-  /* ── PROGRESS GLOBAL ── */
-  .global-progress {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .global-progress-info { flex: 1; }
-  .global-progress-label { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
-  .global-progress-bar { height: 6px; background: var(--surface2); border-radius: 3px; }
-  .global-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
-  .global-progress-pct { font-size: 22px; font-weight: 600; color: var(--accent); font-family: var(--font-display); }
-
-  /* ── DOWNLOAD BAR ── */
-  .download-bar {
-    display: none;
-    background: var(--accent);
-    border-radius: var(--radius-lg);
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    align-items: center;
-    justify-content: space-between;
-    animation: fadeIn 0.5s ease;
-  }
-
-  .download-bar.visible { display: flex; }
-
-  .download-bar-text { color: white; font-size: 15px; font-weight: 500; }
-  .download-bar-sub { color: rgba(255,255,255,0.75); font-size: 13px; margin-top: 1px; }
-
-  .dl-btn {
-    padding: 8px 16px;
-    border-radius: var(--radius-full);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition);
-    font-family: var(--font-body);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: white;
-    border: none;
-    color: var(--accent);
-  }
-
-  .dl-btn:hover { background: rgba(255,255,255,0.9); }
-
-  /* ── LOADING SKELETON ── */
-  .skeleton {
-    background: linear-gradient(90deg, var(--surface2) 25%, #e8e6e0 50%, var(--surface2) 75%);
-    background-size: 200% 100%;
-    animation: skeleton-wave 1.5s infinite;
-    border-radius: 4px;
-  }
-
-  @keyframes skeleton-wave { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 900px) {
-    .pipeline-columns { grid-template-columns: 1fr; }
-    .stages-row { grid-template-columns: repeat(2, 1fr); }
-  }
-</style>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <div class="app">
-
-  <!-- MAIN -->
   <main class="main">
-    <!-- TOP BAR -->
+    
     <div class="topbar">
       <span class="topbar-title" id="topbar-title">AI COURSE CREATOR</span>
       <div class="topbar-actions">
-        <button class="btn btn-primary" onclick="window.location.reload();">
-          + NEW COURSE
-        </button>
+        <button class="btn btn-primary" onclick="window.location.reload();">+ NEW COURSE</button>
       </div>
     </div>
 
-    <!-- SCROLLABLE CONTENT -->
     <div class="content">
-
-      <!-- ── HOME / CREATE PANEL ── -->
+      
       <div class="panel active" id="panel-home">
-        
-        <!-- CREATE CTA -->
         <div class="create-hero">
           <div class="hero-sparkles">
             <div class="sparkle"></div>
@@ -691,8 +32,8 @@
           <h1 class="hero-title">Create course with <em>AI</em></h1>
           <p class="hero-sub">Describe a topic and four specialized agents will build a complete course for you.</p>
 
-          <div class="create-card">
-            <textarea class="create-textarea" id="topic-input" rows="3" placeholder="Describe the course you would like to create..."></textarea>
+          <div class="create-card" id="create-card">
+            <textarea class="create-textarea" id="topic-input" rows="4" maxlength="180" placeholder="Describe the course you would like to create..."></textarea>
             <div class="create-actions">
               <div class="create-actions-left">
                 <select class="audience-select" id="audience-select">
@@ -702,7 +43,7 @@
                 </select>
               </div>
               <div class="create-actions-right">
-                <button class="submit-btn" onclick="startGeneration()">
+                <button class="submit-btn" id="submit-btn" onclick="startGeneration()" aria-label="Generate course">
                   <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>
                 </button>
               </div>
@@ -714,28 +55,54 @@
             <div class="chips">
               <div class="chip" onclick="setTopicAndGo('Machine Learning Fundamentals')">Machine Learning</div>
               <div class="chip" onclick="setTopicAndGo('Full-Stack MERN Development')">MERN Stack</div>
-              <div class="chip" onclick="setTopicAndGo('Introduction to LLMs and RAG')">LLMs & RAG</div>
+              <div class="chip" onclick="setTopicAndGo('Introduction to LLMs and RAG')">LLMs &amp; RAG</div>
               <div class="chip" onclick="setTopicAndGo('Building Agentic Workflows')">Agentic Workflows</div>
-              <div class="chip" onclick="setTopicAndGo('Web Development with FastAPI')">FastAPI</div>
-              <div class="chip" onclick="setTopicAndGo('Data Science with Pandas')">Data Science</div>
-              <div class="chip" onclick="setTopicAndGo('Cybersecurity and Web Exploitation')">Cybersecurity</div>
-              <div class="chip" onclick="setTopicAndGo('Cloud Architecture on AWS')">AWS Architecture</div>
+              <div class="chip" onclick="setTopicAndGo('FastAPI for Backend Development')">FastAPI</div>
+              <div class="chip" onclick="setTopicAndGo('Data Science Foundations')">Data Science</div>
+              <div class="chip" onclick="setTopicAndGo('Cybersecurity Essentials')">Cybersecurity</div>
+              <div class="chip" onclick="setTopicAndGo('AWS Architecture Fundamentals')">AWS Architecture</div>
             </div>
+          </div>
+        </div>
+
+        <div class="hidden-compat">
+          <button id="demo-fill-btn" type="button">Sample Topic</button>
+          <button id="clear-btn" type="button" onclick="resetAll()">Clear</button>
+          <select id="format-select">
+            <option value="course" selected>Course</option>
+            <option value="bootcamp">Bootcamp</option>
+            <option value="roadmap">Roadmap</option>
+            <option value="workshop">Workshop</option>
+          </select>
+          <span id="char-counter"></span>
+          <div class="status-chip status-ready" id="home-status">Ready to generate</div>
+        </div>
+
+        <div class="error-banner" id="error-banner" role="alert" aria-live="polite">
+          <div class="error-copy">
+            <div class="error-title" id="error-title">Something went wrong</div>
+            <div class="error-sub" id="error-sub">Please try again.</div>
+          </div>
+          <div class="error-actions">
+            <button class="btn btn-secondary" onclick="dismissError()">Dismiss</button>
+            <button class="btn btn-primary" onclick="retryLast()">Retry</button>
           </div>
         </div>
       </div>
 
-      <!-- ── PIPELINE PANEL ── -->
       <div class="panel" id="panel-pipeline">
-
-        <!-- Header -->
         <div class="pipeline-header">
-          <button class="pipeline-back" onclick="showPanel('home')">
+          <button class="pipeline-back" onclick="showPanel('home')" aria-label="Back to home">
             <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
           </button>
           <div class="pipeline-title-block">
             <div class="pipeline-course-title" id="pipeline-course-title">Generating course…</div>
             <div class="pipeline-subtitle" id="pipeline-subtitle">Multi-agent pipeline running</div>
+            <div class="pipeline-meta">
+              <span class="meta-badge" id="meta-audience">Audience: Beginners</span>
+              <span class="meta-badge" id="meta-format">Format: Course</span>
+              <span class="meta-badge" id="meta-mode">Mode: Live Pipeline</span>
+            </div>
           </div>
           <div class="pipeline-badge running" id="pipeline-badge">
             <div class="pulse-dot" id="pulse-dot"></div>
@@ -743,28 +110,24 @@
           </div>
         </div>
 
-        <!-- Global progress -->
         <div class="global-progress">
           <div class="global-progress-info">
-            <div class="global-progress-label" id="progress-label">Initializing agents...</div>
-            <div class="global-progress-bar">
-              <div class="global-progress-fill" id="progress-fill" style="width:0%"></div>
-            </div>
+            <div class="global-progress-label" id="progress-label">Connecting to backend agents...</div>
+            <div class="global-progress-bar"><div class="global-progress-fill" id="progress-fill" style="width:0%"></div></div>
           </div>
           <div class="global-progress-pct" id="progress-pct">0%</div>
         </div>
 
-        <!-- Agent stages -->
         <div class="stages-row">
           <div class="stage-card pending" id="stage-0">
             <div class="stage-indicator pending-ind" id="stage-ind-0">1</div>
             <div class="stage-name">Curriculum Architect</div>
-            <div class="stage-desc">Designing syllabus with web research</div>
+            <div class="stage-desc">Designing syllabus with guided research</div>
           </div>
           <div class="stage-card pending" id="stage-1">
             <div class="stage-indicator pending-ind" id="stage-ind-1">2</div>
             <div class="stage-name">Professor</div>
-            <div class="stage-desc">Writing deep-dive lesson content</div>
+            <div class="stage-desc">Writing structured lesson content</div>
           </div>
           <div class="stage-card pending" id="stage-2">
             <div class="stage-indicator pending-ind" id="stage-ind-2">3</div>
@@ -778,413 +141,86 @@
           </div>
         </div>
 
-        <!-- Download bar (shown when done) -->
-        <div class="download-bar" id="download-bar">
-          <div>
-            <div class="download-bar-text"> Course generation complete!</div>
-            <div class="download-bar-sub">Your course is ready to be exported.</div>
+        <div class="toolbar">
+          <div class="tabs" role="tablist" aria-label="Course views">
+            <button class="tab-btn active" onclick="setView('overview')">Overview</button>
+            <button class="tab-btn" onclick="setView('syllabus')">Syllabus</button>
+            <button class="tab-btn" onclick="setView('lessons')">Lessons</button>
+            <button class="tab-btn" onclick="setView('quizzes')">Quizzes</button>
           </div>
-          <button class="dl-btn" onclick="downloadMarkdown()">
-            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-            Export .md
-          </button>
+          <div class="toolbar-right">
+            <button class="btn btn-secondary" id="regenerate-btn" onclick="regenerateCourse()">Regenerate</button>
+            <button class="btn btn-secondary" id="download-btn" onclick="downloadPDF()">Download PDF</button>
+            <button class="btn btn-danger" id="stop-btn" onclick="stopGeneration()" disabled>Stop</button>
+          </div>
         </div>
 
-        <!-- 3-column output -->
-        <div class="pipeline-columns">
-          <!-- COL 1: Syllabus -->
-          <div>
-            <div class="col-header">Structure</div>
+        <div id="view-overview" class="view active">
+          <div class="overview-grid">
+            <div class="summary-card">
+              <div class="summary-icon">📚</div>
+              <div class="summary-value" id="summary-modules">0</div>
+              <div class="summary-label">Modules</div>
+              <div class="summary-note">Generated based on the topic and audience.</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon">⏱️</div>
+              <div class="summary-value" id="summary-duration">0h</div>
+              <div class="summary-label">Estimated duration</div>
+              <div class="summary-note">Useful as a quick preview metric.</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon">🧪</div>
+              <div class="summary-value" id="summary-quizzes">0</div>
+              <div class="summary-label">Quizzes</div>
+              <div class="summary-note">One quiz per module in the workflow.</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon">✅</div>
+              <div class="summary-value" id="summary-status">0%</div>
+              <div class="summary-label">Completion</div>
+              <div class="summary-note">Updates live during generation.</div>
+            </div>
+          </div>
+
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12 2l2.39 6.95H21l-5.7 4.13L17.7 20 12 15.87 6.3 20l2.4-6.92L3 8.95h6.61L12 2z"/></svg>
+            </div>
+            <div class="empty-title">No generated content yet</div>
+            <div class="empty-copy">Enter a topic and start generation to fill the syllabus, lessons, and quiz panels.</div>
+            <button class="btn btn-primary" onclick="document.getElementById('topic-input').focus()">Start here</button>
+          </div>
+        </div>
+
+        <div id="view-syllabus" class="view">
+          <div class="section-title">Structure</div>
+          <div class="course-card">
+            <div class="course-card-head">
+              <div>
+                <div class="course-card-title">Syllabus outline</div>
+                <div class="course-card-sub">Clear module hierarchy for the topic.</div>
+              </div>
+            </div>
             <div id="syllabus-col"></div>
           </div>
-
-          <!-- COL 2: Lessons -->
-          <div>
-            <div class="col-header">Final Lessons</div>
-            <div id="lessons-col"></div>
-          </div>
-
-          <!-- COL 3: Quizzes -->
-          <div>
-            <div class="col-header">Quizzes</div>
-            <div id="quizzes-col"></div>
-          </div>
         </div>
 
-      </div><!-- /pipeline -->
+        <div id="view-lessons" class="view">
+          <div class="section-title">Final Lessons</div>
+          <div id="lessons-col"></div>
+        </div>
 
-    </div><!-- /content -->
+        <div id="view-quizzes" class="view">
+          <div class="section-title">Quizzes</div>
+          <div id="quizzes-col"></div>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
-<script>
-// ── PANEL ROUTING ──────────────────────────────────────────────────────────
-function showPanel(name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-}
-
-function setTopicAndGo(topic) {
-  document.getElementById('topic-input').value = topic;
-  startGeneration();
-}
-
-// ── REAL BACKEND CONNECTION ────────────────────────────────────────────────
-let eventSource = null;
-window._fullCourseContent = "";
-
-function startGeneration() {
-  const topic = document.getElementById('topic-input').value.trim();
-  const audience = document.getElementById('audience-select').value;
-
-  if (!topic) {
-    alert("Please enter a course topic.");
-    return;
-  }
-
-  showPanel('pipeline');
-  document.getElementById('pipeline-course-title').textContent = topic;
-  document.getElementById('pipeline-subtitle').textContent = `Audience: ${audience} · Multi-Agent Pipeline`;
-
-  // Reset UI State
-  document.getElementById('download-bar').classList.remove('visible');
-  document.getElementById('syllabus-col').innerHTML = '';
-  document.getElementById('lessons-col').innerHTML = '';
-  document.getElementById('quizzes-col').innerHTML = '';
-  window._fullCourseContent = "";
-  setProgress(0, 'Connecting to backend...');
-  setBadge(true);
-  for (let i = 0; i < 4; i++) resetStage(i);
-
-  // Close existing stream if any
-  if (eventSource) eventSource.close();
-
-  // Connect to FastAPI SSE endpoint
-  // Using relative path assuming this is served by FastAPI directly
-  const url = `/generate?topic=${encodeURIComponent(topic)}&audience=${encodeURIComponent(audience)}`;
-  eventSource = new EventSource(url);
-
-  // Attach event listeners matching server.py
-  eventSource.addEventListener('stage', e => handleStage(JSON.parse(e.data)));
-  eventSource.addEventListener('progress', e => handleProgress(JSON.parse(e.data)));
-  eventSource.addEventListener('syllabus', e => handleSyllabus(JSON.parse(e.data)));
-  eventSource.addEventListener('module_start', e => handleModuleStart(JSON.parse(e.data)));
-  eventSource.addEventListener('lesson_status', e => handleLessonStatus(JSON.parse(e.data)));
-  eventSource.addEventListener('lesson_done', e => handleLessonDone(JSON.parse(e.data)));
-  eventSource.addEventListener('quiz_done', e => handleQuizDone(JSON.parse(e.data)));
-  
-  eventSource.addEventListener('done', e => { 
-    handleDone(JSON.parse(e.data)); 
-    eventSource.close(); 
-  });
-  
-  eventSource.onerror = () => { 
-    // Only show connection error if the text isn't already showing a caught backend error
-    const currentLabel = document.getElementById('progress-label').textContent;
-    if (!currentLabel.includes('❌')) {
-        setProgress(0, '❌ Connection error. Is the server running?'); 
-    }
-    eventSource.close(); 
-    setBadge(false);
-  };
-}
-
-// ── SSE HANDLERS ───────────────────────────────────────────────────────────
-function handleStage(d) {
-  if (d.status === 'active') activateStage(d.stage);
-  else if (d.status === 'done') doneStage(d.stage);
-}
-
-function handleProgress(d) {
-  setProgress(d.pct, d.label);
-}
-
-function handleSyllabus(d) {
-  const col = document.getElementById('syllabus-col');
-  col.innerHTML = '';
-  const lines = d.text.split('\n').filter(l => l.trim());
-  
-  lines.forEach((line, i) => {
-    // Clean markdown formatting for UI display
-    const cleanLine = line.replace(/\*\*/g, '').replace(/#/g, '').trim();
-    col.innerHTML += `
-      <div class="syllabus-module">
-        <div class="module-num" id="mnum-${i}">${i+1}</div>
-        <div class="module-text">
-          <div class="module-title">${cleanLine}</div>
-        </div>
-      </div>`;
-  });
-}
-
-function handleModuleStart(d) {
-  const mnum = document.getElementById('mnum-' + d.index);
-  if (mnum) mnum.className = 'module-num active';
-
-  // Add Skeleton for Lesson
-  document.getElementById('lessons-col').innerHTML += `
-    <div class="lesson-card" id="lesson-${d.index}">
-      <div class="lesson-card-header">
-        <div class="lesson-card-title">
-          ${d.title}
-          <span class="lesson-status-badge generating" id="lbadge-${d.index}">Drafting…</span>
-        </div>
-      </div>
-      <div class="lesson-card-body" id="lbody-${d.index}">
-        <div class="skeleton" style="height:12px;margin-bottom:8px;width:90%"></div>
-        <div class="skeleton" style="height:12px;margin-bottom:8px;width:75%"></div>
-        <div class="skeleton" style="height:12px;margin-bottom:8px;width:82%"></div>
-      </div>
-    </div>`;
-}
-
-function handleLessonStatus(d) {
-  const badge = document.getElementById('lbadge-' + d.index);
-  if (badge) { 
-    badge.textContent = 'Reviewing…'; 
-    badge.className = 'lesson-status-badge reviewing'; 
-  }
-}
-
-function handleLessonDone(d) {
-  const badge = document.getElementById('lbadge-' + d.index);
-  if (badge) { 
-    badge.textContent = 'Complete'; 
-    badge.className = 'lesson-status-badge done'; 
-  }
-
-  const body = document.getElementById('lbody-' + d.index);
-  if (body) {
-    // Basic Markdown to HTML parsing for UI preview
-    let htmlContent = d.content
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br>');
-      
-    body.innerHTML = htmlContent;
-    
-    // Add expand button for long content
-    const card = document.getElementById('lesson-' + d.index);
-    if(card) {
-      card.innerHTML += `<button class="lesson-expand-btn" onclick="toggleExpand(this)">Show full lesson ↓</button>`;
-    }
-  }
-
-  const mnum = document.getElementById('mnum-' + d.index);
-  if (mnum) mnum.className = 'module-num done';
-}
-
-function handleQuizDone(d) {
-  // 1. Attempt to parse the AI's markdown into structured MCQ data
-  const questions = parseQuiz(d.content);
-  let htmlQuiz = '';
-
-  // 2. Check if parsing was successful
-  if (questions.length === 0) {
-    // Fallback: If AI formatting was weird, just render standard text
-    htmlQuiz = d.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-  } else {
-    // 3. Render the Interactive MCQ UI
-    questions.forEach((q) => {
-      htmlQuiz += `<div class="mcq-question">`;
-      htmlQuiz += `<div class="mcq-question-text">${q.num}. ${q.text}</div>`;
-
-      q.options.forEach(opt => {
-        // Pass whether this option is the correct one to the click handler
-        const isCorrect = opt.letter === q.correct;
-        htmlQuiz += `<button class="mcq-option" onclick="checkAnswer(this, ${isCorrect})">
-            <strong>${opt.letter.toUpperCase()})</strong> ${opt.text}
-        </button>`;
-      });
-      
-      htmlQuiz += `<div class="mcq-feedback"></div>`;
-      htmlQuiz += `</div>`;
-    });
-  }
-
-  // 4. Inject into the DOM
-  document.getElementById('quizzes-col').innerHTML += `
-    <div class="quiz-card">
-      <div class="quiz-card-title">Module ${d.index + 1} Quiz</div>
-      <div style="font-size:13px;color:var(--text-secondary);line-height:1.7">
-        ${htmlQuiz}
-      </div>
-    </div>`;
-}
-
-// ── NEW HELPER: MCQ Click Handler ──
-function checkAnswer(btn, isCorrect) {
-  const parent = btn.parentElement;
-  const feedback = parent.querySelector('.mcq-feedback');
-  const buttons = parent.querySelectorAll('.mcq-option');
-
-  // Disable all buttons in this question once an answer is clicked
-  buttons.forEach(b => {
-      b.disabled = true;
-      b.style.cursor = 'default';
-  });
-
-  if (isCorrect) {
-      btn.classList.add('correct');
-      feedback.textContent = '✅ Correct!';
-      feedback.style.color = 'var(--accent)';
-  } else {
-      btn.classList.add('wrong');
-      feedback.textContent = '❌ Incorrect.';
-      feedback.style.color = 'var(--warn)';
-
-      // Auto-highlight the correct answer so the user learns from their mistake
-      buttons.forEach(b => {
-          if(b.getAttribute('onclick').includes('true')) {
-              b.classList.add('correct');
-          }
-      });
-  }
-  feedback.style.display = 'block';
-}
-
-// ── NEW HELPER: AI Markdown to MCQ Parser ──
-function parseQuiz(text) {
-  let questions = [];
-  
-  // Split the text to isolate the Answer Key
-  const parts = text.split(/(?:###|##|\*\*|---\n|\n---)\s*(?:Answer Key|Answers|Correct Answers)/i);
-  const quizBody = parts[0];
-  const answerKeyBody = parts.length > 1 ? parts[1] : "";
-
-  // Extract the correct answers into a dictionary (e.g., {"1": "c", "2": "b"})
-  let answers = {};
-  if (answerKeyBody) {
-      const ansRegex = /(\d+)[\.\:\-\)]\s*(?:\*\*)?([a-d])/gi;
-      let match;
-      while ((match = ansRegex.exec(answerKeyBody)) !== null) {
-          answers[match[1]] = match[2].toLowerCase();
-      }
-  }
-
-  // Extract the questions and options
-  const qRegex = /(?:^|\n)\s*\*?\*?(\d+)[\.\)]\s*\*?\*?([\s\S]*?)(?=(?:\n\s*\*?\*?\d+[\.\)]|$))/g;
-  let qMatch;
-  while ((qMatch = qRegex.exec(quizBody)) !== null) {
-      let qNum = qMatch[1];
-      let qBlock = qMatch[2].trim();
-
-      // Find all options (a, b, c, d) within this question block
-      const optRegex = /(?:^|\n)\s*([a-d])[\.\)]\s*(.*?)(?=(?:\n\s*[a-d][\.\)]|$))/gi;
-      let options = [];
-      let optMatch;
-      let firstOptIndex = qBlock.length;
-
-      while ((optMatch = optRegex.exec(qBlock)) !== null) {
-          if(options.length === 0) firstOptIndex = optMatch.index;
-          options.push({
-              letter: optMatch[1].toLowerCase(),
-              text: optMatch[2].trim().replace(/\*\*/g, '') 
-          });
-      }
-
-      // The question text is everything before the first option
-      let qText = qBlock.substring(0, firstOptIndex).trim().replace(/\*\*/g, '');
-
-      if (options.length > 0) {
-          questions.push({
-              num: qNum,
-              text: qText,
-              options: options,
-              correct: answers[qNum] || null
-          });
-      }
-  }
-  return questions;
-}
-
-function handleDone(d) {
-  setBadge(false);
-  document.getElementById('download-bar').classList.add('visible');
-  window._fullCourseContent = d.full_content;
-}
-
-// ── UI HELPERS ─────────────────────────────────────────────────────────────
-function toggleExpand(btn) {
-  const body = btn.previousElementSibling;
-  if(body.classList.contains('expanded')) {
-    body.classList.remove('expanded');
-    btn.textContent = "Show full lesson ↓";
-  } else {
-    body.classList.add('expanded');
-    btn.textContent = "Collapse ↑";
-  }
-}
-
-function downloadMarkdown() {
-  if (!window._fullCourseContent) return;
-  const topic = document.getElementById('pipeline-course-title').textContent;
-  const safeFilename = topic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_course.md';
-  
-  const blob = new Blob([window._fullCourseContent], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = safeFilename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-function resetStage(i) {
-  const card = document.getElementById('stage-'+i);
-  const ind = document.getElementById('stage-ind-'+i);
-  card.className = 'stage-card pending';
-  ind.className = 'stage-indicator pending-ind';
-  ind.textContent = i+1;
-  const shimmer = card.querySelector('.stage-shimmer');
-  if (shimmer) shimmer.remove();
-}
-
-function activateStage(i) {
-  const card = document.getElementById('stage-'+i);
-  const ind = document.getElementById('stage-ind-'+i);
-  card.className = 'stage-card active';
-  ind.className = 'stage-indicator active-ind';
-  if (!card.querySelector('.stage-shimmer')) {
-    const shimmer = document.createElement('div');
-    shimmer.className = 'stage-shimmer';
-    card.appendChild(shimmer);
-  }
-}
-
-function doneStage(i) {
-  const card = document.getElementById('stage-'+i);
-  const ind = document.getElementById('stage-ind-'+i);
-  card.className = 'stage-card done';
-  ind.className = 'stage-indicator done-ind';
-  ind.innerHTML = `<svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>`;
-  const shimmer = card.querySelector('.stage-shimmer');
-  if (shimmer) shimmer.remove();
-}
-
-function setProgress(pct, label) {
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-pct').textContent = pct + '%';
-  document.getElementById('progress-label').textContent = label;
-}
-
-function setBadge(running) {
-  const badge = document.getElementById('pipeline-badge');
-  const dot = document.getElementById('pulse-dot');
-  const text = document.getElementById('badge-text');
-  if (running) {
-    badge.className = 'pipeline-badge running';
-    dot.style.display = 'block';
-    text.textContent = 'Running';
-  } else {
-    badge.className = 'pipeline-badge done';
-    dot.style.display = 'none';
-    text.textContent = 'Complete';
-  }
-}
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="/static/script.js"></script>
 </body>
 </html>
