@@ -8,3 +8,4 @@ xhtml2pdf>=0.2.15
 fastapi
 uvicorn
 sse-starlette
+Deprecated
