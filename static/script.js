@@ -527,11 +527,14 @@ function toggleExpand(btn) {
 }
 
 function renderMarkdownLite(md) {
-  let safe = escapeHtml(md);
-  safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  safe = safe.replace(/`([^`]+)`/g, '<code style="background:var(--surface2);padding:2px 6px;border-radius:6px;">$1</code>');
-  safe = safe.replace(/\n/g, '<br>');
-  return safe;
+  // Tell marked to respect standard line breaks
+  marked.setOptions({
+    breaks: true,
+    gfm: true // GitHub Flavored Markdown (enables tables and better code blocks)
+  });
+  
+  // Parse the raw markdown into beautiful HTML
+  return marked.parse(md);
 }
 
 function escapeHtml(str) {
@@ -544,50 +547,94 @@ function escapeHtml(str) {
 }
 
 function downloadPDF() {
-  if (!window._fullCourseContent) {
+  // Check if there is actually content to print
+  if (!$("lessons-col").innerHTML.trim()) {
     showError('Nothing to export', 'Generate a course first before downloading the PDF file.');
     return;
   }
 
-  const panel = $("panel-pipeline");
-  if (!panel) {
-    showError('Export unavailable', 'Could not find the course panel.');
-    return;
-  }
+  // Update button text to show the user it is working
+  const dlBtn = $("download-btn");
+  const originalText = dlBtn.textContent;
+  dlBtn.textContent = "Generating PDF...";
+  dlBtn.disabled = true;
 
-  // Clone to format nicely for PDF
-  const clone = panel.cloneNode(true);
-  clone.style.display = 'block';
-  clone.style.position = 'fixed';
-  clone.style.left = '-10000px';
-  clone.style.top = '0';
-  clone.style.width = '1024px';
-  clone.style.background = '#ffffff';
-  clone.style.padding = '24px';
-  clone.style.boxSizing = 'border-box';
-  clone.classList.add('pdf-capture');
+  // 1. Create a dedicated, clean container for the PDF
+  const printContainer = document.createElement('div');
+  printContainer.className = 'pdf-export-container';
+  
+  // Keep it on-screen but hidden behind everything so the PDF engine can "see" it
+  printContainer.style.position = 'absolute';
+  printContainer.style.top = '0';
+  printContainer.style.left = '0';
+  printContainer.style.width = '800px';
+  printContainer.style.zIndex = '-9999';
+  printContainer.style.background = '#ffffff';
+  printContainer.style.padding = '40px';
 
-  const toolbar = clone.querySelector('.toolbar');
-  if (toolbar) toolbar.remove();
-  const backBtn = clone.querySelector('.pipeline-back');
-  if (backBtn) backBtn.remove();
+  const topic = ($("pipeline-course-title").textContent || 'Course').trim();
 
-  document.body.appendChild(clone);
+  // 2. Build a beautifully formatted, combined document
+  printContainer.innerHTML = `
+    <style>
+      /* Prevent cards from being awkwardly sliced in half across pages */
+      .pdf-export-container .lesson-card, 
+      .pdf-export-container .quiz-card,
+      .pdf-export-container .syllabus-module {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        margin-bottom: 24px;
+      }
+    </style>
+    
+    <h1 style="font-family: var(--font-display); font-size: 36px; color: var(--text-primary); border-bottom: 2px solid var(--border); padding-bottom: 16px; margin-bottom: 32px;">
+      ${topic}
+    </h1>
+    
+    <h2 style="font-family: var(--font-display); font-size: 24px; color: var(--accent); margin-bottom: 16px;">1. Syllabus Outline</h2>
+    ${$("syllabus-col").innerHTML}
+    
+    <h2 style="font-family: var(--font-display); font-size: 24px; color: var(--accent); margin-top: 48px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 24px;">2. Comprehensive Lessons</h2>
+    ${$("lessons-col").innerHTML}
+    
+    <h2 style="font-family: var(--font-display); font-size: 24px; color: var(--accent); margin-top: 48px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 24px;">3. Module Assessments</h2>
+    ${$("quizzes-col").innerHTML}
+  `;
 
-  const topic = ($("pipeline-course-title").textContent || 'course').trim();
+  // 3. Force all collapsed lessons to fully expand (removes the gradient fade)
+  const bodies = printContainer.querySelectorAll('.lesson-card-body');
+  bodies.forEach(body => {
+    body.classList.add('expanded');
+  });
+
+  // 4. Remove UI elements that shouldn't be in a printed document
+  const expandBtns = printContainer.querySelectorAll('.lesson-expand-btn');
+  expandBtns.forEach(btn => btn.remove());
+
+  // Attach it to the page temporarily
+  document.body.appendChild(printContainer);
+
   const safeFilename = topic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_course.pdf';
 
+  // PDF Configuration settings
   const opt = {
-    margin: 0.35,
-    filename: safeFilename,
-    image: { type: 'jpeg', quality: 1 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    margin:       0.4,
+    filename:     safeFilename,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
   };
 
-  html2pdf().set(opt).from(clone).save().finally(() => {
-    clone.remove();
+  // Generate the PDF, then clean up the temporary container
+  html2pdf().set(opt).from(printContainer).save().then(() => {
+    printContainer.remove();
+    dlBtn.textContent = originalText;
+    dlBtn.disabled = false;
+  }).catch(err => {
+    console.error("PDF Error:", err);
+    printContainer.remove();
+    dlBtn.textContent = "Error";
+    setTimeout(() => { dlBtn.textContent = originalText; dlBtn.disabled = false; }, 2000);
   });
 }
 
@@ -653,4 +700,109 @@ if ($("topic-input")) {
 window.addEventListener('load', () => {
   updateCharCounter();
   setProgress(0, 'Ready to start');
+});
+
+// ── AGENT MODAL LOGIC ──────────────────────────────────────────────────────
+const agentData = {
+  curriculum: {
+    name: "Curriculum Architect",
+    desc: "The Master Planner. This agent is responsible for taking your raw topic and designing a logical, progressive learning path tailored to your selected audience.",
+    work: [
+      "Conducts initial research on the user's topic",
+      "Breaks the subject down into digestible, sequential modules",
+      "Ensures prerequisites are taught before advanced concepts"
+    ]
+  },
+  professor: {
+    name: "The Professor",
+    desc: "The Subject Matter Expert. This agent takes the skeleton syllabus and breathes life into it by writing comprehensive, engaging, and educational lesson content.",
+    work: [
+      "Drafts detailed Markdown content for each lesson",
+      "Provides relevant code snippets, examples, and analogies",
+      "Adapts the tone to fit beginners or advanced learners perfectly"
+    ]
+  },
+  dean: {
+    name: "The Dean",
+    desc: "The Quality Controller. Before any lesson reaches the user, The Dean reviews the Professor's work to ensure it meets strict educational standards.",
+    work: [
+      "Checks for factual accuracy and clarity of explanation",
+      "Ensures the formatting is clean, consistent, and readable",
+      "Flags and removes AI hallucinations or overly complex jargon"
+    ]
+  },
+  exam: {
+    name: "Exam Setter",
+    desc: "The Evaluator. To ensure knowledge retention, this agent reads the final approved lessons and generates targeted assessments.",
+    work: [
+      "Creates dynamic multiple-choice questions for each module",
+      "Identifies the core concepts that need to be tested",
+      "Provides accurate answer keys and plausible distractors (wrong answers)"
+    ]
+  }
+};
+
+function openAgentModal(agentKey) {
+  const data = agentData[agentKey];
+  if (!data) return;
+
+  // BULLETPROOF CHECK: If the HTML is missing, inject it automatically!
+  if (!$('agent-modal')) {
+    const modalHTML = `
+      <div class="modal-overlay" id="agent-modal" onclick="closeAgentModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h2 class="modal-title" id="modal-agent-name"></h2>
+            <button class="modal-close" onclick="closeAgentModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p id="modal-agent-desc"></p>
+            <div class="modal-work-label">What this agent does:</div>
+            <ul id="modal-agent-work" class="modal-work-list"></ul>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+  }
+  
+  // Now it is safe to set the text
+  $('modal-agent-name').textContent = data.name;
+  $('modal-agent-desc').textContent = data.desc;
+  
+  const ul = $('modal-agent-work');
+  ul.innerHTML = '';
+  data.work.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item;
+    ul.appendChild(li);
+  });
+  
+  // Tiny delay to allow the browser to draw the HTML before animating it in
+  setTimeout(() => {
+    $('agent-modal').classList.add('active');
+  }, 10);
+}
+
+function closeAgentModal(event) {
+  // If an event is passed, only close if the background overlay was clicked
+  if (event && event.target.id !== 'agent-modal') return;
+  const modal = $('agent-modal');
+  if (modal) {
+      modal.classList.remove('active');
+  }
+}
+
+// ── DYNAMIC HEADER SCROLL EFFECT ───────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const topbar = document.querySelector('.topbar');
+  if (topbar) {
+    // If we scroll down more than 20 pixels, add the glass effect
+    if (window.scrollY > 20) {
+      topbar.classList.add('scrolled');
+    } else {
+      // If we go back to the top, make it transparent again
+      topbar.classList.remove('scrolled');
+    }
+  }
 });

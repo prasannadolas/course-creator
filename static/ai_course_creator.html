@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI Course Creator</title>
+  <title>OrchestrAI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   
@@ -14,9 +14,23 @@
   <main class="main">
     
     <div class="topbar">
-      <span class="topbar-title" id="topbar-title">AI COURSE CREATOR</span>
+      <div class="topbar-left">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <span class="topbar-title" id="topbar-title">OrchestrAI</span>
+      </div>
+
       <div class="topbar-actions">
-        <button class="btn btn-primary" onclick="window.location.reload();">+ NEW COURSE</button>
+        <button class="btn btn-primary" onclick="window.location.reload();">
+          <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" style="margin-right: 4px;">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+          </svg>
+          New Course
+        </button>
+      
       </div>
     </div>
 
@@ -61,6 +75,10 @@
               <div class="chip" onclick="setTopicAndGo('Data Science Foundations')">Data Science</div>
               <div class="chip" onclick="setTopicAndGo('Cybersecurity Essentials')">Cybersecurity</div>
               <div class="chip" onclick="setTopicAndGo('AWS Architecture Fundamentals')">AWS Architecture</div>
+              <div class="chip" onclick="setTopicAndGo('IoT with NodeMCU & ESP8266')">IoT & NodeMCU</div>
+              <div class="chip" onclick="setTopicAndGo('Digital Audio Production in FL Studio')">FL Studio Production</div>
+              <div class="chip" onclick="setTopicAndGo('Ghost Kitchen Logistics and Management')">Ghost Kitchen Systems</div>
+              <div class="chip" onclick="setTopicAndGo('Advanced Cloud Computing')">Cloud Computing</div>
             </div>
           </div>
         </div>
@@ -121,22 +139,22 @@
         <div class="stages-row">
           <div class="stage-card pending" id="stage-0">
             <div class="stage-indicator pending-ind" id="stage-ind-0">1</div>
-            <div class="stage-name">Curriculum Architect</div>
+            <div class="stage-name">Curriculum Agent</div>
             <div class="stage-desc">Designing syllabus with guided research</div>
           </div>
           <div class="stage-card pending" id="stage-1">
             <div class="stage-indicator pending-ind" id="stage-ind-1">2</div>
-            <div class="stage-name">Professor</div>
+            <div class="stage-name">Content Agent</div>
             <div class="stage-desc">Writing structured lesson content</div>
           </div>
           <div class="stage-card pending" id="stage-2">
             <div class="stage-indicator pending-ind" id="stage-ind-2">3</div>
-            <div class="stage-name">The Dean</div>
+            <div class="stage-name">Review Agent</div>
             <div class="stage-desc">Reviewing and polishing lessons</div>
           </div>
           <div class="stage-card pending" id="stage-3">
             <div class="stage-indicator pending-ind" id="stage-ind-3">4</div>
-            <div class="stage-name">Exam Setter</div>
+            <div class="stage-name">Quiz Agent</div>
             <div class="stage-desc">Crafting quizzes and assessments</div>
           </div>
         </div>
@@ -158,25 +176,21 @@
         <div id="view-overview" class="view active">
           <div class="overview-grid">
             <div class="summary-card">
-              <div class="summary-icon">📚</div>
               <div class="summary-value" id="summary-modules">0</div>
               <div class="summary-label">Modules</div>
               <div class="summary-note">Generated based on the topic and audience.</div>
             </div>
             <div class="summary-card">
-              <div class="summary-icon">⏱️</div>
               <div class="summary-value" id="summary-duration">0h</div>
               <div class="summary-label">Estimated duration</div>
               <div class="summary-note">Useful as a quick preview metric.</div>
             </div>
             <div class="summary-card">
-              <div class="summary-icon">🧪</div>
               <div class="summary-value" id="summary-quizzes">0</div>
               <div class="summary-label">Quizzes</div>
               <div class="summary-note">One quiz per module in the workflow.</div>
             </div>
             <div class="summary-card">
-              <div class="summary-icon">✅</div>
               <div class="summary-value" id="summary-status">0%</div>
               <div class="summary-label">Completion</div>
               <div class="summary-note">Updates live during generation.</div>
@@ -217,9 +231,57 @@
         </div>
       </div>
     </div>
+
+    <footer class="app-footer">
+      <div class="footer-container">
+        
+        <div class="footer-col">
+          <div class="footer-brand">OrchestrAI</div>
+          <p class="footer-desc">An autonomous multi-agent pipeline designed to instantly generate comprehensive educational content and structured curriculums.</p>
+          <div class="footer-credit">Built by <strong>Prasanna Dolas</strong></div>
+        </div>
+
+        <div class="footer-col">
+          <h3 class="footer-heading">Meet the Agents</h3>
+          <ul class="footer-list">
+            <li><button class="footer-link" onclick="openAgentModal('curriculum')">Curriculum Agent</button></li>
+            <li><button class="footer-link" onclick="openAgentModal('professor')">Content Agent</button></li>
+            <li><button class="footer-link" onclick="openAgentModal('dean')">Review Agent</button></li>
+            <li><button class="footer-link" onclick="openAgentModal('exam')">Quiz Agent</button></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h3 class="footer-heading">Connect</h3>
+          <ul class="footer-list">
+            <li>
+              <a href="https://www.linkedin.com/in/prasanna-dolas-b872aa328/" class="footer-link" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                LinkedIn
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/prasannadolas" class="footer-link" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+              </a>
+            </li>
+            <li>
+              <a href="https://leetcode.com/u/prasannadolas/" class="footer-link" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.939 5.939 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114l5.7-5.541a1.377 1.377 0 0 0-.03-1.957 1.373 1.373 0 0 0-1.317-.178zm5.72 11.232a1.374 1.374 0 0 0-.961.438l-4.102 4.103a1.377 1.377 0 0 0 0 1.952 1.377 1.377 0 0 0 1.951 0l4.102-4.103a1.377 1.377 0 0 0 0-1.952 1.374 1.374 0 0 0-.99-.438z"/></svg>
+                LeetCode
+              </a>
+            </li>
+          </ul>    
+        </div>
+        
+      </div>
+    </footer>
+    
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="/static/script.js"></script>
 </body>

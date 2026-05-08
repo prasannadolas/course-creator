@@ -65,8 +65,8 @@ async def run_pipeline_stream(topic: str, audience: str):
         syllabus_text = ""
         runner = Runner(agent=curriculum_agent, session_service=session_svc, app_name="course_creator")
         msg = wrap_message(
-            f"Create a syllabus for '{topic}' for {audience}. "
-            f"List exactly 5 modules. Format as 'Module X: Title - one sentence summary'."
+            f"Create a {format} syllabus for '{topic}' for {audience}. "
+            f"List exactly 3 modules. Format as 'Module X: Title - one sentence summary'." # <-- Change to 3 here
         )
         async for event in runner.run_async(session_id=session_id, user_id=user_id, new_message=msg):
             if event.is_final_response():
@@ -173,12 +173,11 @@ def _parse_modules(syllabus_text: str) -> list[str]:
         clean = line.strip().replace('*', '').replace('#', '').strip()
         if re.match(r'^(?:Module\s*\d+|Unit\s*\d+|\d+[\.\)])\s*[:\-\s]', clean, re.IGNORECASE):
             modules.append(clean)
-    return modules[:5] if modules else [
-        "Module 1: Fundamentals", "Module 2: Core Concepts",
-        "Module 3: Application",  "Module 4: Advanced Topics",
-        "Module 5: Conclusion"
+    return modules[:3] if modules else [  # <-- Change slice to :3
+        "Module 1: Fundamentals", 
+        "Module 2: Core Concepts",
+        "Module 3: Application"
     ]
-
 
 # ── ROUTES ─────────────────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
