@@ -205,15 +205,14 @@ button, input, textarea, select { font: inherit; }
   margin-bottom: 12px;
 }
 .hero-title em { font-style: italic; color: var(--accent2); }
-.hero-sub {
-  font-size: 15px;
-  color: var(--text-secondary);
-  margin-bottom: 22px;
-  max-width: none;
-  white-space: nowrap;
-  text-align: center;
-  margin-inline: auto;
-}
+.hero-sub { 
+    font-size: 14px; 
+    white-space: normal; 
+    margin: 0 auto 24px auto; /* Keeps the text block perfectly centered */
+    padding: 0 24px; /* Adds generous breathing room on the left and right */
+    max-width: 360px; /* Forces a clean line break so it never touches the screen edges */
+    line-height: 1.5; /* Improves readability when the text wraps to two lines */
+  }
 
 .quick-pills {
   display: flex;
@@ -1248,3 +1247,69 @@ button, input, textarea, select { font: inherit; }
   color: var(--text-secondary);
 }
 
+/* 1. Header/Topbar Fixes */
+  .topbar { 
+    height: auto; 
+    min-height: 60px; 
+    padding: 10px 16px; 
+    flex-direction: row !important; 
+    align-items: center !important; 
+    justify-content: space-between !important;
+  }
+  
+  .topbar-left { 
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important; /* Groups logo and text tightly on the left */
+    flex: 0 1 auto !important; /* Prevents it from stretching across the screen */
+    gap: 8px !important;
+    width: auto !important; 
+  }
+  
+  .topbar-title { 
+    font-size: 16px; 
+  }
+  
+  .topbar-actions { 
+    width: auto !important; 
+    flex: 0 0 auto !important; 
+  }
+
+  .topbar .btn { 
+    padding: 6px 12px !important; 
+    font-size: 12px !important; 
+    height: 32px !important; /* Makes the top button sleeker */
+  }
+
+  /* 3. Input Card & Main Button Fixes */
+  .create-card { 
+    padding: 16px; 
+    margin-bottom: 24px;
+  }
+  
+  .create-textarea { 
+    font-size: 15px; 
+    min-height: 90px; 
+  }
+  
+  .create-actions { 
+    flex-direction: column !important; 
+    align-items: stretch !important; 
+    gap: 12px; 
+  }
+  
+  .create-actions-left, .create-actions-right { 
+    width: 100% !important; 
+  }
+  
+  .audience-select { 
+    width: 100%; 
+    height: 42px; /* Matches the new button height below */
+  }
+
+  /* Fix the chunky green submit button */
+  .submit-btn { 
+    width: 100% !important; 
+    height: 42px !important; /* Reduced from 48px for better mobile proportion */
+    border-radius: 99px !important; 
+  }

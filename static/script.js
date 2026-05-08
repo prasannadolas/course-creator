@@ -705,7 +705,7 @@ window.addEventListener('load', () => {
 // ── AGENT MODAL LOGIC ──────────────────────────────────────────────────────
 const agentData = {
   curriculum: {
-    name: "Curriculum Architect",
+    name: "Curriculum Agent ",
     desc: "The Master Planner. This agent is responsible for taking your raw topic and designing a logical, progressive learning path tailored to your selected audience.",
     work: [
       "Conducts initial research on the user's topic",
@@ -714,7 +714,7 @@ const agentData = {
     ]
   },
   professor: {
-    name: "The Professor",
+    name: "Content Agent",
     desc: "The Subject Matter Expert. This agent takes the skeleton syllabus and breathes life into it by writing comprehensive, engaging, and educational lesson content.",
     work: [
       "Drafts detailed Markdown content for each lesson",
@@ -723,7 +723,7 @@ const agentData = {
     ]
   },
   dean: {
-    name: "The Dean",
+    name: "Review Agent",
     desc: "The Quality Controller. Before any lesson reaches the user, The Dean reviews the Professor's work to ensure it meets strict educational standards.",
     work: [
       "Checks for factual accuracy and clarity of explanation",
@@ -732,7 +732,7 @@ const agentData = {
     ]
   },
   exam: {
-    name: "Exam Setter",
+    name: "Quiz Agent",
     desc: "The Evaluator. To ensure knowledge retention, this agent reads the final approved lessons and generates targeted assessments.",
     work: [
       "Creates dynamic multiple-choice questions for each module",
