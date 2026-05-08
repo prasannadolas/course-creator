@@ -5,10 +5,14 @@ from duckduckgo_search import DDGS
 logging.basicConfig(level=logging.INFO)
 app_logger = logging.getLogger("SearchTool")
 
-def perform_research(query: str, max_results=3):
+# 👇 THE FIX: We removed max_results=3 from this line
+def perform_research(query: str):
     """
     Performs a real web search to find the latest information.
     """
+    # 👇 THE FIX: We moved max_results safely inside the function instead
+    max_results = 3 
+    
     app_logger.info(f"🔍 Researching: {query}")
     
     try:
