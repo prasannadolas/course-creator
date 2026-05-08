@@ -52,7 +52,7 @@ async def run_pipeline_stream(topic: str, audience: str):
         session_svc = InMemorySessionService()
         session_id  = "web_session"
         user_id     = "web_user"
-        session_svc.create_session(
+        await session_svc.create_session(
             session_id=session_id, user_id=user_id, app_name="course_creator"
         )
 
