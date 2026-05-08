@@ -1,6 +1,7 @@
 import asyncio
 import json
 import traceback
+import inspect
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -52,9 +53,14 @@ async def run_pipeline_stream(topic: str, audience: str):
         session_svc = InMemorySessionService()
         session_id  = "web_session"
         user_id     = "web_user"
-        await session_svc.create_session(
+        
+        session_result = session_svc.create_session(
             session_id=session_id, user_id=user_id, app_name="course_creator"
         )
+        
+        if inspect.isawaitable(session_result):
+            await session_result
+        # ------------------------------------
 
         full_content = f"# {topic}\n**Audience:** {audience}\n\n"
 
