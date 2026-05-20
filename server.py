@@ -1,16 +1,25 @@
+from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
+import bcrypt
+from database import get_db, User, Course
+import jwt
 import asyncio
 import json
 import traceback
 import inspect
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, StreamingResponse
+
+
+from config import JWT_SECRET_KEY
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from sse_starlette.sse import EventSourceResponse
+from pydantic import BaseModel
 from types import SimpleNamespace
 
 # Import errors for Exception Handling
-from google.genai import errors
+from google.genai.errors import ClientError, ServerError
 
 # ADK imports
 from google.adk.runners import Runner
@@ -21,6 +30,9 @@ from course_agents.curriculum_agent import curriculum_agent
 from course_agents.content_agent import content_agent
 from course_agents.review_agent import review_agent
 from course_agents.quiz_agent import quiz_agent
+
+# Password hashing setup
+SECRET_KEY = JWT_SECRET_KEY
 
 app = FastAPI()
 
@@ -155,12 +167,12 @@ async def run_pipeline_stream(topic: str, audience: str):
         yield sse_event("done",     {"full_content": full_content})
 
     # ── ERROR HANDLING ────────────────────────────────────────────────────────
-    except errors.ServerError as e:
+    except ServerError as e:
         # Catches the 503 Server Overloaded error
         print(f"Caught 503 Error: {e}")
         yield sse_event("progress", {"pct": 0, "label": "❌ Google's servers are overloaded. Please try again in a minute."})
         
-    except errors.ClientError as e:
+    except ClientError as e:
         # Catches the 429 Rate Limit error
         print(f"Caught 429 Error: {e}")
         yield sse_event("progress", {"pct": 0, "label": "❌ API rate limit reached. Please wait 30 seconds."})
@@ -185,6 +197,57 @@ def _parse_modules(syllabus_text: str) -> list[str]:
         "Module 3: Application"
     ]
 
+# ── AUTHENTICATION ROUTES ──────────────────────────────────────────────────
+# ── DATA MODELS (This tells FastAPI exactly what JSON to expect) ────────────
+class RegisterUser(BaseModel):
+    full_name: str
+    email: str
+    password: str
+
+class LoginUser(BaseModel):
+    email: str
+    password: str
+
+# ── AUTHENTICATION ROUTES ──────────────────────────────────────────────────
+@app.post("/auth/register")
+def register(user_data: RegisterUser, db: Session = Depends(get_db)):
+    # Check if email exists
+    if db.query(User).filter(User.email == user_data.email).first():
+        return {"ok": False, "error": "Email already registered"}
+    
+    # Securely hash the password using modern bcrypt directly
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(user_data.password.encode('utf-8'), salt).decode('utf-8')
+    
+    new_user = User(full_name=user_data.full_name, email=user_data.email, password_hash=hashed_password)
+    db.add(new_user)
+    db.commit()
+    return {"ok": True}
+
+@app.post("/auth/login")
+def login(user_data: LoginUser, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == user_data.email).first()
+    
+    # Verify the user exists AND the password is correct
+    if not user or not bcrypt.checkpw(user_data.password.encode('utf-8'), user.password_hash.encode('utf-8')):
+        return {"ok": False, "error": "Invalid email or password"}
+    
+    # Create a secure token
+    token = jwt.encode({"sub": user.email, "id": user.id}, SECRET_KEY, algorithm="HS256")
+    
+    return {
+        "ok": True, 
+        "token": token, 
+        "user": {"full_name": user.full_name, "email": user.email}
+    }
+
+# ── ROUTING FOR LOGIN PAGE ──────────────────────────────────────────────────
+@app.get("/login", response_class=HTMLResponse)
+async def serve_login():
+    # CHANGE THIS from "static/rex.html" to "static/login.html" 👇
+    with open("static/login.html", encoding="utf-8") as f:
+        return f.read()
+
 # ── ROUTES ─────────────────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
 async def serve_ui():
@@ -194,3 +257,42 @@ async def serve_ui():
 @app.get("/generate")
 async def generate(topic: str, audience: str = "Beginners"):
     return EventSourceResponse(run_pipeline_stream(topic, audience))
+
+# ── SECURITY HELPER: VERIFY USER TOKEN ──────────────────────────────────────
+def get_current_user(request: Request, db: Session = Depends(get_db)):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    token = auth_header.split(" ")[1]
+    try:
+        # Decode the token using your secret key
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        user_id = payload.get("id")
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        return user
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
+@app.get("/api/history")
+def get_user_history(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Fetches all saved courses for the currently logged-in user."""
+    # Query the database for this user's courses, newest first
+    courses = db.query(Course).filter(Course.user_id == current_user.id).order_by(Course.created_at.desc()).all()
+    
+    # Format the data to send back to javascript
+    history_data = []
+    for c in courses:
+        history_data.append({
+            "id": c.id, 
+            "topic": c.topic, 
+            "audience": c.audience, 
+            "content": c.full_content, 
+            "date": c.created_at.strftime("%b %d, %Y")
+        })
+        
+    return {"ok": True, "courses": history_data}

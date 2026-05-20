@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OrchestrAI — Sign In</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a6b4a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+   :root {
+      /* Match main app light theme */
+      --bg:          #f4f6f5; 
+      --surface:     #ffffff;
+      --surface-2:   #f9f9f9;
+      --border:      #e2e8e4;
+      --border-focus:#1a6b4a;
+      --text:        #111111;
+      --text-muted:  #666666;
+      --green:       #1a6b4a;
+      --green-light: #238c63;
+      --green-glow:  rgba(26,107,74,0.15);
+      --error:       #d93025;
+      --error-bg:    rgba(217,48,37,0.1);
+      --radius:      12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated background grid ──────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(26,107,74,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26,107,74,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridDrift 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+    @keyframes gridDrift {
+      0%   { background-position: 0 0; }
+      100% { background-position: 48px 48px; }
+    }
+
+    /* ── Glow orb ───────────────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(26,107,74,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      animation: orbPulse 4s ease-in-out infinite alternate;
+    }
+    @keyframes orbPulse {
+      0%   { opacity: 0.6; transform: translateX(-50%) scale(1); }
+      100% { opacity: 1;   transform: translateX(-50%) scale(1.1); }
+    }
+
+    /* ── Card ───────────────────────────────────────────────────── */
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 0 0 1px rgba(26,107,74,0.08), 0 24px 64px rgba(0,0,0,0.5);
+      animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Brand ──────────────────────────────────────────────────── */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(26,107,74,0.15);
+      border: 1px solid rgba(26,107,74,0.3);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green-light);
+    }
+    .brand-name {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    /* ── Heading ────────────────────────────────────────────────── */
+    .card-heading { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 300; line-height: 1.2; margin-bottom: 6px; }
+    .card-heading em { font-style: italic; color: var(--green-light); }
+    .card-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
+
+    /* ── Tab switcher ───────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--green);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(26,107,74,0.4);
+    }
+
+    /* ── Form fields ────────────────────────────────────────────── */
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+    .field input {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input::placeholder { color: #4d5562; }
+    .field input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--green-glow);
+    }
+    .field input.error-input { border-color: var(--error); }
+
+    /* ── Password strength ──────────────────────────────────────── */
+    .strength-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .strength-fill {
+      height: 100%;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s, background 0.3s;
+    }
+    .strength-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Error / success banners ────────────────────────────────── */
+    .banner {
+      display: none;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      margin-bottom: 16px;
+      align-items: center;
+      gap: 8px;
+    }
+    .banner.error  { display: flex; background: var(--error-bg); color: var(--error); border: 1px solid rgba(248,81,73,0.2); }
+    .banner.success{ display: flex; background: rgba(26,107,74,0.1); color: #3fb97d; border: 1px solid rgba(26,107,74,0.25); }
+
+    /* ── Submit button ──────────────────────────────────────────── */
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .submit-btn:hover:not(:disabled) {
+      background: var(--green-light);
+      box-shadow: 0 4px 16px rgba(26,107,74,0.4);
+    }
+    .submit-btn:active:not(:disabled) { transform: scale(0.98); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .submit-btn .spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    .submit-btn.loading .spinner { display: inline-block; }
+    .submit-btn.loading .btn-text { opacity: 0.7; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Divider & footer ───────────────────────────────────────── */
+    .divider { height: 1px; background: var(--border); margin: 24px 0; }
+    .card-footer {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .card-footer a {
+      color: var(--green-light);
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .card-footer a:hover { text-decoration: underline; }
+
+    /* ── User Avatar (shown after login) ────────────────────────── */
+    .user-pill {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: rgba(26,107,74,0.08);
+      border: 1px solid rgba(26,107,74,0.2);
+      border-radius: 14px;
+      margin-bottom: 20px;
+    }
+    .user-pill.visible { display: flex; }
+    .avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px; color: #fff;
+      flex-shrink: 0;
+    }
+    .user-pill-name { font-weight: 600; font-size: 15px; }
+    .user-pill-email { font-size: 12px; color: var(--text-muted); }
+    .user-pill-actions { margin-left: auto; }
+    .btn-sm {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-sm:hover { border-color: var(--error); color: var(--error); }
+
+    /* ── Panel visibility ───────────────────────────────────────── */
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+
+    /* ── Redirect note ──────────────────────────────────────────── */
+    .redirect-note {
+      display: none;
+      text-align: center;
+      padding: 20px 0 4px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .redirect-note a {
+      color: var(--green-light);
+      font-weight: 500;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Brand -->
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <span class="brand-name">OrchestrAI</span>
+  </div>
+
+  <!-- Logged-in pill (shown when already authenticated) -->
+  <div class="user-pill" id="user-pill">
+    <div class="avatar" id="user-avatar">P</div>
+    <div>
+      <div class="user-pill-name" id="user-name">Prasanna</div>
+      <div class="user-pill-email" id="user-email">email@example.com</div>
+    </div>
+    <div class="user-pill-actions">
+      <button class="btn-sm" onclick="handleLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <!-- Redirect note (when already logged in) -->
+  <div class="redirect-note" id="redirect-note">
+    You're signed in. <a href="/">Go to the course creator →</a>
+  </div>
+
+  <!-- Auth forms (hidden when logged in) -->
+  <div id="auth-section">
+    <h1 class="card-heading">Welcome <em>back.</em></h1>
+    <p class="card-sub">Sign in or create your free OrchestrAI account.</p>
+
+    <!-- Tab switcher -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <!-- Error / Success banner -->
+    <div class="banner" id="banner">
+      <svg id="banner-icon" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      <span id="banner-msg">Error message here</span>
+    </div>
+
+    <!-- ── LOGIN FORM ───────────────────────────────────────────── -->
+    <div class="form-panel active" id="panel-login">
+      <div class="field">
+        <label for="login-email">Email address</label>
+        <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button class="submit-btn" id="login-btn" onclick="handleLogin()">
+        <span class="spinner"></span>
+        <span class="btn-text">Sign In</span>
+      </button>
+    </div>
+
+    <!-- ── REGISTER FORM ────────────────────────────────────────── -->
+    <div class="form-panel" id="panel-register">
+      <div class="field">
+        <label for="reg-name">Full name</label>
+        <input type="text" id="reg-name" placeholder="Enter your name" autocomplete="name"/>
+      </div>
+      <div class="field">
+        <label for="reg-email">Email address</label>
+        <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label for="reg-password">Password</label>
+        <input type="password" id="reg-password" placeholder="Min. 8 characters" autocomplete="new-password" oninput="updateStrength(this.value)"/>
+        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+        <div class="strength-label" id="strength-label"></div>
+      </div>
+      <button class="submit-btn" id="register-btn" onclick="handleRegister()">
+        <span class="spinner"></span>
+        <span class="btn-text">Create Account</span>
+      </button>
+    </div>
+</div>
+
+<script>
+// ── Config — point to your FastAPI server ──────────────────────────────────
+const API = "";   // empty string = same origin; change to "http://localhost:8000" for dev
+
+// ── State ──────────────────────────────────────────────────────────────────
+let currentTab = "login";
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById("tab-login").classList.toggle("active", tab === "login");
+  document.getElementById("tab-register").classList.toggle("active", tab === "register");
+  document.getElementById("panel-login").classList.toggle("active", tab === "login");
+  document.getElementById("panel-register").classList.toggle("active", tab === "register");
+
+  const h = document.querySelector(".card-heading");
+  const sub = document.querySelector(".card-sub");
+  if (tab === "login") {
+    h.innerHTML = 'Welcome <em>back.</em>';
+    sub.textContent = "Sign in to your OrchestrAI account.";
+  } else {
+    h.innerHTML = 'Create your <em>account.</em>';
+    sub.textContent = "Join OrchestrAI and start building courses.";
+  }
+  hideBanner();
+}
+
+// ── Banner helpers ─────────────────────────────────────────────────────────
+function showBanner(msg, type = "error") {
+  const el = document.getElementById("banner");
+  el.className = `banner ${type}`;
+  document.getElementById("banner-msg").textContent = msg;
+}
+function hideBanner() {
+  document.getElementById("banner").className = "banner";
+}
+
+// ── Button loading state ───────────────────────────────────────────────────
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.classList.toggle("loading", loading);
+}
+
+// ── Password strength ──────────────────────────────────────────────────────
+function updateStrength(val) {
+  const fill = document.getElementById("strength-fill");
+  const label = document.getElementById("strength-label");
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const levels = [
+    { pct: "0%",   color: "#30363d", text: "" },
+    { pct: "25%",  color: "#f85149", text: "Weak" },
+    { pct: "50%",  color: "#e3b341", text: "Fair" },
+    { pct: "75%",  color: "#1a6b4a", text: "Good" },
+    { pct: "100%", color: "#3fb97d", text: "Strong ✓" },
+  ];
+  const lvl = levels[score] || levels[0];
+  fill.style.width = lvl.pct;
+  fill.style.background = lvl.color;
+  label.textContent = lvl.text;
+  label.style.color = lvl.color;
+}
+
+// ── LOGIN ──────────────────────────────────────────────────────────────────
+async function handleLogin() {
+  hideBanner();
+  const email    = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value;
+
+  if (!email || !password) {
+    showBanner("Please fill in all fields.");
+    return;
+  }
+
+  setLoading("login-btn", true);
+  try {
+    const res  = await fetch(`${API}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      showBanner(data.error || "Login failed.");
+      return;
+    }
+
+    // Persist token + user info
+    localStorage.setItem("orchestrai_token", data.token);
+    localStorage.setItem("orchestrai_user",  JSON.stringify(data.user));
+
+    showBanner("Signed in! Redirecting…", "success");
+    setTimeout(() => { window.location.href = "/"; }, 1000);
+
+  } catch (e) {
+    showBanner("Network error — is the server running?");
+  } finally {
+    setLoading("login-btn", false);
+  }
+}
+
+// ── REGISTER ───────────────────────────────────────────────────────────────
+async function handleRegister() {
+  hideBanner();
+  const full_name = document.getElementById("reg-name").value.trim();
+  const email     = document.getElementById("reg-email").value.trim();
+  const password  = document.getElementById("reg-password").value;
+
+  if (!full_name || !email || !password) {
+    showBanner("Please fill in all fields.");
+    return;
+  }
+
+  setLoading("register-btn", true);
+  try {
+    const res  = await fetch(`${API}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ full_name, email, password })
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      showBanner(data.error || "Registration failed.");
+      return;
+    }
+
+    showBanner("Account created! Signing you in…", "success");
+
+    // Auto-login after registration
+    setTimeout(async () => {
+      const lRes  = await fetch(`${API}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const lData = await lRes.json();
+      if (lData.ok) {
+        localStorage.setItem("orchestrai_token", lData.token);
+        localStorage.setItem("orchestrai_user",  JSON.stringify(lData.user));
+        window.location.href = "/";
+      }
+    }, 1000);
+
+  } catch (e) {
+    showBanner("Network error — is the server running?");
+  } finally {
+    setLoading("register-btn", false);
+  }
+}
+
+// ── LOGOUT ─────────────────────────────────────────────────────────────────
+async function handleLogout() {
+  const token = localStorage.getItem("orchestrai_token");
+  if (token) {
+    await fetch(`${API}/auth/logout`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}` }
+    }).catch(() => {});
+  }
+  localStorage.removeItem("orchestrai_token");
+  localStorage.removeItem("orchestrai_user");
+  location.reload();
+}
+
+// ── On-load: check if already logged in ───────────────────────────────────
+(function checkExistingSession() {
+  const token = localStorage.getItem("orchestrai_token");
+  const user  = JSON.parse(localStorage.getItem("orchestrai_user") || "null");
+
+  if (token && user) {
+    // Show logged-in pill, hide auth forms
+    document.getElementById("auth-section").style.display = "none";
+    document.querySelector(".card-heading") && (document.querySelector(".card-heading").style.display = "none");
+    document.querySelector(".card-sub")     && (document.querySelector(".card-sub").style.display = "none");
+
+    const pill = document.getElementById("user-pill");
+    pill.classList.add("visible");
+
+    const initials = user.full_name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+    document.getElementById("user-avatar").textContent = initials;
+    document.getElementById("user-avatar").style.background = user.avatar_color || "#1a6b4a";
+    document.getElementById("user-name").textContent  = user.full_name;
+    document.getElementById("user-email").textContent = user.email;
+
+    document.getElementById("redirect-note").style.display = "block";
+  }
+})();
+
+// ── Enter key support ──────────────────────────────────────────────────────
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  if (currentTab === "login")    handleLogin();
+  if (currentTab === "register") handleRegister();
+});
+</script>
+</body>
+</html>

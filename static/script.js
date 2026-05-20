@@ -7,7 +7,150 @@ let lastTopic = '';
 let lastAudience = 'Beginners';
 let lastFormat = 'Course';
 let eventSource = null;
+const API = ""; // <--- Add this line!
 window._fullCourseContent = '';
+
+// ── AUTHENTICATION & HISTORY LOGIC ─────────────────────────────────────────
+function checkAuthUI() {
+  const token = localStorage.getItem("orchestrai_token");
+  const userStr = localStorage.getItem("orchestrai_user");
+  
+  if (token && userStr) {
+    const user = JSON.parse(userStr);
+    if ($('nav-login-btn')) $('nav-login-btn').style.display = 'none';
+    if ($('user-menu')) $('user-menu').style.display = 'flex';
+    
+    // Set Profile Details
+    if ($('header-user-name')) $('header-user-name').textContent = user.full_name.split(' ')[0];
+    if ($('header-avatar')) {
+      const initials = user.full_name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+      $('header-avatar').textContent = initials;
+    }
+  } else {
+    if ($('nav-login-btn')) $('nav-login-btn').style.display = 'inline-flex';
+    if ($('user-menu')) $('user-menu').style.display = 'none';
+  }
+}
+
+// ── LOGOUT LOGIC ───────────────────────────────────────────────────────────
+// ── UPDATED LOGOUT LOGIC ───────────────────────────────────────────────────
+function confirmLogout() {
+  // Show our custom modal instead of the browser's default confirm box
+  const modal = $('logout-confirm-modal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeLogoutModal() {
+  const modal = $('logout-confirm-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+// Ensure you also close the modal after logout to be safe
+async function handleLogout() {
+  closeLogoutModal(); 
+  
+  const token = localStorage.getItem("orchestrai_token");
+  if (token) {
+    await fetch(`${API}/auth/logout`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}` }
+    }).catch(() => {});
+  }
+  localStorage.removeItem("orchestrai_token");
+  localStorage.removeItem("orchestrai_user");
+  
+  // Redirect to home page instead of login page
+  window.location.href = "/"; 
+}
+
+// Force refresh when navigating back
+window.onpageshow = function(event) {
+    if (event.persisted) {
+        window.location.reload(); 
+    }
+    checkAuthUI(); // Re-verify auth state immediately
+};
+
+// Security: If the user is on the login page but already has a token, send them home
+if (window.location.pathname === '/login' && localStorage.getItem("orchestrai_token")) {
+    window.location.href = "/";
+}
+
+async function openHistoryModal() {
+  const modal = $('history-modal');
+  const list = $('history-list');
+  modal.classList.add('active');
+  list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">Fetching your courses from the cloud...</div>';
+
+  try {
+    const res = await fetch('/api/history', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem("orchestrai_token")}` }
+    });
+    const data = await res.json();
+
+    if (!data.ok || data.courses.length === 0) {
+      list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">You haven\'t saved any courses yet.</div>';
+      return;
+    }
+
+    // Render the list of courses
+    list.innerHTML = data.courses.map((course, index) => `
+      <div class="history-card" onclick="viewCloudCourse(${index})">
+        <div class="history-title">${escapeHtml(course.topic)}</div>
+        <div class="history-meta">
+          <span>📅 ${course.date}</span>
+          <span>👥 ${course.audience}</span>
+        </div>
+      </div>
+    `).join('');
+
+    // Save data temporarily so we can click on them
+    window._cloudCourses = data.courses;
+
+  } catch (err) {
+    list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--danger);">Failed to load history.</div>';
+  }
+}
+
+function closeHistoryModal(event) {
+  if (event && event.target.id !== 'history-modal') return;
+  $('history-modal').classList.remove('active');
+}
+
+function viewCloudCourse(index) {
+  const course = window._cloudCourses[index];
+  const list = $('history-list');
+  
+  // Replace the list with a beautiful reader view of the selected course
+  list.innerHTML = `
+    <button class="btn btn-secondary" onclick="openHistoryModal()" style="margin-bottom: 16px;">&larr; Back to List</button>
+    <div class="history-content-viewer lesson-card-body expanded">
+      ${marked.parse(course.content)}
+    </div>
+  `;
+}
+
+// Check UI on page load
+window.addEventListener('load', checkAuthUI);
+
+// ── PERSISTENCE HELPERS (localStorage) ─────────────────────────────────────
+const STORAGE_KEY = 'orchestrai_saved_course';
+
+function saveToStorage(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch(e) { console.warn('Storage save failed:', e); }
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function clearStorage() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+}
 
 const sampleTopics = [
   'Machine Learning Fundamentals',
@@ -99,6 +242,7 @@ function retryLast() {
 }
 
 function resetAll() {
+  clearStorage();
   $("topic-input").value = '';
   $("audience-select").value = 'Beginners';
   $("format-select").value = 'course';
@@ -157,7 +301,8 @@ function setButtonsState(running) {
   if (regenBtn) regenBtn.disabled = running;
   
   const downloadBtn = $("download-btn");
-  if (downloadBtn) downloadBtn.disabled = running;
+  // Keep download enabled as long as some content exists (supports partial/stopped exports)
+  if (downloadBtn) downloadBtn.disabled = running && !window._fullCourseContent;
 }
 
 // ── REAL BACKEND CONNECTION ────────────────────────────────────────────────
@@ -237,6 +382,9 @@ function startGeneration(forceLast = false) {
   eventSource.addEventListener('syllabus', e => {
       const data = JSON.parse(e.data);
       handleSyllabus(data);
+      // Seed _fullCourseContent with title + syllabus immediately
+      const topicTitle = $("pipeline-course-title").textContent || lastTopic;
+      window._fullCourseContent = `# ${topicTitle}\n**Audience:** ${lastAudience}\n\n## Syllabus\n${data.text}\n\n`;
       // Update Overview stats based on syllabus
       const moduleCount = data.text.split('\n').filter(l => l.trim()).length;
       $("summary-modules").textContent = String(moduleCount);
@@ -387,6 +535,9 @@ function handleLessonDone(d) {
 
   const mnum = $("mnum-" + d.index);
   if (mnum) mnum.className = 'module-num done';
+
+  // ── Incrementally build _fullCourseContent so partial stops can be exported ──
+  window._fullCourseContent += `\n# ${d.title}\n\n${d.content}\n\n`;
 }
 
 function handleQuizDone(d) {
@@ -419,22 +570,41 @@ function handleQuizDone(d) {
       </div>
       <div class="quiz-card-body">${htmlQuiz}</div>
     </div>`;
+
+  // Append quiz to running content so partial exports include it
+  window._fullCourseContent += `\n### Quiz: ${d.title}\n${d.content}\n\n`;
 }
 
 function handleDone(d) {
   setBadge(false);
-  window._fullCourseContent = d.full_content;
+  window._fullCourseContent = d.full_content; // This is the full Markdown string
+  
+  // Update the UI
   $("empty-state").style.display = 'none';
   $("summary-status").textContent = '100%';
-  
-  const homeStatus = $("home-status");
-  if (homeStatus) {
-      homeStatus.className = 'status-chip status-ready';
-      homeStatus.textContent = 'Ready to generate';
-  }
-  
   setButtonsState(false);
   isRunning = false;
+
+  // Save to the database via your FastAPI backend
+  fetch('/api/save_course', {
+      method: 'POST',
+      headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem("orchestrai_token")}`
+      },
+      body: JSON.stringify({
+          topic: lastTopic,
+          audience: lastAudience,
+          content: window._fullCourseContent // We are sending the full markdown content
+      })
+  })
+  .then(res => res.json())
+  .then(data => {
+      if(data.ok) {
+          showSavedBanner(); // Visual feedback that it hit the cloud
+      }
+  })
+  .catch(err => console.error("Cloud save failed:", err));
 }
 
 // ── QUIZ PARSERS & LOGIC ───────────────────────────────────────────────────
@@ -547,95 +717,96 @@ function escapeHtml(str) {
 }
 
 function downloadPDF() {
-  // Check if there is actually content to print
-  if (!$("lessons-col").innerHTML.trim()) {
-    showError('Nothing to export', 'Generate a course first before downloading the PDF file.');
+  if (!window._fullCourseContent || window._fullCourseContent.trim().length < 50) {
+    showError('No Content Yet', 'Wait for at least one module to finish generating, then click Download PDF.');
     return;
   }
 
-  // Update button text to show the user it is working
   const dlBtn = $("download-btn");
-  const originalText = dlBtn.textContent;
-  dlBtn.textContent = "Generating PDF...";
-  dlBtn.disabled = true;
+  const originalText = dlBtn ? dlBtn.textContent : 'Download PDF';
+  if (dlBtn) { dlBtn.textContent = 'Preparing PDF…'; dlBtn.disabled = true; }
 
-  // 1. Create a dedicated, clean container for the PDF
-  const printContainer = document.createElement('div');
-  printContainer.className = 'pdf-export-container';
-  
-  // Keep it on-screen but hidden behind everything so the PDF engine can "see" it
-  printContainer.style.position = 'absolute';
-  printContainer.style.top = '0';
-  printContainer.style.left = '0';
-  printContainer.style.width = '800px';
-  printContainer.style.zIndex = '-9999';
-  printContainer.style.background = '#ffffff';
-  printContainer.style.padding = '40px';
-
-  const topic = ($("pipeline-course-title").textContent || 'Course').trim();
-
-  // 2. Build a beautifully formatted, combined document
-  printContainer.innerHTML = `
-    <style>
-      /* Prevent cards from being awkwardly sliced in half across pages */
-      .pdf-export-container .lesson-card, 
-      .pdf-export-container .quiz-card,
-      .pdf-export-container .syllabus-module {
-        page-break-inside: avoid;
-        break-inside: avoid;
-        margin-bottom: 24px;
-      }
-    </style>
-    
-    <h1 style="font-family: var(--font-display); font-size: 36px; color: var(--text-primary); border-bottom: 2px solid var(--border); padding-bottom: 16px; margin-bottom: 32px;">
-      ${topic}
-    </h1>
-    
-    <h2 style="font-family: var(--font-display); font-size: 24px; color: var(--accent); margin-bottom: 16px;">1. Syllabus Outline</h2>
-    ${$("syllabus-col").innerHTML}
-    
-    <h2 style="font-family: var(--font-display); font-size: 24px; color: var(--accent); margin-top: 48px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 24px;">2. Comprehensive Lessons</h2>
-    ${$("lessons-col").innerHTML}
-    
-    <h2 style="font-family: var(--font-display); font-size: 24px; color: var(--accent); margin-top: 48px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 24px;">3. Module Assessments</h2>
-    ${$("quizzes-col").innerHTML}
-  `;
-
-  // 3. Force all collapsed lessons to fully expand (removes the gradient fade)
-  const bodies = printContainer.querySelectorAll('.lesson-card-body');
-  bodies.forEach(body => {
-    body.classList.add('expanded');
-  });
-
-  // 4. Remove UI elements that shouldn't be in a printed document
-  const expandBtns = printContainer.querySelectorAll('.lesson-expand-btn');
-  expandBtns.forEach(btn => btn.remove());
-
-  // Attach it to the page temporarily
-  document.body.appendChild(printContainer);
-
+  const isPartial = isRunning || (!isRunning && window._fullCourseContent && !$("badge-text")?.textContent?.includes('Complete'));
+  const rawTopic = ($("pipeline-course-title") ? $("pipeline-course-title").textContent : 'Course').trim();
+  const topic = rawTopic + (isPartial && $("badge-text") && $("badge-text").textContent === 'Stopped' ? ' (Partial)' : '');
   const safeFilename = topic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_course.pdf';
 
-  // PDF Configuration settings
-  const opt = {
-    margin:       0.4,
-    filename:     safeFilename,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-  };
-
-  // Generate the PDF, then clean up the temporary container
-  html2pdf().set(opt).from(printContainer).save().then(() => {
-    printContainer.remove();
-    dlBtn.textContent = originalText;
-    dlBtn.disabled = false;
-  }).catch(err => {
-    console.error("PDF Error:", err);
-    printContainer.remove();
-    dlBtn.textContent = "Error";
-    setTimeout(() => { dlBtn.textContent = originalText; dlBtn.disabled = false; }, 2000);
+  // ── Open PDF content in a new tab and trigger browser print-to-PDF ─────
+  // This is the most reliable cross-browser approach — no canvas issues.
+  const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>${escapeHtml(topic)} – Course</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', Arial, sans-serif; font-size: 14px; color: #1a1917; background: #fff; padding: 0; line-height: 1.7; }
+  .cover { background: #1a6b4a; color: #fff; padding: 80px 60px; min-height: 220px; }
+  .cover h1 { font-size: 36px; font-weight: 600; margin-bottom: 12px; }
+  .cover .meta { font-size: 14px; opacity: 0.85; }
+  .body-wrap { padding: 48px 60px; }
+  h1 { font-size: 26px; color: #1a6b4a; border-bottom: 2px solid #e0f0e8; padding-bottom: 8px; margin: 48px 0 16px; page-break-before: always; }
+  h1:first-of-type { page-break-before: auto; margin-top: 0; }
+  h2 { font-size: 20px; color: #222; margin: 28px 0 10px; }
+  h3 { font-size: 16px; color: #333; margin: 20px 0 8px; }
+  p { margin-bottom: 12px; color: #222; }
+  ul, ol { margin: 8px 0 16px 24px; }
+  li { margin-bottom: 4px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  pre { background: #f4f4f4; border: 1px solid #ddd; border-radius: 6px; padding: 16px; font-family: 'Courier New', monospace; font-size: 12.5px; white-space: pre-wrap; word-break: break-word; margin: 16px 0; page-break-inside: avoid; }
+  code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 12.5px; color: #c82c46; }
+  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+  blockquote { border-left: 4px solid #1a6b4a; padding-left: 14px; margin: 16px 0; color: #555; font-style: italic; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+  th { background: #f0f8f4; font-weight: 600; }
+  hr { border: none; border-top: 1px solid #eee; margin: 24px 0; }
+  @media print {
+    .no-print { display: none !important; }
+    body { font-size: 13px; }
+    h1 { page-break-before: always; }
+    h1:first-of-type { page-break-before: auto; }
+    pre { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="cover">
+  <h1>${escapeHtml(topic)}</h1>
+  <div class="meta">Generated by OrchestrAI &nbsp;·&nbsp; ${new Date().toLocaleDateString('en-IN', {year:'numeric',month:'long',day:'numeric'})}</div>
+</div>
+<div class="body-wrap">
+${marked.parse(window._fullCourseContent)}
+</div>
+<script>
+  // Auto-trigger print dialog once fonts/content load
+  window.addEventListener('load', function() {
+    setTimeout(function() { window.print(); }, 800);
   });
+<\/script>
+</body></html>`;
+
+  const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const win  = window.open(url, '_blank');
+
+  if (!win) {
+    // Fallback: direct download of the HTML (user can open & print)
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = safeFilename.replace('.pdf', '.html');
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    showError('Pop-up Blocked', 'Allow pop-ups for this site, then click Download PDF again. Or use the downloaded HTML file — open it and press Ctrl+P → Save as PDF.');
+  } else {
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+
+  if (dlBtn) {
+    setTimeout(() => { dlBtn.textContent = originalText; dlBtn.disabled = false; }, 1500);
+  }
 }
 
 function resetStage(i) {
@@ -692,6 +863,71 @@ function setBadge(running) {
   }
 }
 
+// ── SAVED COURSE BANNER ────────────────────────────────────────────────────
+function showSavedBanner() {
+  if ($('saved-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'saved-banner';
+  banner.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;background:#1a6b4a;color:#fff;padding:14px 20px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;opacity:0;transition:opacity 0.3s ease,transform 0.3s ease;transform:translateY(10px);';
+  banner.innerHTML = '<svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Course saved — survives refresh!';
+  document.body.appendChild(banner);
+  setTimeout(() => { banner.style.opacity='1'; banner.style.transform='translateY(0)'; }, 50);
+  setTimeout(() => { banner.style.opacity='0'; banner.style.transform='translateY(10px)'; }, 3500);
+  setTimeout(() => banner.remove(), 4000);
+}
+
+// ── RESTORE SAVED COURSE ───────────────────────────────────────────────────
+function restoreSavedCourse() {
+  const saved = loadFromStorage();
+  if (!saved || !saved.fullContent) return;
+
+  window._fullCourseContent = saved.fullContent;
+  lastTopic    = saved.topic    || '';
+  lastAudience = saved.audience || 'Beginners';
+  lastFormat   = saved.format   || 'Course';
+
+  showPanel('pipeline');
+  setView('overview');
+
+  $("pipeline-course-title").textContent = saved.topic || 'Restored Course';
+  $("pipeline-subtitle").textContent = 'Audience: ' + saved.audience + ' · ' + capitalize(saved.format) + ' · Restored from last session';
+  $("meta-audience").textContent = 'Audience: ' + saved.audience;
+  $("meta-format").textContent   = 'Format: ' + capitalize(saved.format);
+  $("meta-mode").textContent     = 'Mode: Restored';
+
+  $("summary-modules").textContent  = String(saved.modules  || 0);
+  $("summary-duration").textContent = saved.duration || '0h';
+  $("summary-quizzes").textContent  = String(saved.quizzes  || 0);
+  $("summary-status").textContent   = '100%';
+  $("empty-state").style.display    = 'none';
+
+  if (saved.syllabusHTML) $("syllabus-col").innerHTML = saved.syllabusHTML;
+  if (saved.lessonsHTML)  $("lessons-col").innerHTML  = saved.lessonsHTML;
+  if (saved.quizzesHTML)  $("quizzes-col").innerHTML  = saved.quizzesHTML;
+
+  setBadge(false);
+  setProgress(100, 'Course restored from last session');
+  setButtonsState(false);
+
+  const notice = document.createElement('div');
+  notice.id = 'restore-notice';
+  notice.style.cssText = 'background:#e8f4ee;border:1px solid #b8dfc8;border-radius:10px;padding:12px 16px;margin:0 0 16px;font-size:13px;color:#1a6b4a;display:flex;align-items:center;justify-content:space-between;gap:12px;';
+  const savedDate = saved.savedAt ? new Date(saved.savedAt).toLocaleString('en-IN') : '';
+  notice.innerHTML = '<span>\uD83D\uDCC2 <strong>Restored:</strong> "' + escapeHtml(saved.topic) + '" — saved ' + savedDate + '</span><button onclick="clearSavedAndReset()" style="background:#1a6b4a;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">Clear & Start New</button>';
+  const overviewGrid = document.querySelector('.overview-grid');
+  if (overviewGrid && overviewGrid.parentNode) overviewGrid.parentNode.insertBefore(notice, overviewGrid.nextSibling);
+
+  document.querySelectorAll('.lesson-expand-btn').forEach(btn => {
+    btn.onclick = function() { toggleExpand(this); };
+  });
+}
+
+function clearSavedAndReset() {
+  clearStorage();
+  window._fullCourseContent = '';
+  window.location.reload();
+}
+
 // ── INITIALIZATION ─────────────────────────────────────────────────────────
 if ($("topic-input")) {
     $("topic-input").addEventListener('input', updateCharCounter);
@@ -699,7 +935,12 @@ if ($("topic-input")) {
 
 window.addEventListener('load', () => {
   updateCharCounter();
-  setProgress(0, 'Ready to start');
+  const saved = loadFromStorage();
+  if (saved && saved.fullContent) {
+    restoreSavedCourse();
+  } else {
+    setProgress(0, 'Ready to start');
+  }
 });
 
 // ── AGENT MODAL LOGIC ──────────────────────────────────────────────────────
@@ -806,3 +1047,4 @@ window.addEventListener('scroll', () => {
     }
   }
 });
+
