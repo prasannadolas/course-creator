@@ -1,4 +1,3 @@
-google-generativeai
 google-genai
 google-adk==0.1.0
 google-cloud-aiplatform>=1.87.0
@@ -9,4 +8,10 @@ xhtml2pdf>=0.2.15
 fastapi
 uvicorn
 sse-starlette
+sqlalchemy 
+passlib 
+bcrypt 
+pyjwt
+python-multipart
 Deprecated
+
