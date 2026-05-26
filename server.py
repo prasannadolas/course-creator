@@ -83,8 +83,8 @@ async def run_pipeline_stream(topic: str, audience: str):
         syllabus_text = ""
         runner = Runner(agent=curriculum_agent, session_service=session_svc, app_name="course_creator")
         msg = wrap_message(
-            f"Create a {format} syllabus for '{topic}' for {audience}. "
-            f"List exactly 3 modules. Format as 'Module X: Title - one sentence summary'." # <-- Change to 3 here
+            f"Create a syllabus for '{topic}' for {audience}. "
+            f"List exactly 3 modules. Format as 'Module X: Title - one sentence summary'." 
         )
         async for event in runner.run_async(session_id=session_id, user_id=user_id, new_message=msg):
             if event.is_final_response():
