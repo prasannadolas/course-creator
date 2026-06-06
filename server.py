@@ -100,13 +100,13 @@ async def run_pipeline_stream(topic: str, audience: str):
         modules = _parse_modules(syllabus_text)
 
         # ── PHASE 2: PROFESSOR + DEAN + QUIZ AGENT (per module) ───────────────
-        yield sse_event("stage", {"stage": 1, "status": "active", "label": "Professor: writing lessons..."})
+        yield sse_event("stage", {"stage": 1, "status": "active", "label": "Professor: Writing lessons..."})
 
         for i, module_title in enumerate(modules):
             base_pct = 20 + int((i / len(modules)) * 65)
 
             yield sse_event("module_start", {"index": i, "title": module_title})
-            yield sse_event("progress",     {"pct": base_pct, "label": f"Professor: writing {module_title}..."})
+            yield sse_event("progress",     {"pct": base_pct, "label": f"CONENT AGENT: Writing {module_title}..."})
 
             # ── Professor ──────────────────────────────────────────────────────
             runner_draft = Runner(agent=content_agent, session_service=session_svc, app_name="course_creator")
@@ -119,7 +119,7 @@ async def run_pipeline_stream(topic: str, audience: str):
                 pass  # Draft stays internal (Dean will polish it)
 
             yield sse_event("lesson_status", {"index": i, "status": "reviewing"})
-            yield sse_event("progress",      {"pct": base_pct + 5, "label": f"Dean: reviewing {module_title}..."})
+            yield sse_event("progress",      {"pct": base_pct + 5, "label": f"REVIEW AGENT: Reviewing {module_title}..."})
 
             await asyncio.sleep(5) # small cool-down to help prevent rate limits
 
@@ -143,7 +143,7 @@ async def run_pipeline_stream(topic: str, audience: str):
 
             # ── Quiz Agent ─────────────────────────────────────────────────────
             yield sse_event("stage",    {"stage": 3, "status": "active"})
-            yield sse_event("progress", {"pct": base_pct + 10, "label": f"Exam Setter: writing quiz for {module_title}..."})
+            yield sse_event("progress", {"pct": base_pct + 10, "label": f"QUIZ AGENT: Writing quiz for {module_title}..."})
 
             quiz_text = ""
             runner_quiz = Runner(agent=quiz_agent, session_service=session_svc, app_name="course_creator")
@@ -241,11 +241,15 @@ def login(user_data: LoginUser, db: Session = Depends(get_db)):
         "user": {"full_name": user.full_name, "email": user.email}
     }
 
-# ── ROUTING FOR LOGIN PAGE ──────────────────────────────────────────────────
+# ── ROUTING FOR AUTH PAGES ──────────────────────────────────────────────────
 @app.get("/login", response_class=HTMLResponse)
 async def serve_login():
-    # CHANGE THIS from "static/rex.html" to "static/login.html" 👇
     with open("static/login.html", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/register", response_class=HTMLResponse)
+async def serve_register():
+    with open("static/register.html", encoding="utf-8") as f:
         return f.read()
 
 # ── ROUTES ─────────────────────────────────────────────────────────────────

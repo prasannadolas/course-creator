@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ThinkForge — Sign In</title>
+  <title>ThinkForge — Create Account</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a6b4a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -19,7 +19,7 @@
       background: var(--bg);
       padding: 24px;
     }
-    .back-link {
+     .back-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -84,6 +84,11 @@
     }
     .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
 
+    /* Password strength */
+    .strength-bar { height: 4px; background: var(--surface2); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .strength-fill { height: 100%; border-radius: 2px; width: 0%; transition: all 0.3s ease; }
+    .strength-label { font-size: 12px; font-weight: 600; margin-top: 6px; }
+
     .banner {
       display: none; padding: 12px 14px; border-radius: var(--radius-md);
       font-size: 13px; margin-bottom: 20px; align-items: center; gap: 8px; font-weight: 500;
@@ -133,8 +138,8 @@
     <span class="brand-name">ThinkForge</span>
   </div>
 
-  <h1 class="card-heading">Welcome <em>back.</em></h1>
-  <p class="card-sub">Sign in to your ThinkForge account.</p>
+  <h1 class="card-heading">Create your <em>account.</em></h1>
+  <p class="card-sub">Join ThinkForge and start building courses.</p>
 
   <div class="banner" id="banner">
     <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
@@ -144,21 +149,27 @@
   </div>
 
   <div class="field">
-    <label for="login-email">Email address</label>
-    <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email"/>
+    <label for="reg-name">Full name</label>
+    <input type="text" id="reg-name" placeholder="Enter your name" autocomplete="name"/>
   </div>
   <div class="field">
-    <label for="login-password">Password</label>
-    <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"/>
+    <label for="reg-email">Email address</label>
+    <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"/>
+  </div>
+  <div class="field">
+    <label for="reg-password">Password</label>
+    <input type="password" id="reg-password" placeholder="Min. 8 characters" autocomplete="new-password" oninput="updateStrength(this.value)"/>
+    <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+    <div class="strength-label" id="strength-label"></div>
   </div>
   
-  <button class="submit-btn" id="login-btn" onclick="handleLogin()">
+  <button class="submit-btn" id="register-btn" onclick="handleRegister()">
     <span class="spinner"></span>
-    <span class="btn-text">Sign In</span>
+    <span class="btn-text">Create Account</span>
   </button>
 
   <div class="card-footer">
-    Don't have an account? <a href="/register">Create one</a>
+    Already have an account? <a href="/login">Sign in</a>
   </div>
 </div>
 
@@ -172,40 +183,76 @@ function showBanner(msg, type = "error") {
 }
 function hideBanner() { document.getElementById("banner").className = "banner"; }
 function setLoading(loading) {
-  const btn = document.getElementById("login-btn");
+  const btn = document.getElementById("register-btn");
   btn.disabled = loading;
   btn.classList.toggle("loading", loading);
 }
 
-async function handleLogin() {
-  hideBanner();
-  const email    = document.getElementById("login-email").value.trim();
-  const password = document.getElementById("login-password").value;
+function updateStrength(val) {
+  const fill = document.getElementById("strength-fill");
+  const label = document.getElementById("strength-label");
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
 
-  if (!email || !password) {
+  // Access CSS variables from your style.css for perfect matching
+  const levels = [
+    { pct: "0%",   color: "var(--surface2)", text: "" },
+    { pct: "25%",  color: "var(--danger)",   text: "Weak" },
+    { pct: "50%",  color: "var(--warn)",     text: "Fair" },
+    { pct: "75%",  color: "var(--success)",  text: "Good" },
+    { pct: "100%", color: "var(--accent)",   text: "Strong ✓" },
+  ];
+  const lvl = levels[score] || levels[0];
+  fill.style.width = lvl.pct;
+  fill.style.background = lvl.color;
+  label.textContent = lvl.text;
+  label.style.color = lvl.color;
+}
+
+async function handleRegister() {
+  hideBanner();
+  const full_name = document.getElementById("reg-name").value.trim();
+  const email     = document.getElementById("reg-email").value.trim();
+  const password  = document.getElementById("reg-password").value;
+
+  if (!full_name || !email || !password) {
     showBanner("Please fill in all fields.");
     return;
   }
 
   setLoading(true);
   try {
-    const res  = await fetch(`${API}/auth/login`, {
+    const res  = await fetch(`${API}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ full_name, email, password })
     });
     const data = await res.json();
 
     if (!data.ok) {
-      showBanner(data.error || "Login failed.");
+      showBanner(data.error || "Registration failed.");
       return;
     }
 
-    localStorage.setItem("orchestrai_token", data.token);
-    localStorage.setItem("orchestrai_user",  JSON.stringify(data.user));
+    showBanner("Account created! Signing you in…", "success");
 
-    showBanner("Signed in! Redirecting…", "success");
-    setTimeout(() => { window.location.href = "/"; }, 800);
+    // Auto-login after registration
+    setTimeout(async () => {
+      const lRes  = await fetch(`${API}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const lData = await lRes.json();
+      if (lData.ok) {
+        localStorage.setItem("orchestrai_token", lData.token);
+        localStorage.setItem("orchestrai_user",  JSON.stringify(lData.user));
+        window.location.href = "/";
+      }
+    }, 1000);
 
   } catch (e) {
     showBanner("Network error — is the server running?");
@@ -220,7 +267,7 @@ if (localStorage.getItem("orchestrai_token")) {
 }
 
 document.addEventListener("keydown", e => {
-  if (e.key === "Enter") handleLogin();
+  if (e.key === "Enter") handleRegister();
 });
 </script>
 </body>

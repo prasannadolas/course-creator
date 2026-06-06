@@ -7,7 +7,7 @@ let lastTopic = '';
 let lastAudience = 'Beginners';
 let lastFormat = 'Course';
 let eventSource = null;
-const API = ""; // <--- Add this line!
+const API = ""; 
 window._fullCourseContent = '';
 
 // ── AUTHENTICATION & HISTORY LOGIC ─────────────────────────────────────────
@@ -17,8 +17,13 @@ function checkAuthUI() {
   
   if (token && userStr) {
     const user = JSON.parse(userStr);
+    
+    // Hide BOTH auth buttons when logged in
     if ($('nav-login-btn')) $('nav-login-btn').style.display = 'none';
-    if ($('user-menu')) $('user-menu').style.display = 'flex';
+    if ($('nav-register-btn')) $('nav-register-btn').style.display = 'none'; // <--- Make sure this line exists!
+    
+    // Show the user menu
+    if ($('user-menu')) $('user-menu').style.display = 'flex'
     
     // Set Profile Details
     if ($('header-user-name')) $('header-user-name').textContent = user.full_name.split(' ')[0];
@@ -27,15 +32,17 @@ function checkAuthUI() {
       $('header-avatar').textContent = initials;
     }
   } else {
+    // Show BOTH auth buttons when logged out
     if ($('nav-login-btn')) $('nav-login-btn').style.display = 'inline-flex';
+    if ($('nav-register-btn')) $('nav-register-btn').style.display = 'inline-flex';
+    
+    // Hide the user menu
     if ($('user-menu')) $('user-menu').style.display = 'none';
   }
 }
 
 // ── LOGOUT LOGIC ───────────────────────────────────────────────────────────
-// ── UPDATED LOGOUT LOGIC ───────────────────────────────────────────────────
 function confirmLogout() {
-  // Show our custom modal instead of the browser's default confirm box
   const modal = $('logout-confirm-modal');
   if (modal) modal.classList.add('active');
 }
@@ -45,7 +52,6 @@ function closeLogoutModal() {
   if (modal) modal.classList.remove('active');
 }
 
-// Ensure you also close the modal after logout to be safe
 async function handleLogout() {
   closeLogoutModal(); 
   
@@ -59,7 +65,6 @@ async function handleLogout() {
   localStorage.removeItem("orchestrai_token");
   localStorage.removeItem("orchestrai_user");
   
-  // Redirect to home page instead of login page
   window.location.href = "/"; 
 }
 
@@ -68,7 +73,7 @@ window.onpageshow = function(event) {
     if (event.persisted) {
         window.location.reload(); 
     }
-    checkAuthUI(); // Re-verify auth state immediately
+    checkAuthUI();
 };
 
 // Security: If the user is on the login page but already has a token, send them home
@@ -93,7 +98,6 @@ async function openHistoryModal() {
       return;
     }
 
-    // Render the list of courses
     list.innerHTML = data.courses.map((course, index) => `
       <div class="history-card" onclick="viewCloudCourse(${index})">
         <div class="history-title">${escapeHtml(course.topic)}</div>
@@ -104,7 +108,6 @@ async function openHistoryModal() {
       </div>
     `).join('');
 
-    // Save data temporarily so we can click on them
     window._cloudCourses = data.courses;
 
   } catch (err) {
@@ -121,7 +124,6 @@ function viewCloudCourse(index) {
   const course = window._cloudCourses[index];
   const list = $('history-list');
   
-  // Replace the list with a beautiful reader view of the selected course
   list.innerHTML = `
     <button class="btn btn-secondary" onclick="openHistoryModal()" style="margin-bottom: 16px;">&larr; Back to List</button>
     <div class="history-content-viewer lesson-card-body expanded">
@@ -301,7 +303,6 @@ function setButtonsState(running) {
   if (regenBtn) regenBtn.disabled = running;
   
   const downloadBtn = $("download-btn");
-  // Keep download enabled as long as some content exists (supports partial/stopped exports)
   if (downloadBtn) downloadBtn.disabled = running && !window._fullCourseContent;
 }
 
@@ -536,7 +537,6 @@ function handleLessonDone(d) {
   const mnum = $("mnum-" + d.index);
   if (mnum) mnum.className = 'module-num done';
 
-  // ── Incrementally build _fullCourseContent so partial stops can be exported ──
   window._fullCourseContent += `\n# ${d.title}\n\n${d.content}\n\n`;
 }
 
@@ -571,21 +571,18 @@ function handleQuizDone(d) {
       <div class="quiz-card-body">${htmlQuiz}</div>
     </div>`;
 
-  // Append quiz to running content so partial exports include it
   window._fullCourseContent += `\n### Quiz: ${d.title}\n${d.content}\n\n`;
 }
 
 function handleDone(d) {
   setBadge(false);
-  window._fullCourseContent = d.full_content; // This is the full Markdown string
+  window._fullCourseContent = d.full_content; 
   
-  // Update the UI
   $("empty-state").style.display = 'none';
   $("summary-status").textContent = '100%';
   setButtonsState(false);
   isRunning = false;
 
-  // Save to the database via your FastAPI backend
   fetch('/api/save_course', {
       method: 'POST',
       headers: { 
@@ -595,13 +592,13 @@ function handleDone(d) {
       body: JSON.stringify({
           topic: lastTopic,
           audience: lastAudience,
-          content: window._fullCourseContent // We are sending the full markdown content
+          content: window._fullCourseContent 
       })
   })
   .then(res => res.json())
   .then(data => {
       if(data.ok) {
-          showSavedBanner(); // Visual feedback that it hit the cloud
+          showSavedBanner(); 
       }
   })
   .catch(err => console.error("Cloud save failed:", err));
@@ -697,13 +694,7 @@ function toggleExpand(btn) {
 }
 
 function renderMarkdownLite(md) {
-  // Tell marked to respect standard line breaks
-  marked.setOptions({
-    breaks: true,
-    gfm: true // GitHub Flavored Markdown (enables tables and better code blocks)
-  });
-  
-  // Parse the raw markdown into beautiful HTML
+  marked.setOptions({ breaks: true, gfm: true });
   return marked.parse(md);
 }
 
@@ -731,8 +722,6 @@ function downloadPDF() {
   const topic = rawTopic + (isPartial && $("badge-text") && $("badge-text").textContent === 'Stopped' ? ' (Partial)' : '');
   const safeFilename = topic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_course.pdf';
 
-  // ── Open PDF content in a new tab and trigger browser print-to-PDF ─────
-  // This is the most reliable cross-browser approach — no canvas issues.
   const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -781,7 +770,6 @@ function downloadPDF() {
 ${marked.parse(window._fullCourseContent)}
 </div>
 <script>
-  // Auto-trigger print dialog once fonts/content load
   window.addEventListener('load', function() {
     setTimeout(function() { window.print(); }, 800);
   });
@@ -793,7 +781,6 @@ ${marked.parse(window._fullCourseContent)}
   const win  = window.open(url, '_blank');
 
   if (!win) {
-    // Fallback: direct download of the HTML (user can open & print)
     const a = document.createElement('a');
     a.href = url;
     a.download = safeFilename.replace('.pdf', '.html');
@@ -987,7 +974,6 @@ function openAgentModal(agentKey) {
   const data = agentData[agentKey];
   if (!data) return;
 
-  // BULLETPROOF CHECK: If the HTML is missing, inject it automatically!
   if (!$('agent-modal')) {
     const modalHTML = `
       <div class="modal-overlay" id="agent-modal" onclick="closeAgentModal(event)">
@@ -1007,7 +993,6 @@ function openAgentModal(agentKey) {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
   }
   
-  // Now it is safe to set the text
   $('modal-agent-name').textContent = data.name;
   $('modal-agent-desc').textContent = data.desc;
   
@@ -1019,14 +1004,12 @@ function openAgentModal(agentKey) {
     ul.appendChild(li);
   });
   
-  // Tiny delay to allow the browser to draw the HTML before animating it in
   setTimeout(() => {
     $('agent-modal').classList.add('active');
   }, 10);
 }
 
 function closeAgentModal(event) {
-  // If an event is passed, only close if the background overlay was clicked
   if (event && event.target.id !== 'agent-modal') return;
   const modal = $('agent-modal');
   if (modal) {
@@ -1038,13 +1021,10 @@ function closeAgentModal(event) {
 window.addEventListener('scroll', () => {
   const topbar = document.querySelector('.topbar');
   if (topbar) {
-    // If we scroll down more than 20 pixels, add the glass effect
     if (window.scrollY > 20) {
       topbar.classList.add('scrolled');
     } else {
-      // If we go back to the top, make it transparent again
       topbar.classList.remove('scrolled');
     }
   }
 });
-

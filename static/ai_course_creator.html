@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OrchestrAI</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a6b4a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <title>ThinkForge | Forging Knowledge Through Autonomous Agents.</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a6b4a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 4 C 6 4 4 8 4 11.5 C 4 13.5 5.5 14.5 5.5 16 C 5.5 18 7.5 19 10 19 L 14 19 C 16.5 19 18.5 18 18.5 16 C 18.5 14.5 20 13.5 20 11.5 C 20 8 18 4 12 4 Z' /><path d='M12 4 V 6' /><path d='M13.5 7 L 9.5 12 H 12.5 L 11 17 L 15.5 11 H 12.5 Z' fill='%231a6b4a' stroke='none'/></svg>">  <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   
   <link rel="stylesheet" href="/static/style.css">
@@ -17,15 +16,19 @@
     <div class="topbar">
       <div class="topbar-left">
         <div class="brand-icon">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 4 C 6 4 4 8 4 11.5 C 4 13.5 5.5 14.5 5.5 16 C 5.5 18 7.5 19 10 19 L 14 19 C 16.5 19 18.5 18 18.5 16 C 18.5 14.5 20 13.5 20 11.5 C 20 8 18 4 12 4 Z" />
+            <path d="M12 4 V 6" />
+            <path d="M13.5 7 L 9.5 12 H 12.5 L 11 17 L 15.5 11 H 12.5 Z" fill="currentColor" stroke="none" />
           </svg>
         </div>
-        <span class="topbar-title" id="topbar-title">OrchestrAI</span>
+        <span class="topbar-title" id="topbar-title">ThinkForge</span>
       </div>
 
-      <div class="topbar-actions">
-        <button class="btn btn-primary" id="nav-login-btn" onclick="window.location.href='/login'">Sign In</button>
+     <div class="topbar-actions">
+        <button class="btn btn-secondary" id="nav-login-btn" onclick="window.location.href='/login'">Sign in</button>
+        <button class="btn btn-primary" id="nav-register-btn" onclick="window.location.href='/register'">Sign up for free</button>
+        
         
         <div id="user-menu" style="display: none; align-items: center; gap: 12px;">
           <button class="btn btn-secondary" onclick="openHistoryModal()">
@@ -53,8 +56,8 @@
             <div class="sparkle"></div>
             <div class="sparkle"></div>
           </div>
-          <h1 class="hero-title">Create course with <em>AI</em></h1>
-          <p class="hero-sub">Describe a topic and four specialized agents will build a complete course for you.</p>
+          <h1 class="hero-title">Build courses with <em>Agentic Loops</em></h1>
+         <p class="hero-sub">Describe a topic and a four-stage autonomous agent pipeline will synthesize a complete curriculum.</p>
 
           <div class="create-card" id="create-card">
             <textarea class="create-textarea" id="topic-input" rows="4" maxlength="180" placeholder="Describe the course you would like to create..."></textarea>
@@ -81,14 +84,23 @@
               <div class="chip" onclick="setTopicAndGo('Full-Stack MERN Development')">MERN Stack</div>
               <div class="chip" onclick="setTopicAndGo('Introduction to LLMs and RAG')">LLMs &amp; RAG</div>
               <div class="chip" onclick="setTopicAndGo('Building Agentic Workflows')">Agentic Workflows</div>
+              <div class="chip" onclick="setTopicAndGo('Blockchain Fundamentals')">Blockchain</div>
               <div class="chip" onclick="setTopicAndGo('FastAPI for Backend Development')">FastAPI</div>
               <div class="chip" onclick="setTopicAndGo('Data Science Foundations')">Data Science</div>
               <div class="chip" onclick="setTopicAndGo('Cybersecurity Essentials')">Cybersecurity</div>
               <div class="chip" onclick="setTopicAndGo('AWS Architecture Fundamentals')">AWS Architecture</div>
-              <div class="chip" onclick="setTopicAndGo('IoT with NodeMCU & ESP8266')">IoT & NodeMCU</div>
-              <div class="chip" onclick="setTopicAndGo('Digital Audio Production in FL Studio')">FL Studio Production</div>
-              <div class="chip" onclick="setTopicAndGo('Ghost Kitchen Logistics and Management')">Ghost Kitchen Systems</div>
+              <div class="chip" onclick="setTopicAndGo('Prompt Engineering for AI')">Prompt Engineering</div>
+              <div class="chip" onclick="setTopicAndGo('Building Agentic Workflows')">Agentic Workflows</div>
+              <div class="chip" onclick="setTopicAndGo('Generative AI Applications')">Generative AI</div>
+              <div class="chip" onclick="setTopicAndGo('Natural Language Processing')">NLP</div>
+              <div class="chip" onclick="setTopicAndGo('Computer Vision Fundamentals')">Computer Vision</div>
               <div class="chip" onclick="setTopicAndGo('Advanced Cloud Computing')">Cloud Computing</div>
+              <div class="chip" onclick="setTopicAndGo('DevOps, Docker and Kubernetes')">DevOps</div>
+              <div class="chip" onclick="setTopicAndGo('RestAPI for Backend Development')">RestAPI</div>
+              <div class="chip" onclick="setTopicAndGo('Mobile App Development')">Mobile Development</div>
+              <div class="chip" onclick="setTopicAndGo('Android App Development')">Android</div>
+              <div class="chip" onclick="setTopicAndGo('Flutter App Development')">Flutter</div>
+              <div class="chip" onclick="setTopicAndGo('UI/UX Design Fundamentals')">UI/UX Design</div>
             </div>
           </div>
         </div>
@@ -246,7 +258,7 @@
       <div class="footer-container">
         
         <div class="footer-col">
-          <div class="footer-brand">OrchestrAI</div>
+          <div class="footer-brand">ThinkForge</div>
           <p class="footer-desc">An autonomous multi-agent pipeline designed to instantly generate comprehensive educational content and structured curriculums.</p>
           <div class="footer-credit">Built by <strong>Prasanna Dolas</strong></div>
         </div>
