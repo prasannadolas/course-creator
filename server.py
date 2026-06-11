@@ -207,6 +207,10 @@ class RegisterUser(BaseModel):
 class LoginUser(BaseModel):
     email: str
     password: str
+class CourseCreate(BaseModel):
+    topic: str
+    audience: str
+    content: str
 
 # ── AUTHENTICATION ROUTES ──────────────────────────────────────────────────
 @app.post("/auth/register")
@@ -300,3 +304,21 @@ def get_user_history(current_user: User = Depends(get_current_user), db: Session
         })
         
     return {"ok": True, "courses": history_data}
+
+@app.post("/api/save_course")
+def save_course(course_data: CourseCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Saves a successfully generated course to the database."""
+    try:
+        new_course = Course(
+            topic=course_data.topic,
+            audience=course_data.audience,
+            full_content=course_data.content,
+            user_id=current_user.id
+        )
+        db.add(new_course)
+        db.commit()
+        return {"ok": True, "message": "Course saved successfully"}
+    except Exception as e:
+        db.rollback()
+        print(f"Error saving course: {e}")
+        return {"ok": False, "error": "Failed to save course"}

@@ -862,9 +862,46 @@ button, input, textarea, select { font: inherit; }
 }
 
 @media (max-width: 480px) {
-  /* Ultra-small phones */
-  .chips { justify-content: flex-start; }
-  .chip { font-size: 12px; padding: 6px 12px; }
+  /* ── 1. ULTRA-COMPACT TOPBAR ── */
+  .topbar { padding: 8px 12px !important; }
+  
+  /* Hide the text 'EduGenesis' and User Name to save space; keep the logos! */
+  .topbar-title { display: none !important; }
+  #header-user-name { display: none !important; }
+  
+  .brand-icon { width: 28px !important; height: 28px !important; }
+  
+  /* Compress the buttons */
+  .topbar-actions { gap: 6px !important; }
+  #user-menu { gap: 6px !important; }
+  #user-menu .btn { padding: 6px 10px !important; font-size: 11.5px !important; height: 32px !important; }
+  #user-menu .btn svg { width: 14px !important; height: 14px !important; margin-right: 4px !important; }
+  
+  .profile-pill { padding: 3px 8px 3px 3px !important; gap: 4px !important; }
+  .avatar { width: 26px !important; height: 26px !important; font-size: 11px !important; }
+
+  /* ── 2. HERO SECTION TIGHTENING ── */
+  .content { padding: 12px 12px 40px !important; }
+  .create-hero { padding-top: 8px !important; padding-bottom: 20px !important; }
+  .hero-title { font-size: 26px !important; margin-bottom: 6px !important; }
+  .hero-sub { font-size: 13px !important; margin-bottom: 16px !important; padding: 0 4px !important; }
+  .hero-sparkles { margin-bottom: 6px !important; }
+
+  /* ── 3. INPUT CARD COMPRESSION ── */
+  .create-card { padding: 14px !important; margin-bottom: 20px !important; border-radius: 16px !important; }
+  .create-textarea { font-size: 14px !important; min-height: 60px !important; padding-bottom: 0 !important; }
+  .create-actions { margin-top: 8px !important; padding-top: 10px !important; gap: 10px !important; }
+  .audience-select { height: 42px !important; font-size: 13px !important; border-radius: 10px !important; }
+  
+  /* Make the generate button a sleek rounded box instead of a massive pill */
+  .submit-btn { height: 42px !important; border-radius: 10px !important; }
+  .submit-btn svg { width: 18px !important; height: 18px !important; }
+
+  /* ── 4. CHIPS (POPULAR TOPICS) ── */
+  .quick-topics { margin-bottom: 24px !important; }
+  .quick-topics-label { margin-bottom: 10px !important; font-size: 10px !important; }
+  .chips { gap: 6px !important; justify-content: center !important; }
+  .chip { font-size: 11px !important; padding: 6px 10px !important; }
 }
 
 /* ── HISTORY MODAL STYLES ── */
@@ -942,3 +979,99 @@ button, input, textarea, select { font: inherit; }
   align-items: center;
 }
 .btn-icon:hover { color: var(--danger); }
+
+/* ── SIDEBAR STYLES ── */
+.sidebar-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition);
+}
+.sidebar-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -340px; /* Hidden off-screen to the left */
+  width: 340px;
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.06);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar.open {
+  transform: translateX(340px); /* Slides in */
+}
+
+.sidebar-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sidebar-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.sidebar-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition);
+}
+.sidebar-close:hover { color: var(--text-primary); }
+
+.sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* Make scrollbar look nice inside sidebar */
+.sidebar-body::-webkit-scrollbar { width: 6px; }
+.sidebar-body::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+/* Adjustments for mobile screens */
+@media (max-width: 640px) {
+  .sidebar { width: 300px; left: -300px; }
+  .sidebar.open { transform: translateX(300px); }
+}
+
+/* ── DASHBOARD LAYOUT ALIGNMENT FIX ── */
+
+/* Force the core wrappers to start from the top, not the center */
+body, .app, .main {
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+}
+
+/* Force the content container to stick to the top bar */
+.content {
+  margin-top: 0 !important;
+  margin-bottom: auto !important;
+  justify-content: flex-start !important;
+}
+
+/* Ensure the hero section doesn't have an accidental massive top margin */
+.create-hero {
+  margin-top: 0 !important;
+  padding-top: 48px !important;
+}

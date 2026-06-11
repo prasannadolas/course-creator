@@ -40,6 +40,17 @@ function checkAuthUI() {
     if ($('user-menu')) $('user-menu').style.display = 'none';
   }
 }
+// ── LOGIN MODAL LOGIC ──────────────────────────────────────────────────────
+function showLoginModal() {
+  const modal = $('login-required-modal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeLoginModal(event) {
+  if (event && event.target.id !== 'login-required-modal' && event.type === 'click') return;
+  const modal = $('login-required-modal');
+  if (modal) modal.classList.remove('active');
+}
 
 // ── LOGOUT LOGIC ───────────────────────────────────────────────────────────
 function confirmLogout() {
@@ -81,11 +92,13 @@ if (window.location.pathname === '/login' && localStorage.getItem("orchestrai_to
     window.location.href = "/";
 }
 
-async function openHistoryModal() {
-  const modal = $('history-modal');
-  const list = $('history-list');
-  modal.classList.add('active');
-  list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">Fetching your courses from the cloud...</div>';
+// ── SIDEBAR & HISTORY LOGIC ────────────────────────────────────────────────
+async function openHistorySidebar() {
+  $('sidebar-overlay').classList.add('active');
+  $('history-sidebar').classList.add('open');
+  
+  const list = $('sidebar-list');
+  list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">Fetching your courses...</div>';
 
   try {
     const res = await fetch('/api/history', {
@@ -115,21 +128,29 @@ async function openHistoryModal() {
   }
 }
 
-function closeHistoryModal(event) {
-  if (event && event.target.id !== 'history-modal') return;
-  $('history-modal').classList.remove('active');
+function closeHistorySidebar() {
+  $('sidebar-overlay').classList.remove('active');
+  $('history-sidebar').classList.remove('open');
 }
 
 function viewCloudCourse(index) {
-  const course = window._cloudCourses[index];
-  const list = $('history-list');
+  // 1. Close the sidebar smoothly
+  closeHistorySidebar();
   
-  list.innerHTML = `
-    <button class="btn btn-secondary" onclick="openHistoryModal()" style="margin-bottom: 16px;">&larr; Back to List</button>
-    <div class="history-content-viewer lesson-card-body expanded">
-      ${marked.parse(course.content)}
-    </div>
-  `;
+  // 2. Load the course data
+  const course = window._cloudCourses[index];
+  $('reader-title').textContent = course.topic;
+  
+  // 3. Parse and inject the Markdown content
+  $('reader-content').innerHTML = marked.parse(course.content);
+  
+  // 4. Open the large reading modal
+  $('course-reader-modal').classList.add('active');
+}
+
+function closeCourseReader(event) {
+  if (event && event.target.id !== 'course-reader-modal' && event.type === 'click') return;
+  $('course-reader-modal').classList.remove('active');
 }
 
 // Check UI on page load
@@ -308,6 +329,14 @@ function setButtonsState(running) {
 
 // ── REAL BACKEND CONNECTION ────────────────────────────────────────────────
 function startGeneration(forceLast = false) {
+  // --- 1. NEW AUTHENTICATION CHECK ---
+  const token = localStorage.getItem("orchestrai_token");
+  if (!token) {
+    showLoginModal(); // Pop up the container!
+    return; // Stop the generation process entirely
+  }
+  // -----------------------------------
+
   if (isRunning) return;
   dismissError();
 
@@ -469,6 +498,45 @@ function handleStage(d) {
 
 function handleProgress(d) {
   setProgress(d.pct, d.label);
+  
+  // ── UNLOCK UI & SAVE PARTIAL COURSE ON ERROR ──
+  if (d.label.includes('❌')) {
+    isRunning = false;
+    setButtonsState(false); 
+    
+    $("pipeline-badge").className = 'pipeline-badge error';
+    $("badge-text").textContent = 'Error';
+    $("pulse-dot").style.display = 'none';
+    
+    if (eventSource) {
+        eventSource.close();
+    }
+
+    // NEW: If we managed to generate at least the syllabus or 1 module, save it!
+    if (window._fullCourseContent && window._fullCourseContent.trim().length > 50) {
+        fetch('/api/save_course', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("orchestrai_token")}`
+            },
+            body: JSON.stringify({
+                topic: lastTopic + " (Partial)", // Tagged as partial so you know it crashed
+                audience: lastAudience,
+                content: window._fullCourseContent 
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.ok) {
+                // Change the banner slightly so you know the partial save worked
+                const bannerText = "Partial course salvaged & saved!";
+                showSavedBanner(bannerText); 
+            }
+        })
+        .catch(err => console.error("Cloud save failed for partial course:", err));
+    }
+  }
 }
 
 function handleSyllabus(d) {
@@ -851,18 +919,18 @@ function setBadge(running) {
 }
 
 // ── SAVED COURSE BANNER ────────────────────────────────────────────────────
-function showSavedBanner() {
+function showSavedBanner(customText) {
   if ($('saved-banner')) return;
   const banner = document.createElement('div');
   banner.id = 'saved-banner';
   banner.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;background:#1a6b4a;color:#fff;padding:14px 20px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;opacity:0;transition:opacity 0.3s ease,transform 0.3s ease;transform:translateY(10px);';
-  banner.innerHTML = '<svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Course saved — survives refresh!';
+  const text = customText || 'Course saved — survives refresh!';
+  banner.innerHTML = `<svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> ${text}`;  
   document.body.appendChild(banner);
   setTimeout(() => { banner.style.opacity='1'; banner.style.transform='translateY(0)'; }, 50);
   setTimeout(() => { banner.style.opacity='0'; banner.style.transform='translateY(10px)'; }, 3500);
   setTimeout(() => banner.remove(), 4000);
 }
-
 // ── RESTORE SAVED COURSE ───────────────────────────────────────────────────
 function restoreSavedCourse() {
   const saved = loadFromStorage();

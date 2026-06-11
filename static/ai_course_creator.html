@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ThinkForge | Forging Knowledge Through Autonomous Agents.</title>
+  <title>EduGenesis| Forging Knowledge Through Autonomous Agents.</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a6b4a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 4 C 6 4 4 8 4 11.5 C 4 13.5 5.5 14.5 5.5 16 C 5.5 18 7.5 19 10 19 L 14 19 C 16.5 19 18.5 18 18.5 16 C 18.5 14.5 20 13.5 20 11.5 C 20 8 18 4 12 4 Z' /><path d='M12 4 V 6' /><path d='M13.5 7 L 9.5 12 H 12.5 L 11 17 L 15.5 11 H 12.5 Z' fill='%231a6b4a' stroke='none'/></svg>">  <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css?v=3">  
 </head>
 <body>
 <div class="app">
@@ -22,27 +21,32 @@
             <path d="M13.5 7 L 9.5 12 H 12.5 L 11 17 L 15.5 11 H 12.5 Z" fill="currentColor" stroke="none" />
           </svg>
         </div>
-        <span class="topbar-title" id="topbar-title">ThinkForge</span>
+        <span class="topbar-title" id="topbar-title">EduGenesis</span>
       </div>
 
-     <div class="topbar-actions">
+      <div class="topbar-actions">
         <button class="btn btn-secondary" id="nav-login-btn" onclick="window.location.href='/login'">Sign in</button>
         <button class="btn btn-primary" id="nav-register-btn" onclick="window.location.href='/register'">Sign up for free</button>
         
-        
         <div id="user-menu" style="display: none; align-items: center; gap: 12px;">
-          <button class="btn btn-secondary" onclick="openHistoryModal()">
-            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" style="margin-right: 4px;"><path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4zM4 9a2 2 0 100 4h12a2 2 0 100-4H4zM4 15a2 2 0 100 4h12a2 2 0 100-4H4z"/></svg>
+          <button class="btn btn-secondary" onclick="openHistorySidebar()">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" style="margin-right: 4px;">
+              <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4zM4 9a2 2 0 100 4h12a2 2 0 100-4H4zM4 15a2 2 0 100 4h12a2 2 0 100-4H4z"/>
+            </svg>
             My Courses
           </button>
+          
           <button class="btn btn-primary" onclick="window.location.reload();">New Course</button>
+          
           <div class="profile-pill">
-      <div class="avatar" id="header-avatar">P</div>
-      <span id="header-user-name" style="font-weight: 600; font-size: 14px;"></span>
-      <button class="btn-icon" onclick="confirmLogout()" title="Sign Out">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-      </button>
-    </div>
+            <div class="avatar" id="header-avatar">P</div>
+            <span id="header-user-name" style="font-weight: 600; font-size: 14px;"></span>
+            <button class="btn-icon" onclick="confirmLogout()" title="Sign Out">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -90,7 +94,6 @@
               <div class="chip" onclick="setTopicAndGo('Cybersecurity Essentials')">Cybersecurity</div>
               <div class="chip" onclick="setTopicAndGo('AWS Architecture Fundamentals')">AWS Architecture</div>
               <div class="chip" onclick="setTopicAndGo('Prompt Engineering for AI')">Prompt Engineering</div>
-              <div class="chip" onclick="setTopicAndGo('Building Agentic Workflows')">Agentic Workflows</div>
               <div class="chip" onclick="setTopicAndGo('Generative AI Applications')">Generative AI</div>
               <div class="chip" onclick="setTopicAndGo('Natural Language Processing')">NLP</div>
               <div class="chip" onclick="setTopicAndGo('Computer Vision Fundamentals')">Computer Vision</div>
@@ -258,7 +261,7 @@
       <div class="footer-container">
         
         <div class="footer-col">
-          <div class="footer-brand">ThinkForge</div>
+          <div class="footer-brand">EduGenesis</div>
           <p class="footer-desc">An autonomous multi-agent pipeline designed to instantly generate comprehensive educational content and structured curriculums.</p>
           <div class="footer-credit">Built by <strong>Prasanna Dolas</strong></div>
         </div>
@@ -302,14 +305,43 @@
     
   </main>
 </div>
-<div class="modal-overlay" id="history-modal" onclick="closeHistoryModal(event)">
-  <div class="modal-card" style="max-width: 700px; max-height: 85vh; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <h2 class="modal-title">My Saved Courses</h2>
-      <button class="modal-close" onclick="closeHistoryModal()">&times;</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeHistorySidebar()"></div>
+
+<div class="sidebar" id="history-sidebar">
+  <div class="sidebar-header">
+    <h2 class="sidebar-title">My Courses</h2>
+    <button class="sidebar-close" onclick="closeHistorySidebar()">&times;</button>
+  </div>
+  <div class="sidebar-body" id="sidebar-list">
     </div>
-    <div class="modal-body" style="overflow-y: auto; padding-right: 8px;" id="history-list">
-      <div style="text-align:center; padding: 40px; color: var(--text-muted);">Loading your courses...</div>
+</div>
+
+<div class="modal-overlay" id="course-reader-modal" onclick="closeCourseReader(event)">
+  <div class="modal-card" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
+    <div class="modal-header" style="padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 0;">
+      <h2 class="modal-title" id="reader-title">Course</h2>
+      <button class="modal-close" onclick="closeCourseReader()">&times;</button>
+    </div>
+    <div class="modal-body history-content-viewer" id="reader-content" style="overflow-y: auto; padding: 24px 0 0 0;">
+      </div>
+  </div>
+</div>
+
+<!-- ── LOGIN REQUIRED MODAL ── -->
+<div class="modal-overlay" id="login-required-modal" onclick="closeLoginModal(event)">
+  <div class="modal-card" style="max-width: 400px; text-align: center;" onclick="event.stopPropagation()">
+    <div class="modal-header" style="justify-content: center; margin-bottom: 8px;">
+      <h2 class="modal-title">Sign in Required</h2>
+    </div>
+    <div class="modal-body">
+      <!-- Added the <br> tag right after "courses," -->
+      <p style="margin-bottom: 24px; color: var(--text-secondary); line-height: 1.5;">To generate and save custom AI courses,<br>Please sign in or create a free account.</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 15px;" onclick="window.location.href='/register'">Create a free account</button>
+        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="window.location.href='/login'">Sign in</button>
+        <button class="btn" style="width: 100%; justify-content: center; border: none; background: transparent; color: var(--text-muted);" onclick="closeLoginModal()">Maybe later</button>
+      </div>
     </div>
   </div>
 </div>

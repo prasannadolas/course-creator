@@ -3,47 +3,22 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ThinkForge — Create Account</title>
+  <title>EduGenesis — Create Account</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a6b4a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/static/style.css">
   
   <style>
-    /* Auth-specific layout using main theme variables */
-    body {
+    body { background: var(--bg); }
+    
+    .auth-wrapper {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      background: var(--bg);
-      padding: 24px;
+      min-height: calc(100vh - 68px); /* Full screen minus header */
+      padding: 40px 24px;
     }
-     .back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-decoration: none;
-  margin-bottom: 24px;
-  transition: color var(--transition);
-}
-
-.back-link:hover {
-  color: var(--text-primary);
-}
-
-.back-link svg {
-  width: 16px;
-  height: 16px;
-  transition: transform var(--transition);
-}
-
-.back-link:hover svg {
-  transform: translateX(-3px);
-}
     
     .auth-card {
       position: relative;
@@ -61,14 +36,6 @@
       from { opacity: 0; transform: translateY(24px) scale(0.97); }
       to   { opacity: 1; transform: translateY(0) scale(1); }
     }
-
-    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
-    .brand-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--accent), #2a8b61);
-      display: flex; align-items: center; justify-content: center; color: white;
-    }
-    .brand-name { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--text-primary); }
 
     .card-heading { font-family: var(--font-display); font-size: 28px; font-weight: 400; line-height: 1.2; margin-bottom: 6px; }
     .card-heading em { font-style: italic; color: var(--accent); }
@@ -120,57 +87,110 @@
 </head>
 <body>
 
-<div class="auth-card">
-  
-  <a href="/" class="back-link">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="19" y1="12" x2="5" y2="12"></line>
-      <polyline points="12 19 5 12 12 5"></polyline>
-    </svg>
-    Back to Home
-  </a>
-  <div class="brand">
-    <div class="brand-icon">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-      </svg>
+<div class="app">
+  <main class="main">
+    
+    <div class="topbar">
+      <div class="topbar-left" style="cursor: pointer;" onclick="window.location.href='/'">
+        <div class="brand-icon">
+         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 4 C 6 4 4 8 4 11.5 C 4 13.5 5.5 14.5 5.5 16 C 5.5 18 7.5 19 10 19 L 14 19 C 16.5 19 18.5 18 18.5 16 C 18.5 14.5 20 13.5 20 11.5 C 20 8 18 4 12 4 Z" />
+            <path d="M12 4 V 6" />
+            <path d="M13.5 7 L 9.5 12 H 12.5 L 11 17 L 15.5 11 H 12.5 Z" fill="currentColor" stroke="none" />
+          </svg>
+        </div>
+        <span class="topbar-title">EduGenesis</span>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="btn btn-secondary" onclick="window.location.href='/login'">Sign in</button>
+      </div>
     </div>
-    <span class="brand-name">ThinkForge</span>
-  </div>
 
-  <h1 class="card-heading">Create your <em>account.</em></h1>
-  <p class="card-sub">Join ThinkForge and start building courses.</p>
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <h1 class="card-heading">Create your <em>account.</em></h1>
+        <p class="card-sub">Join EduGenesis and start building courses.</p>
 
-  <div class="banner" id="banner">
-    <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-    </svg>
-    <span id="banner-msg"></span>
-  </div>
+        <div class="banner" id="banner">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          <span id="banner-msg"></span>
+        </div>
 
-  <div class="field">
-    <label for="reg-name">Full name</label>
-    <input type="text" id="reg-name" placeholder="Enter your name" autocomplete="name"/>
-  </div>
-  <div class="field">
-    <label for="reg-email">Email address</label>
-    <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"/>
-  </div>
-  <div class="field">
-    <label for="reg-password">Password</label>
-    <input type="password" id="reg-password" placeholder="Min. 8 characters" autocomplete="new-password" oninput="updateStrength(this.value)"/>
-    <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
-    <div class="strength-label" id="strength-label"></div>
-  </div>
-  
-  <button class="submit-btn" id="register-btn" onclick="handleRegister()">
-    <span class="spinner"></span>
-    <span class="btn-text">Create Account</span>
-  </button>
+        <div class="field">
+          <label for="reg-name">Full name</label>
+          <input type="text" id="reg-name" placeholder="Enter your name" autocomplete="name"/>
+        </div>
+        <div class="field">
+          <label for="reg-email">Email address</label>
+          <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"/>
+        </div>
+        <div class="field">
+          <label for="reg-password">Password</label>
+          <input type="password" id="reg-password" placeholder="Min. 8 characters" autocomplete="new-password" oninput="updateStrength(this.value)"/>
+          <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+          <div class="strength-label" id="strength-label"></div>
+        </div>
+        
+        <button class="submit-btn" id="register-btn" onclick="handleRegister()">
+          <span class="spinner"></span>
+          <span class="btn-text">Create Account</span>
+        </button>
 
-  <div class="card-footer">
-    Already have an account? <a href="/login">Sign in</a>
-  </div>
+        <div class="card-footer">
+          Already have an account? <a href="/login">Sign in</a>
+        </div>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      <div class="footer-container">
+        
+        <div class="footer-col">
+          <div class="footer-brand">EduGenesis</div>
+          <p class="footer-desc">An autonomous multi-agent pipeline designed to instantly generate comprehensive educational content and structured curriculums.</p>
+          <div class="footer-credit">Built by <strong>Prasanna Dolas</strong></div>
+        </div>
+
+        <div class="footer-col">
+          <h3 class="footer-heading">Meet the Agents</h3>
+          <ul class="footer-list">
+            <li><button class="footer-link" onclick="window.location.href='/'">Curriculum Agent</button></li>
+            <li><button class="footer-link" onclick="window.location.href='/'">Content Agent</button></li>
+            <li><button class="footer-link" onclick="window.location.href='/'">Review Agent</button></li>
+            <li><button class="footer-link" onclick="window.location.href='/'">Quiz Agent</button></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h3 class="footer-heading">Connect</h3>
+          <ul class="footer-list">
+            <li>
+              <a href="https://www.linkedin.com/in/prasanna-dolas-b872aa328/" class="footer-link" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                LinkedIn
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/prasannadolas" class="footer-link" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+              </a>
+            </li>
+            <li>
+              <a href="https://leetcode.com/u/prasannadolas/" class="footer-link" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.939 5.939 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114l5.7-5.541a1.377 1.377 0 0 0-.03-1.957 1.373 1.373 0 0 0-1.317-.178zm5.72 11.232a1.374 1.374 0 0 0-.961.438l-4.102 4.103a1.377 1.377 0 0 0 0 1.952 1.377 1.377 0 0 0 1.951 0l4.102-4.103a1.377 1.377 0 0 0 0-1.952 1.374 1.374 0 0 0-.99-.438z"/></svg>
+                LeetCode
+              </a>
+            </li>
+          </ul>    
+        </div>
+        
+      </div>
+    </footer>
+  </main>
 </div>
 
 <script>
@@ -197,7 +217,6 @@ function updateStrength(val) {
   if (/[0-9]/.test(val)) score++;
   if (/[^A-Za-z0-9]/.test(val)) score++;
 
-  // Access CSS variables from your style.css for perfect matching
   const levels = [
     { pct: "0%",   color: "var(--surface2)", text: "" },
     { pct: "25%",  color: "var(--danger)",   text: "Weak" },
