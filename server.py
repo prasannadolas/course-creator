@@ -109,11 +109,16 @@ async def run_pipeline_stream(topic: str, audience: str):
             yield sse_event("progress",     {"pct": base_pct, "label": f"CONENT AGENT: Writing {module_title}..."})
 
             # ── Professor ──────────────────────────────────────────────────────
+            # ── Professor ──────────────────────────────────────────────────────
             runner_draft = Runner(agent=content_agent, session_service=session_svc, app_name="course_creator")
             draft_prompt = (
                 f"Write the FULL DETAILED LESSON for '{module_title}'. "
                 f"Include practical code examples. Every code block MUST have an explanation. "
-                f"Write at least 500 words."
+                f"Write at least 500 words. "
+                f"CRITICAL INSTRUCTION: Identify 1 or 2 complex, highly visual concepts in this lesson. "
+                f"Wrap the exact name of those concepts in a visualization tag like this: [VISUALIZE: Concept Name]. "
+                f"For example: 'This is the process of [VISUALIZE: Neural Network Backpropagation].' "
+                f"Only tag concepts that would greatly benefit from an interactive graph or animation."
             )
             async for event in runner_draft.run_async(session_id=session_id, user_id=user_id, new_message=wrap_message(draft_prompt)):
                 pass  # Draft stays internal (Dean will polish it)
@@ -130,7 +135,9 @@ async def run_pipeline_stream(topic: str, audience: str):
             runner_rev = Runner(agent=review_agent, session_service=session_svc, app_name="course_creator")
             rev_prompt = (
                 "Review the lesson. Improve structure, bold key terms, "
-                "ensure code blocks are formatted correctly. Return only the polished lesson."
+                "ensure code blocks are formatted correctly. "
+                "CRITICAL INSTRUCTION: You MUST perfectly preserve any [VISUALIZE: Concept Name] tags exactly as they appear. Do NOT remove or modify them! "
+                "Return only the polished lesson."
             )
             async for event in runner_rev.run_async(session_id=session_id, user_id=user_id, new_message=wrap_message(rev_prompt)):
                 if event.is_final_response():
@@ -322,3 +329,36 @@ def save_course(course_data: CourseCreate, current_user: User = Depends(get_curr
         db.rollback()
         print(f"Error saving course: {e}")
         return {"ok": False, "error": "Failed to save course"}
+    
+@app.get("/api/visualize")
+async def generate_visualization(concept: str, current_user: User = Depends(get_current_user)):
+    """Lazily generates an interactive HTML/JS sandbox for a specific concept."""
+    try:
+        session_svc = InMemorySessionService()
+        
+        # We recycle your existing content_agent but give it a strict coding prompt
+        runner = Runner(agent=content_agent, session_service=session_svc, app_name="course_creator")
+        
+        vis_prompt = (
+            f"You are an expert creative web developer. The user needs to understand the concept: '{concept}'. "
+            "Write a standalone HTML snippet containing embedded CSS and JavaScript to visually and interactively explain this concept. "
+            "Use HTML5 Canvas, SVG, or interactive DOM elements. Keep it beautiful, modern, and educational. "
+            "CRITICAL RULES: \n"
+            "1. Return ONLY the raw, executable HTML code.\n"
+            "2. Do NOT wrap the response in markdown blocks (e.g., no ```html). Just the code.\n"
+            "3. Ensure the styling looks good inside a 800x600 container with a light #f5f4f0 background."
+        )
+        
+        raw_code = ""
+        async for event in runner.run_async(session_id=f"vis_{concept}", user_id=str(current_user.id), new_message=wrap_message(vis_prompt)):
+            if event.is_final_response():
+                raw_code = extract_text(event) or ""
+                
+        # Failsafe: Strip markdown tags if the AI disobeys rule 2
+        clean_code = raw_code.replace("```html", "").replace("```javascript", "").replace("```", "").strip()
+        
+        return {"ok": True, "html": clean_code}
+        
+    except Exception as e:
+        print(f"Sandbox generation failed: {e}")
+        return {"ok": False, "error": "Failed to generate sandbox."}

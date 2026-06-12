@@ -112,11 +112,12 @@ async function openHistorySidebar() {
     }
 
     list.innerHTML = data.courses.map((course, index) => `
-      <div class="history-card" onclick="viewCloudCourse(${index})">
+     <div class="history-card" onclick="viewCloudCourse(${index})">
         <div class="history-title">${escapeHtml(course.topic)}</div>
         <div class="history-meta">
-          <span>📅 ${course.date}</span>
-          <span>👥 ${course.audience}</span>
+          <span>${course.date}</span>
+          <span style="color: var(--border-strong);">•</span>
+          <span>${course.audience}</span>
         </div>
       </div>
     `).join('');
@@ -132,25 +133,116 @@ function closeHistorySidebar() {
   $('sidebar-overlay').classList.remove('active');
   $('history-sidebar').classList.remove('open');
 }
-
-function viewCloudCourse(index) {
-  // 1. Close the sidebar smoothly
-  closeHistorySidebar();
-  
-  // 2. Load the course data
-  const course = window._cloudCourses[index];
-  $('reader-title').textContent = course.topic;
-  
-  // 3. Parse and inject the Markdown content
-  $('reader-content').innerHTML = marked.parse(course.content);
-  
-  // 4. Open the large reading modal
-  $('course-reader-modal').classList.add('active');
+function closeCourseReader() {
+  const modal = $('course-reader-modal');
+  if (modal) modal.classList.remove('active');
 }
 
-function closeCourseReader(event) {
-  if (event && event.target.id !== 'course-reader-modal' && event.type === 'click') return;
-  $('course-reader-modal').classList.remove('active');
+function viewCloudCourse(index) {
+  closeHistorySidebar();
+  const course = window._cloudCourses[index];
+  
+  const cleanTopic = course.topic.replace(' (Partial)', '');
+  $('reader-title').textContent = cleanTopic;
+
+  let processedMD = course.content;
+
+  // ── 1. REMOVE THE SYLLABUS SECTION ENTIRELY ──
+  // We locate the syllabus block and delete it completely before parsing
+  const syllabusIndex = processedMD.indexOf('## Syllabus');
+  if (syllabusIndex !== -1) {
+      // Find where the actual lessons start
+      const lessonStartIndex = processedMD.search(/\n#\s+(Module|Unit)\s+1[:\-]/i);
+      
+      if (lessonStartIndex > syllabusIndex) {
+          let before = processedMD.substring(0, syllabusIndex);
+          let after = processedMD.substring(lessonStartIndex);
+          // By skipping the syllabus block entirely, it vanishes from the UI
+          processedMD = before + after; 
+      }
+  }
+
+  // ── 2. FIX SQUISHED PARAGRAPHS ──
+  processedMD = processedMD.replace(/(?<!#)\n(Module \d+:)/gi, '\n\n**$1**');
+
+  // ── 3. PARSE TO HTML ──
+  const rawHtml = marked.parse(processedMD);
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = rawHtml;
+
+  const newWrapper = document.createElement('div');
+  
+  // NOTE: The Audience metadata container has been completely removed here.
+
+  let currentContent = newWrapper; 
+  let isFirstH1 = true;
+  let hasModuleOpened = false;
+
+  // ── 4. STRICT ACCORDION BUILDING ──
+  Array.from(tempDiv.children).forEach(child => {
+    // Hide duplicate main titles and the raw markdown Audience text
+    if (child.tagName === 'H1' && isFirstH1) { isFirstH1 = false; return; }
+    if (child.tagName === 'P' && child.textContent.includes('Audience:')) return; 
+
+    // STRICT RULES: Only trigger an accordion if it is a explicitly a Module header
+    let isModule = child.tagName === 'H1' && child.textContent.toLowerCase().includes('module');
+
+    if (isModule) {
+      const details = document.createElement('details');
+      details.className = 'course-accordion';
+      
+      // Open the very first module by default instead of the syllabus
+      if (!hasModuleOpened) {
+          details.open = true; 
+          hasModuleOpened = true;
+      }
+
+      const summary = document.createElement('summary');
+      summary.textContent = child.textContent.replace(/\*\*/g, ''); 
+      details.appendChild(summary);
+
+      currentContent = document.createElement('div');
+      currentContent.className = 'accordion-content';
+      details.appendChild(currentContent);
+
+      newWrapper.appendChild(details);
+    } else {
+      if (child.tagName === 'H1') {
+          const h2 = document.createElement('h2');
+          h2.innerHTML = child.innerHTML;
+          currentContent.appendChild(h2);
+      } else {
+          currentContent.appendChild(child.cloneNode(true));
+      }
+    }
+  });
+
+  $('reader-content').innerHTML = '';
+  $('reader-content').appendChild(newWrapper);
+  
+  // ── 5. DOWNLOAD BUTTON ──
+  const downloadBtnWrapper = document.createElement('div');
+  downloadBtnWrapper.style.cssText = 'padding: 24px 0 12px; display: flex; justify-content: center; border-top: 1px solid var(--border); margin-top: 24px;';
+  
+  const downloadBtn = document.createElement('button');
+  downloadBtn.className = 'btn btn-primary';
+  downloadBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <polyline points="7 10 12 15 17 10"></polyline>
+      <line x1="12" y1="15" x2="12" y2="3"></line>
+    </svg>
+    Download Full PDF
+  `;
+  
+  downloadBtn.onclick = function() {
+    downloadHistoryPDF(cleanTopic, course.content, this);
+  };
+  
+  downloadBtnWrapper.appendChild(downloadBtn);
+  $('reader-content').appendChild(downloadBtnWrapper);
+
+  $('course-reader-modal').classList.add('active');
 }
 
 // Check UI on page load
@@ -521,7 +613,7 @@ function handleProgress(d) {
                 'Authorization': `Bearer ${localStorage.getItem("orchestrai_token")}`
             },
             body: JSON.stringify({
-                topic: lastTopic + " (Partial)", // Tagged as partial so you know it crashed
+                topic: lastTopic, // Tagged as partial so you know it crashed
                 audience: lastAudience,
                 content: window._fullCourseContent 
             })
@@ -762,8 +854,24 @@ function toggleExpand(btn) {
 }
 
 function renderMarkdownLite(md) {
+  // 1. Intercept [VISUALIZE: Concept] tags and convert them into HTML buttons
+  const visualizerRegex = /\[VISUALIZE:\s*([^\]]+)\]/g;
+  
+  const processedMd = md.replace(visualizerRegex, (match, conceptName) => {
+    // We use a specific class 'visualizer-pill' that we will style in CSS in Step 4
+    return `<button class="visualizer-pill" onclick="openVisualizerSandbox('${escapeHtml(conceptName)}')">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+              </svg>
+              Explore: ${escapeHtml(conceptName)}
+            </button>`;
+  });
+
+  // 2. Parse the rest of the markdown normally
   marked.setOptions({ breaks: true, gfm: true });
-  return marked.parse(md);
+  return marked.parse(processedMd);
 }
 
 function escapeHtml(str) {
@@ -775,93 +883,190 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-function downloadPDF() {
-  if (!window._fullCourseContent || window._fullCourseContent.trim().length < 50) {
-    showError('No Content Yet', 'Wait for at least one module to finish generating, then click Download PDF.');
-    return;
-  }
+// ── UNIFIED PDF GENERATOR (LIVE & HISTORY) ─────────────────────────────────
 
-  const dlBtn = $("download-btn");
-  const originalText = dlBtn ? dlBtn.textContent : 'Download PDF';
-  if (dlBtn) { dlBtn.textContent = 'Preparing PDF…'; dlBtn.disabled = true; }
+/// 1. The main template engine that formats the layout
+function generatePDFHTML(topic, rawContent) {
+  const cleanTopic = topic.replace(' (Partial)', '');
+  const dateStr = new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
 
-  const isPartial = isRunning || (!isRunning && window._fullCourseContent && !$("badge-text")?.textContent?.includes('Complete'));
-  const rawTopic = ($("pipeline-course-title") ? $("pipeline-course-title").textContent : 'Course').trim();
-  const topic = rawTopic + (isPartial && $("badge-text") && $("badge-text").textContent === 'Stopped' ? ' (Partial)' : '');
-  const safeFilename = topic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_course.pdf';
+  // Fix the "squished syllabus" bug by forcing a double newline before every module
+  let processedMD = rawContent.replace(/\n(Module \d+:)/gi, '\n\n$1');
+  const rawHtml = marked.parse(processedMD);
 
-  const htmlContent = `<!DOCTYPE html>
+  // Create a temporary DOM to precisely manipulate the layout before printing
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = rawHtml;
+
+  // NEW: Create a dedicated wrapper to center the Syllabus vertically
+  const children = Array.from(tempDiv.children);
+  let inSyllabus = false;
+  let syllabusWrapper = null;
+
+  children.forEach(child => {
+    if (child.tagName === 'H2' && child.textContent.toLowerCase().includes('syllabus')) {
+      inSyllabus = true;
+      syllabusWrapper = document.createElement('div');
+      syllabusWrapper.className = 'syllabus-wrapper';
+      child.parentNode.insertBefore(syllabusWrapper, child);
+      syllabusWrapper.appendChild(child);
+    } else if (child.tagName === 'H1') {
+      inSyllabus = false;
+    } else if (inSyllabus && child.tagName === 'P') {
+      // Wrap syllabus items in a beautiful card class and move into the centered wrapper
+      child.className = 'syllabus-box';
+      syllabusWrapper.appendChild(child);
+    }
+  });
+
+  // Hide the raw duplicate headers that we are handling via the Cover Page
+  const firstH1 = tempDiv.querySelector('h1');
+  if (firstH1) firstH1.style.display = 'none';
+  const audienceP = Array.from(tempDiv.querySelectorAll('p')).find(p => p.textContent.includes('Audience:'));
+  if (audienceP) audienceP.style.display = 'none';
+
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<title>${escapeHtml(topic)} – Course</title>
+<title>${escapeHtml(cleanTopic)} - Course PDF</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', Arial, sans-serif; font-size: 14px; color: #1a1917; background: #fff; padding: 0; line-height: 1.7; }
-  .cover { background: #1a6b4a; color: #fff; padding: 80px 60px; min-height: 220px; }
-  .cover h1 { font-size: 36px; font-weight: 600; margin-bottom: 12px; }
-  .cover .meta { font-size: 14px; opacity: 0.85; }
-  .body-wrap { padding: 48px 60px; }
-  h1 { font-size: 26px; color: #1a6b4a; border-bottom: 2px solid #e0f0e8; padding-bottom: 8px; margin: 48px 0 16px; page-break-before: always; }
-  h1:first-of-type { page-break-before: auto; margin-top: 0; }
-  h2 { font-size: 20px; color: #222; margin: 28px 0 10px; }
-  h3 { font-size: 16px; color: #333; margin: 20px 0 8px; }
-  p { margin-bottom: 12px; color: #222; }
-  ul, ol { margin: 8px 0 16px 24px; }
-  li { margin-bottom: 4px; }
-  strong { font-weight: 600; }
-  em { font-style: italic; }
-  pre { background: #f4f4f4; border: 1px solid #ddd; border-radius: 6px; padding: 16px; font-family: 'Courier New', monospace; font-size: 12.5px; white-space: pre-wrap; word-break: break-word; margin: 16px 0; page-break-inside: avoid; }
-  code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 12.5px; color: #c82c46; }
-  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
-  blockquote { border-left: 4px solid #1a6b4a; padding-left: 14px; margin: 16px 0; color: #555; font-style: italic; }
-  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
-  th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
-  th { background: #f0f8f4; font-weight: 600; }
-  hr { border: none; border-top: 1px solid #eee; margin: 24px 0; }
-  @media print {
-    .no-print { display: none !important; }
-    body { font-size: 13px; }
-    h1 { page-break-before: always; }
-    h1:first-of-type { page-break-before: auto; }
-    pre { page-break-inside: avoid; }
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap');
+  
+  /* PERFECT PAGE PADDING & MARGINS */
+  @page { size: A4; margin: 25mm 20mm; }
+  body { 
+    font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #222; 
+    line-height: 1.7; max-width: 800px; margin: 0 auto; 
   }
+
+  /* PAGE 1: CENTERED COVER PAGE */
+  .cover-page { 
+    height: 90vh; display: flex; flex-direction: column; justify-content: center; 
+    align-items: center; text-align: center; page-break-after: always; 
+  }
+  .cover-title { 
+    font-family: 'Fraunces', serif; font-size: 38pt; font-weight: 600; 
+    color: #1a6b4a; margin-bottom: 24px; line-height: 1.15; 
+  }
+  .cover-meta { font-size: 14pt; color: #555; font-weight: 600; margin-bottom: 6px; }
+  .cover-credit { font-size: 13pt; color: #1a6b4a; font-weight: 700; margin-bottom: 24px; }
+  .cover-time { font-size: 11pt; color: #888; }
+
+  /* PAGE 2: CENTERED SYLLABUS PAGE */
+  .syllabus-wrapper {
+    height: 90vh; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center;
+    page-break-after: always;
+  }
+  .syllabus-wrapper h2 {
+    text-align: center;
+    font-size: 24pt;
+    color: #1a6b4a;
+    margin-top: 0;
+    margin-bottom: 32px;
+    border-bottom: none;
+  }
+  .syllabus-box { 
+    background: #f8fbf9; border: 1px solid #d1eadf; border-left: 4px solid #1a6b4a; 
+    padding: 16px 20px; border-radius: 8px; margin-bottom: 16px; 
+    page-break-inside: avoid; text-align: left; 
+  }
+
+  /* PAGE 3+: CONTENT TYPOGRAPHY */
+  p { margin-bottom: 16px; text-align: justify; hyphens: auto; }
+  
+  /* FORCED PAGE BREAKS FOR MODULES */
+  h1 { 
+    page-break-before: always; 
+    font-size: 22pt; color: #1a6b4a; margin-top: 0; padding-bottom: 8px; 
+    border-bottom: 2px solid #e8f4ee; margin-bottom: 24px; 
+  }
+  h2 { font-size: 18pt; color: #111; margin-top: 28px; margin-bottom: 16px; }
+  h3 { font-size: 14pt; color: #333; margin-top: 20px; margin-bottom: 12px; }
+
+  /* CODE & TABLES */
+  pre { 
+    background: #f5f5f5; padding: 16px; border-radius: 8px; font-size: 9.5pt; 
+    font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; 
+    word-wrap: break-word; page-break-inside: avoid; margin-bottom: 16px; 
+  }
+  code { background: #f0f0f0; padding: 2px 5px; border-radius: 4px; color: #d63384; font-family: monospace; font-size: 0.95em; }
+  pre code { background: none; padding: 0; color: #333; }
+  ul, ol { margin-bottom: 16px; padding-left: 24px; }
+  li { margin-bottom: 8px; text-align: left; }
+  blockquote { border-left: 4px solid #1a6b4a; padding-left: 16px; margin: 16px 0; color: #555; font-style: italic; }
 </style>
 </head>
 <body>
-<div class="cover">
-  <h1>${escapeHtml(topic)}</h1>
-  <div class="meta">Generated by OrchestrAI &nbsp;·&nbsp; ${new Date().toLocaleDateString('en-IN', {year:'numeric',month:'long',day:'numeric'})}</div>
-</div>
-<div class="body-wrap">
-${marked.parse(window._fullCourseContent)}
-</div>
-<script>
-  window.addEventListener('load', function() {
-    setTimeout(function() { window.print(); }, 800);
-  });
-<\/script>
-</body></html>`;
+  <div class="cover-page">
+    <div class="cover-title">${escapeHtml(cleanTopic)}</div>
+    <div class="cover-meta">Generated by EduGenesis</div>
+    <div class="cover-credit">Built by Prasanna Dolas</div>
+  </div>
+  <div class="content-wrapper">
+    ${tempDiv.innerHTML}
+  </div>
+  <script>
+    // Triggers the print dialog automatically when the tab opens
+    window.onload = () => { setTimeout(() => window.print(), 500); };
+  </script>
+</body>
+</html>`;
+}
 
+// 2. The trigger that creates the blob and opens the print tab
+function executePDFDownload(htmlContent, safeFilename, btn, originalText) {
   const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
   const win  = window.open(url, '_blank');
 
-  if (!win) {
+  if (!win) { // Fallback if pop-ups are blocked
     const a = document.createElement('a');
     a.href = url;
     a.download = safeFilename.replace('.pdf', '.html');
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
-    showError('Pop-up Blocked', 'Allow pop-ups for this site, then click Download PDF again. Or use the downloaded HTML file — open it and press Ctrl+P → Save as PDF.');
+    alert("Pop-up blocked! The file was saved as HTML instead. Open the HTML file and press Ctrl+P to save as PDF.");
   } else {
     setTimeout(() => URL.revokeObjectURL(url), 10000);
   }
 
-  if (dlBtn) {
-    setTimeout(() => { dlBtn.textContent = originalText; dlBtn.disabled = false; }, 1500);
+  if (btn) {
+    setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 1500);
   }
+}
+
+// 3. Connect the LIVE pipeline button
+function downloadPDF() {
+  if (!window._fullCourseContent || window._fullCourseContent.trim().length < 50) {
+    showError('No Content Yet', 'Wait for at least one module to finish generating.');
+    return;
+  }
+  const dlBtn = $("download-btn");
+  const originalText = dlBtn ? dlBtn.innerHTML : 'Download PDF';
+  if (dlBtn) { dlBtn.innerHTML = 'Preparing PDF…'; dlBtn.disabled = true; }
+
+  const rawTopic = ($("pipeline-course-title") ? $("pipeline-course-title").textContent : 'Course').trim();
+  const safeFilename = rawTopic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_course.pdf';
+  
+  const htmlContent = generatePDFHTML(rawTopic, window._fullCourseContent);
+  executePDFDownload(htmlContent, safeFilename, dlBtn, originalText);
+}
+
+// 4. Connect the HISTORY modal button
+function downloadHistoryPDF(topic, content, btn) {
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Preparing PDF…';
+  btn.disabled = true;
+
+  const cleanTopic = topic.replace(' (Partial)', '');
+  const safeFilename = cleanTopic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_course.pdf';
+  
+  const htmlContent = generatePDFHTML(cleanTopic, content);
+  executePDFDownload(htmlContent, safeFilename, btn, originalText);
 }
 
 function resetStage(i) {
@@ -1096,3 +1301,253 @@ window.addEventListener('scroll', () => {
     }
   }
 });
+
+// ── VISUALIZER SANDBOX LOGIC ───────────────────────────────────────────────
+async function openVisualizerSandbox(conceptName) {
+  const modal = $('visualizer-modal');
+  if (!modal) return;
+
+  $('visualizer-title').textContent = conceptName;
+  const contentContainer = $('visualizer-content');
+  
+  // 1. Show Loading State
+  contentContainer.innerHTML = `
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color: var(--text-muted); text-align:center; padding: 40px;">
+      <div class="spinner" style="display:block; width:36px; height:36px; border: 3px solid var(--border-strong); border-top-color: var(--accent); margin-bottom:20px;"></div>
+      <p style="font-size: 16px; color: var(--text-primary); font-weight: 600; margin-bottom: 8px;">
+        Generating Interactive Sandbox
+      </p>
+      <p style="font-size: 14px; max-width: 300px;">
+        Writing real-time visualization code to map out <strong>${escapeHtml(conceptName)}</strong>...
+      </p>
+    </div>
+  `;
+  modal.classList.add('active');
+
+  // 2. LAZY LOAD: Fetch the code from the backend only when clicked
+  try {
+    const res = await fetch(`/api/visualize?concept=${encodeURIComponent(conceptName)}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem("orchestrai_token")}` }
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      // Inject the raw HTML
+      contentContainer.innerHTML = data.html;
+      
+      // 3. SECURE EXECUTION: Browsers block <script> tags injected via innerHTML. 
+      // We must manually extract and re-append them to force execution!
+      Array.from(contentContainer.querySelectorAll("script")).forEach(oldScript => {
+        const newScript = document.createElement("script");
+        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+      });
+    } else {
+      throw new Error(data.error);
+    }
+  } catch (err) {
+    contentContainer.innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color: var(--danger); text-align:center;">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 16px;">
+          <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <p style="font-weight: 600;">Sandbox Generation Failed</p>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">The visualization agent hit an API limit. Try again in a minute.</p>
+      </div>`;
+  }
+}
+
+function closeVisualizerSandbox(event) {
+  if (event && event.target.id !== 'visualizer-modal' && event.type === 'click') return;
+  const modal = $('visualizer-modal');
+  if (modal) {
+      modal.classList.remove('active');
+      // Clear the content so any running animations/scripts stop completely
+      if ($('visualizer-content')) $('visualizer-content').innerHTML = ''; 
+  }
+}
+
+/// 1. The main template engine that formats the layout
+function generatePDFHTML(topic, rawContent) {
+  const cleanTopic = topic.replace(' (Partial)', '');
+  const dateStr = new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
+
+  // Fix the "squished syllabus" bug by forcing a double newline before every module
+  let processedMD = rawContent.replace(/\n(Module \d+:)/gi, '\n\n$1');
+  const rawHtml = marked.parse(processedMD);
+
+  // Create a temporary DOM to precisely manipulate the layout before printing
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = rawHtml;
+
+  // NEW: Create a dedicated wrapper to center the Syllabus vertically
+  const children = Array.from(tempDiv.children);
+  let inSyllabus = false;
+  let syllabusWrapper = null;
+
+  children.forEach(child => {
+    if (child.tagName === 'H2' && child.textContent.toLowerCase().includes('syllabus')) {
+      inSyllabus = true;
+      syllabusWrapper = document.createElement('div');
+      syllabusWrapper.className = 'syllabus-wrapper';
+      child.parentNode.insertBefore(syllabusWrapper, child);
+      syllabusWrapper.appendChild(child);
+    } else if (child.tagName === 'H1') {
+      inSyllabus = false;
+    } else if (inSyllabus && child.tagName === 'P') {
+      // Wrap syllabus items in a beautiful card class and move into the centered wrapper
+      child.className = 'syllabus-box';
+      syllabusWrapper.appendChild(child);
+    }
+  });
+
+  // Hide the raw duplicate headers that we are handling via the Cover Page
+  const firstH1 = tempDiv.querySelector('h1');
+  if (firstH1) firstH1.style.display = 'none';
+  const audienceP = Array.from(tempDiv.querySelectorAll('p')).find(p => p.textContent.includes('Audience:'));
+  if (audienceP) audienceP.style.display = 'none';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>${escapeHtml(cleanTopic)} - Course PDF</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap');
+  
+  /* PERFECT PAGE PADDING & MARGINS */
+  @page { size: A4; margin: 25mm 20mm; }
+  body { 
+    font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #222; 
+    line-height: 1.7; max-width: 800px; margin: 0 auto; 
+  }
+
+  /* PAGE 1: CENTERED COVER PAGE */
+  .cover-page { 
+    height: 90vh; display: flex; flex-direction: column; justify-content: center; 
+    align-items: center; text-align: center; page-break-after: always; 
+  }
+  .cover-title { 
+    font-family: 'Fraunces', serif; font-size: 38pt; font-weight: 600; 
+    color: #1a6b4a; margin-bottom: 24px; line-height: 1.15; 
+  }
+  .cover-meta { font-size: 14pt; color: #555; font-weight: 600; margin-bottom: 6px; }
+  .cover-credit { font-size: 13pt; color: #1a6b4a; font-weight: 700; margin-bottom: 24px; }
+  .cover-time { font-size: 11pt; color: #888; }
+
+  /* PAGE 2: CENTERED SYLLABUS PAGE */
+  .syllabus-wrapper {
+    height: 90vh; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center;
+    page-break-after: always;
+  }
+  .syllabus-wrapper h2 {
+    text-align: center;
+    font-size: 24pt;
+    color: #1a6b4a;
+    margin-top: 0;
+    margin-bottom: 32px;
+    border-bottom: none;
+  }
+  .syllabus-box { 
+    background: #f8fbf9; border: 1px solid #d1eadf; border-left: 4px solid #1a6b4a; 
+    padding: 16px 20px; border-radius: 8px; margin-bottom: 16px; 
+    page-break-inside: avoid; text-align: left; 
+  }
+
+  /* PAGE 3+: CONTENT TYPOGRAPHY */
+  p { margin-bottom: 16px; text-align: justify; hyphens: auto; }
+  
+  /* FORCED PAGE BREAKS FOR MODULES */
+  h1 { 
+    page-break-before: always; 
+    font-size: 22pt; color: #1a6b4a; margin-top: 0; padding-bottom: 8px; 
+    border-bottom: 2px solid #e8f4ee; margin-bottom: 24px; 
+  }
+  h2 { font-size: 18pt; color: #111; margin-top: 28px; margin-bottom: 16px; }
+  h3 { font-size: 14pt; color: #333; margin-top: 20px; margin-bottom: 12px; }
+
+  /* CODE & TABLES */
+  pre { 
+    background: #f5f5f5; padding: 16px; border-radius: 8px; font-size: 9.5pt; 
+    font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; 
+    word-wrap: break-word; page-break-inside: avoid; margin-bottom: 16px; 
+  }
+  code { background: #f0f0f0; padding: 2px 5px; border-radius: 4px; color: #d63384; font-family: monospace; font-size: 0.95em; }
+  pre code { background: none; padding: 0; color: #333; }
+  ul, ol { margin-bottom: 16px; padding-left: 24px; }
+  li { margin-bottom: 8px; text-align: left; }
+  blockquote { border-left: 4px solid #1a6b4a; padding-left: 16px; margin: 16px 0; color: #555; font-style: italic; }
+</style>
+</head>
+<body>
+  <div class="cover-page">
+    <div class="cover-title">${escapeHtml(cleanTopic)}</div>
+    <div class="cover-meta">Generated by EduGenesis</div>
+    <div class="cover-credit">Built by Prasanna Dolas</div>
+  </div>
+  <div class="content-wrapper">
+    ${tempDiv.innerHTML}
+  </div>
+  <script>
+    // Triggers the print dialog automatically when the tab opens
+    window.onload = () => { setTimeout(() => window.print(), 500); };
+  </script>
+</body>
+</html>`;
+}
+
+// 2. The trigger that creates the blob and opens the print tab
+function executePDFDownload(htmlContent, safeFilename, btn, originalText) {
+  const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const win  = window.open(url, '_blank');
+
+  if (!win) { // Fallback if pop-ups are blocked
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = safeFilename.replace('.pdf', '.html');
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    alert("Pop-up blocked! The file was saved as HTML instead. Open the HTML file and press Ctrl+P to save as PDF.");
+  } else {
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+
+  if (btn) {
+    setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 1500);
+  }
+}
+
+// 3. Connect the LIVE pipeline button
+function downloadPDF() {
+  if (!window._fullCourseContent || window._fullCourseContent.trim().length < 50) {
+    showError('No Content Yet', 'Wait for at least one module to finish generating.');
+    return;
+  }
+  const dlBtn = $("download-btn");
+  const originalText = dlBtn ? dlBtn.innerHTML : 'Download PDF';
+  if (dlBtn) { dlBtn.innerHTML = 'Preparing PDF…'; dlBtn.disabled = true; }
+
+  const rawTopic = ($("pipeline-course-title") ? $("pipeline-course-title").textContent : 'Course').trim();
+  const safeFilename = rawTopic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_course.pdf';
+  
+  const htmlContent = generatePDFHTML(rawTopic, window._fullCourseContent);
+  executePDFDownload(htmlContent, safeFilename, dlBtn, originalText);
+}
+
+// 4. Connect the HISTORY modal button
+function downloadHistoryPDF(topic, content, btn) {
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Preparing PDF…';
+  btn.disabled = true;
+
+  const cleanTopic = topic.replace(' (Partial)', '');
+  const safeFilename = cleanTopic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_course.pdf';
+  
+  const htmlContent = generatePDFHTML(cleanTopic, content);
+  executePDFDownload(htmlContent, safeFilename, btn, originalText);
+}

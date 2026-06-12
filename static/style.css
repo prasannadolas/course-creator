@@ -1075,3 +1075,107 @@ body, .app, .main {
   margin-top: 0 !important;
   padding-top: 48px !important;
 }
+
+/* ── VISUALIZER PILLS (INLINE INTERACTIVE TAGS) ── */
+.visualizer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  margin: 0 4px;
+  background: linear-gradient(135deg, var(--accent-light), #d1eadf);
+  border: 1px solid rgba(26, 107, 74, 0.2);
+  border-radius: var(--radius-full);
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.visualizer-pill:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 107, 74, 0.25);
+}
+
+.visualizer-pill svg {
+  transition: transform 0.3s ease;
+}
+
+.visualizer-pill:hover svg {
+  transform: scale(1.1) rotate(15deg);
+}
+
+/* ── COURSE ACCORDION (MODAL DROPDOWNS) ── */
+.course-accordion {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  transition: box-shadow var(--transition);
+}
+.course-accordion:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.course-accordion summary {
+  padding: 16px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--surface2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  list-style: none; /* Removes default ugly browser arrow */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  transition: all var(--transition);
+}
+
+/* Chrome/Safari fix to hide default arrow */
+.course-accordion summary::-webkit-details-marker { display: none; }
+
+/* Custom animated arrow */
+.course-accordion summary::after {
+  content: '';
+  width: 20px; height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' fill='%236b6860' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z'/%3E%3C/svg%3E");
+  background-size: cover;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Active Open State */
+.course-accordion[open] summary {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-bottom: 1px solid rgba(26,107,74,0.15);
+}
+.course-accordion[open] summary::after {
+  transform: rotate(-180deg);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' fill='%231a6b4a' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z'/%3E%3C/svg%3E");
+}
+
+.course-accordion .accordion-content {
+  padding: 24px;
+  background: var(--surface);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fix internal spacing so content perfectly touches the padding */
+.course-accordion .accordion-content > :first-child { margin-top: 0; }
+.course-accordion .accordion-content > :last-child { margin-bottom: 0; }
+
