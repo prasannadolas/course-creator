@@ -483,13 +483,21 @@ function startGeneration(forceLast = false) {
   
   window._fullCourseContent = "";
   
-  // Reset overview stats
+// Reset overview stats
   $("summary-modules").textContent = '0';
   $("summary-quizzes").textContent = '0';
   $("summary-duration").textContent = '0h';
 
   setProgress(0, 'Connecting to backend agents...');
   for (let i = 0; i < 4; i++) resetStage(i);
+
+  // ── BUG FIX: Force the badge to reset on every new run ──
+  const badge = $("pipeline-badge");
+  const dot = $("pulse-dot");
+  if (badge) badge.className = 'pipeline-badge running';
+  if ($("badge-text")) $("badge-text").textContent = 'Running';
+  if (dot) dot.style.display = 'block';
+  // ────────────────────────────────────────────────────────
 
   // Close existing stream if any
   if (eventSource) eventSource.close();

@@ -313,22 +313,22 @@ def get_user_history(current_user: User = Depends(get_current_user), db: Session
     return {"ok": True, "courses": history_data}
 
 @app.post("/api/save_course")
-def save_course(course_data: CourseCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Saves a successfully generated course to the database."""
-    try:
-        new_course = Course(
-            topic=course_data.topic,
-            audience=course_data.audience,
-            full_content=course_data.content,
-            user_id=current_user.id
-        )
-        db.add(new_course)
-        db.commit()
-        return {"ok": True, "message": "Course saved successfully"}
-    except Exception as e:
-        db.rollback()
-        print(f"Error saving course: {e}")
-        return {"ok": False, "error": "Failed to save course"}
+def save_course(course: CourseCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    
+    # 1. Create the database row
+    new_course = Course(
+        topic=course.topic,
+        audience=course.audience,
+        full_content=course.content,  # <--- We map the incoming 'content' to the DB's 'full_content'
+        user_id=current_user.id
+    )
+    
+    # 2. Save it to Supabase
+    db.add(new_course)
+    db.commit()           # <--- CRITICAL: This tells Supabase to permanently save it!
+    db.refresh(new_course)
+    
+    return {"ok": True, "course_id": new_course.id}
     
 @app.get("/api/visualize")
 async def generate_visualization(concept: str, current_user: User = Depends(get_current_user)):

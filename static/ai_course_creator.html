@@ -317,12 +317,15 @@
 </div>
 
 <div class="modal-overlay" id="course-reader-modal" onclick="closeCourseReader(event)">
-  <div class="modal-card" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
-    <div class="modal-header" style="padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 0;">
-      <h2 class="modal-title" id="reader-title">Course</h2>
+  <div class="modal-card reader-modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header reader-modal-header">
+      <div class="reader-modal-title-group">
+        <div class="reader-modal-eyebrow">Course Content</div>
+        <h2 class="modal-title" id="reader-title">Course</h2>
+      </div>
       <button class="modal-close" onclick="closeCourseReader()">&times;</button>
     </div>
-    <div class="modal-body history-content-viewer" id="reader-content" style="overflow-y: auto; padding: 24px 0 0 0;">
+    <div class="reader-modal-scroll" id="reader-content">
       </div>
   </div>
 </div>
