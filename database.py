@@ -7,7 +7,7 @@ import datetime
 if os.environ.get("RENDER"):
     # PRODUCTION (Render): Using the IPv4 Connection Pooler for deployment
     # ⚠️ IMPORTANT: If Render crashes, you must replace the URL below with the EXACT "Connection Pooler" URI from your Supabase Dashboard!
-    DATABASE_URL = "postgresql://postgres.ouscmjufewdqqfgkqewm:EduGenesis1234567891@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
+    DATABASE_URL = "postgresql://postgres.ouscmjufewdqqfgkqewm:EduGenesis1234567891@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
 else:
     # LOCAL (VS Code): Using the Direct Connection to avoid the tenant bug locally
     DATABASE_URL = "postgresql://postgres:EduGenesis1234567891@db.ouscmjufewdqqfgkqewm.supabase.co:5432/postgres"
