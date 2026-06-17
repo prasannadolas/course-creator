@@ -5,29 +5,21 @@ import datetime
 
 # ── 1. SUPABASE CONNECTION ──
 if os.environ.get("RENDER"):
-    # PRODUCTION (Render): Paste the REAL pooler URL you copied from your dashboard below!
-    SUPABASE_URL = "postgresql://postgres.ouscmjufewdqqfgkqewm:EduGenesis1234567891@REAL_SERVER_ADDRESS_HERE:6543/postgres"
+    # PRODUCTION (Render): Using the IPv4 Connection Pooler for deployment
+    # ⚠️ IMPORTANT: If Render crashes, you must replace the URL below with the EXACT "Connection Pooler" URI from your Supabase Dashboard!
+    DATABASE_URL = "postgresql://postgres.ouscmjufewdqqfgkqewm:EduGenesis1234567891@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
 else:
-    # LOCAL (VS Code): Use the Direct Connection to avoid the tenant bug locally
-    SUPABASE_URL = "postgresql://postgres:EduGenesis1234567891@db.ouscmjufewdqqfgkqewm.supabase.co:5432/postgres"
-
-# We check if you provided a Supabase URL, otherwise we fall back to local SQLite for safety
-DATABASE_URL = SUPABASE_URL if "REAL_SERVER_ADDRESS_HERE" not in SUPABASE_URL else "sqlite:///./orchestrai.db"
+    # LOCAL (VS Code): Using the Direct Connection to avoid the tenant bug locally
+    DATABASE_URL = "postgresql://postgres:EduGenesis1234567891@db.ouscmjufewdqqfgkqewm.supabase.co:5432/postgres"
 
 # ── 2. ENGINE CONFIGURATION ──
-if DATABASE_URL.startswith("sqlite"):
-    # SQLite requires check_same_thread bypass
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-    print("🟢 Running Database Locally (SQLite)")
-else:
-    # Supabase (PostgreSQL) connects natively!
-    # pool_pre_ping=True prevents the "server closed connection unexpectedly" error
-    engine = create_engine(
-        DATABASE_URL,
-        pool_pre_ping=True,   # Checks if connection is alive before trying to save
-        pool_recycle=300      # Refreshes the connection every 5 minutes
-    )
-    print("🚀 Connected to Cloud Database (Supabase)")
+# We removed the SQLite fallback entirely. Your app will strictly use Supabase now!
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,   # Checks if connection is alive before trying to save
+    pool_recycle=300      # Refreshes the connection every 5 minutes
+)
+print("🚀 Connected to Cloud Database (Supabase)")
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
