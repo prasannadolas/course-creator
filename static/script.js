@@ -111,8 +111,19 @@ async function openHistorySidebar() {
       return;
     }
 
+    // Save to global array so viewCloudCourse(index) works perfectly
+    window._cloudCourses = data.courses;
+
     list.innerHTML = data.courses.map((course, index) => `
      <div class="history-card" onclick="viewCloudCourse(${index})">
+        
+        <button class="history-delete-btn" onclick="deleteCloudCourse(${course.id}, event)" title="Delete Course">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+
         <div class="history-title">${escapeHtml(course.topic)}</div>
         <div class="history-meta">
           <span>${course.date}</span>
@@ -122,10 +133,36 @@ async function openHistorySidebar() {
       </div>
     `).join('');
 
-    window._cloudCourses = data.courses;
-
   } catch (err) {
     list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--danger);">Failed to load history.</div>';
+  }
+}
+
+// THE DELETE FUNCTION
+async function deleteCloudCourse(courseId, event) {
+  // CRITICAL: This stops the click from accidentally opening the course!
+  event.stopPropagation(); 
+
+  if (!confirm("Are you sure you want to delete this course?")) {
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/history/' + courseId, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem("orchestrai_token") }
+    });
+    const data = await res.json();
+    
+    if (data.ok) {
+      // Refresh the sidebar to instantly remove the deleted card
+      openHistorySidebar(); 
+    } else {
+      alert("Failed to delete course.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("An error occurred while deleting.");
   }
 }
 
@@ -133,6 +170,7 @@ function closeHistorySidebar() {
   $('sidebar-overlay').classList.remove('active');
   $('history-sidebar').classList.remove('open');
 }
+
 function closeCourseReader() {
   const modal = $('course-reader-modal');
   if (modal) modal.classList.remove('active');

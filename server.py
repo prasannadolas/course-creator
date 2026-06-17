@@ -30,6 +30,7 @@ from course_agents.curriculum_agent import curriculum_agent
 from course_agents.content_agent import content_agent
 from course_agents.review_agent import review_agent
 from course_agents.quiz_agent import quiz_agent
+from course_agents.visualizer_agent import visualizer_agent 
 
 # Password hashing setup
 SECRET_KEY = JWT_SECRET_KEY
@@ -312,6 +313,21 @@ def get_user_history(current_user: User = Depends(get_current_user), db: Session
         
     return {"ok": True, "courses": history_data}
 
+@app.delete("/api/history/{course_id}")
+def delete_course(course_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Deletes a specific course if the logged-in user owns it."""
+    # 1. Find the course and verify it belongs to the current user
+    course = db.query(Course).filter(Course.id == course_id, Course.user_id == current_user.id).first()
+    
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found or unauthorized")
+        
+    # 2. Delete it from Supabase
+    db.delete(course)
+    db.commit()
+    
+    return {"ok": True, "message": "Course deleted"}
+
 @app.post("/api/save_course")
 def save_course(course: CourseCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     
@@ -337,8 +353,7 @@ async def generate_visualization(concept: str, current_user: User = Depends(get_
         session_svc = InMemorySessionService()
         
         # We recycle your existing content_agent but give it a strict coding prompt
-        runner = Runner(agent=content_agent, session_service=session_svc, app_name="course_creator")
-        
+        runner = Runner(agent=visualizer_agent, session_service=session_svc, app_name="course_creator")        
         vis_prompt = (
             f"You are an expert creative web developer. The user needs to understand the concept: '{concept}'. "
             "Write a standalone HTML snippet containing embedded CSS and JavaScript to visually and interactively explain this concept. "

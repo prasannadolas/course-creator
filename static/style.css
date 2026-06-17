@@ -906,6 +906,7 @@ button, input, textarea, select { font: inherit; }
 
 /* ── HISTORY MODAL STYLES ── */
 .history-card {
+  position: relative; /* CRITICAL: Keeps the button inside the card */
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 16px 20px;
@@ -914,14 +915,69 @@ button, input, textarea, select { font: inherit; }
   cursor: pointer;
   transition: all var(--transition);
 }
+
 .history-card:hover {
   border-color: var(--accent);
   box-shadow: 0 4px 12px rgba(26,107,74,0.08);
   transform: translateY(-2px);
 }
-.history-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
-.history-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; align-items: center; }
-.history-meta::before { content: ''; display: inline-block; width: 3px; height: 3px; border-radius: 50%; background: var(--text-muted); }
+
+.history-delete-btn {
+  position: absolute;
+  bottom: 12px; /* MOVED from top to bottom */
+  right: 14px;  /* Stays on the right side */
+  background: var(--surface2);
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0; /* Hidden until you hover */
+  transition: all 0.2s ease;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.history-card:hover .history-delete-btn {
+  opacity: 1; 
+}
+
+.history-delete-btn:hover {
+  color: var(--danger);
+  background: var(--danger-light);
+}
+
+@media (max-width: 768px) {
+  .history-delete-btn { opacity: 1; }
+}
+
+.history-title { 
+  font-size: 15px; 
+  font-weight: 700; 
+  color: var(--text-primary); 
+  margin-bottom: 8px; /* Increased slightly to give space above the date */
+  padding-right: 0; 
+}
+
+.history-meta { 
+  font-size: 12px; 
+  color: var(--text-muted); 
+  display: flex; 
+  gap: 8px; 
+  align-items: center; 
+  padding-right: 32px; /* Prevents the date text from hitting the trash can */
+}
+
+.history-meta::before { 
+  content: ''; 
+  display: inline-block; 
+  width: 3px; 
+  height: 3px; 
+  border-radius: 50%; 
+  background: var(--text-muted); 
+}
 
 /* ── COURSE READER MODAL OVERRIDES ── */
 #course-reader-modal .modal-card {
