@@ -3,14 +3,16 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey,
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 import datetime
 
+# ── 1. SUPABASE CONNECTION ──
 if os.environ.get("RENDER"):
-    # PRODUCTION (Render): Use the IPv4 Connection Pooler
-    SUPABASE_URL = "postgresql://postgres.ouscmjufewdqqfgkqewm:EduGenesis1234567891@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
+    # PRODUCTION (Render): Paste the REAL pooler URL you copied from your dashboard below!
+    SUPABASE_URL = "postgresql://postgres.ouscmjufewdqqfgkqewm:EduGenesis1234567891@REAL_SERVER_ADDRESS_HERE:6543/postgres"
 else:
-    # LOCAL (VS Code): Use the Direct Connection to avoid the tenant bug
+    # LOCAL (VS Code): Use the Direct Connection to avoid the tenant bug locally
     SUPABASE_URL = "postgresql://postgres:EduGenesis1234567891@db.ouscmjufewdqqfgkqewm.supabase.co:5432/postgres"
+
 # We check if you provided a Supabase URL, otherwise we fall back to local SQLite for safety
-DATABASE_URL = SUPABASE_URL if "[YOUR-PASSWORD]" not in SUPABASE_URL else "sqlite:///./orchestrai.db"
+DATABASE_URL = SUPABASE_URL if "REAL_SERVER_ADDRESS_HERE" not in SUPABASE_URL else "sqlite:///./orchestrai.db"
 
 # ── 2. ENGINE CONFIGURATION ──
 if DATABASE_URL.startswith("sqlite"):
