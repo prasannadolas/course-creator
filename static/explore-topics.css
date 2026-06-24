@@ -1,0 +1,142 @@
+/* ════════════════════════════════════════════════════════════════════════
+   EXPLORE TOPICS LIBRARY MODAL STYLES
+   Markup:  partials/explore-topics-modal.html
+   Logic:   js/explore-topics.js
+   Depends on shared tokens/base classes from style.css: CSS custom
+   properties, the generic .modal-overlay/.modal-card/.modal-header rules,
+   AND the base .chip/.chips classes (those stay in style.css because the
+   home panel's "Popular topics" chips use them too — this file only
+   contains the .explore-chips .chip override for the modal's button grid).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────
+   EXPLORE TOPICS LIBRARY MODAL (SPLIT DIRECTORY + BUTTON GRID)
+───────────────────────────────────────────────────────── */
+
+#explore-modal .modal-card {
+  width: 95%;
+  max-width: 1400px;
+  height: 90vh;
+}
+
+/* SEARCH BAR */
+#explore-search-input {
+  height: 56px;
+  width: 100%;
+  padding: 0 24px 0 52px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background-color: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%239c9a94' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 20px center;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  transition: all 0.2s ease;
+  margin-bottom: 32px; /* Slightly more breathing room below search */
+}
+
+#explore-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+/* ── DIRECTORY GRID (PERFECTLY ALIGNED TO SEARCH BAR) ── */
+.explore-library-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px; /* Clean empty space between left and right columns */
+  padding: 0 24px 32px 24px; /* Compress the grid to exactly match the Search Bar */
+  border-top: none;
+}
+
+.explore-column {
+  display: flex;
+  flex-direction: column;
+  border-right: none !important; /* Removed the harsh center line */
+}
+
+.explore-category {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0 0 32px 0; /* Space between vertical categories */
+  box-shadow: none;
+}
+
+/* ── 1. SOLID GREEN CONTAINED HEADERS ── */
+.explore-category-title {
+  margin: 0 0 16px 0;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 800; 
+  color: #ffffff; 
+  background: var(--accent); /* Website Theme Green */
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-radius: 12px; /* Rounded corners matching your theme */
+  box-shadow: 0 4px 12px rgba(26,107,74,0.15); /* Soft, premium shadow */
+}
+
+/* ── 2. TWO BUTTONS PER LINE (GRID) ── */
+.explore-chips {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important; 
+  gap: 12px !important;
+  padding: 0 !important; /* Removed messy internal padding */
+}
+
+/* ── 3. THEMED BUTTON SHAPE ── */
+.explore-chips .chip {
+  width: 100%;
+  border: 1px solid var(--border-strong); 
+  border-radius: 12px; 
+  background: var(--surface); 
+  padding: 14px 16px;
+  font-size: 13.5px;
+  font-weight: 600; 
+  justify-content: flex-start;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+/* Hover Effect */
+/* Hover Effect (Turns Pitch Black instead of Green) */
+.explore-chips .chip:hover {
+  background: var(--text-primary); /* Uses your theme's black */
+  color: #ffffff;
+  border-color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15); /* Switched to a clean black shadow */
+}
+
+.explore-chips .chip:active {
+  transform: translateY(0);
+  background: #000000; /* Slightly darker black on direct press */
+  border-color: #000000;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* ── MOBILE RESPONSIVENESS ── */
+@media (max-width: 900px){
+  .explore-library-grid {
+      grid-template-columns: 1fr; /* Stack left/right into a single column */
+  }
+}
+
+@media (max-width: 550px){
+  .explore-chips {
+      grid-template-columns: 1fr !important; /* 1 button per line on phones */
+  }
+}

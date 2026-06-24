@@ -1,0 +1,377 @@
+<!--
+  EXPLORE TOPICS MODAL — Topic Library
+  Functionality: js/explore-topics.js (openExploreModal, closeExploreModal,
+  filterExploreTopics, setTopicAndGo)
+  Loaded into #explore-topics-mount in ai_course_creator.html
+-->
+   <!-- ── EXPLORE TOPICS MODAL (COMPREHENSIVE LIBRARY) ── -->
+<div class="modal-overlay" id="explore-modal" onclick="closeExploreModal(event)">
+  <div class="modal-card" style="max-width: 1400px; width: 95%; height: 90vh; max-height: 90vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-radius: 20px;" onclick="event.stopPropagation()">
+    
+    <div class="modal-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border); margin: 0; background: var(--surface); flex-shrink: 0;">
+      <h2 class="modal-title" style="font-size: 22px;">Topic Library</h2>
+      <button class="modal-close" onclick="closeExploreModal()">&times;</button>
+    </div>
+    
+    <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 24px 0 0 0; background: var(--surface);">
+      
+      <div style="padding: 0 24px;">
+         <input type="text" id="explore-search-input" placeholder="Search for subjects, exams, languages, or concepts..." onkeyup="filterExploreTopics()">
+      </div>
+
+     <div class="explore-library-grid">
+
+        <div class="explore-column">
+            
+            <div class="explore-category">
+              <h3 class="explore-category-title">AI & Machine Learning</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Machine Learning Fundamentals')">Machine Learning</div>
+                <div class="chip" onclick="setTopicAndGo('Deep Learning & Neural Networks')">Deep Learning</div>
+                <div class="chip" onclick="setTopicAndGo('Natural Language Processing')">NLP</div>
+                <div class="chip" onclick="setTopicAndGo('Computer Vision Fundamentals')">Computer Vision</div>
+                <div class="chip" onclick="setTopicAndGo('Generative AI Applications')">Generative AI</div>
+                <div class="chip" onclick="setTopicAndGo('Prompt Engineering for AI')">Prompt Engineering</div>
+                <div class="chip" onclick="setTopicAndGo('Large Language Models (LLMs)')">LLMs</div>
+                <div class="chip" onclick="setTopicAndGo('Retrieval Augmented Generation (RAG)')">RAG</div>
+                <div class="chip" onclick="setTopicAndGo('Building AI Agents')">AI Agents</div>
+                <div class="chip" onclick="setTopicAndGo('Multi-Agent Systems')">Multi-Agent Systems</div>
+                <div class="chip" onclick="setTopicAndGo('Reinforcement Learning Fundamentals')">Reinforcement Learning</div>
+                <div class="chip" onclick="setTopicAndGo('PyTorch for Deep Learning')">PyTorch</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Programming Languages</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Python Programming')">Python</div>
+                <div class="chip" onclick="setTopicAndGo('JavaScript Programming')">JavaScript</div>
+                <div class="chip" onclick="setTopicAndGo('TypeScript Fundamentals')">TypeScript</div>
+                <div class="chip" onclick="setTopicAndGo('Java Programming')">Java</div>
+                <div class="chip" onclick="setTopicAndGo('C Programming')">C</div>
+                <div class="chip" onclick="setTopicAndGo('C++ Programming')">C++</div>
+                <div class="chip" onclick="setTopicAndGo('C# Programming')">C#</div>
+                <div class="chip" onclick="setTopicAndGo('Go (Golang) Programming')">Go</div>
+                <div class="chip" onclick="setTopicAndGo('Rust Programming')">Rust</div>
+                <div class="chip" onclick="setTopicAndGo('Swift Programming')">Swift</div>
+                <div class="chip" onclick="setTopicAndGo('Kotlin Fundamentals')">Kotlin</div>
+                <div class="chip" onclick="setTopicAndGo('PHP Development')">PHP</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Web Development</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('HTML5 Fundamentals')">HTML5</div>
+                <div class="chip" onclick="setTopicAndGo('CSS3 Advanced')">CSS3</div>
+                <div class="chip" onclick="setTopicAndGo('Modern JavaScript Web Development')">JavaScript</div>
+                <div class="chip" onclick="setTopicAndGo('React.js Framework')">React.js</div>
+                <div class="chip" onclick="setTopicAndGo('Next.js Fullstack Framework')">Next.js</div>
+                <div class="chip" onclick="setTopicAndGo('Vue.js Framework')">Vue.js</div>
+                <div class="chip" onclick="setTopicAndGo('Angular Framework')">Angular</div>
+                <div class="chip" onclick="setTopicAndGo('Tailwind CSS')">Tailwind CSS</div>
+                <div class="chip" onclick="setTopicAndGo('Node.js Backend Development')">Node.js</div>
+                <div class="chip" onclick="setTopicAndGo('Express.js Framework')">Express.js</div>
+                <div class="chip" onclick="setTopicAndGo('Django Web Framework')">Django</div>
+                <div class="chip" onclick="setTopicAndGo('REST API Design')">REST APIs</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Computer Science Fundamentals</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Data Structures Fundamentals')">Data Structures</div>
+                <div class="chip" onclick="setTopicAndGo('Algorithms and Problem Solving')">Algorithms</div>
+                <div class="chip" onclick="setTopicAndGo('Object Oriented Programming (OOP)')">Object Oriented Programming</div>
+                <div class="chip" onclick="setTopicAndGo('Operating Systems Concepts')">Operating Systems</div>
+                <div class="chip" onclick="setTopicAndGo('Computer Networks Fundamentals')">Computer Networks</div>
+                <div class="chip" onclick="setTopicAndGo('Database Management Systems (DBMS)')">DBMS</div>
+                <div class="chip" onclick="setTopicAndGo('Software Engineering Principles')">Software Engineering</div>
+                <div class="chip" onclick="setTopicAndGo('Software Design Patterns')">Design Patterns</div>
+                <div class="chip" onclick="setTopicAndGo('Distributed Systems')">Distributed Systems</div>
+                <div class="chip" onclick="setTopicAndGo('Concurrency and Multithreading')">Concurrency</div>
+                <div class="chip" onclick="setTopicAndGo('Compiler Design')">Compilers</div>
+                <div class="chip" onclick="setTopicAndGo('System Programming')">System Programming</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Data Science & Engineering</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Data Science Foundations')">Data Science</div>
+                <div class="chip" onclick="setTopicAndGo('Data Analysis Techniques')">Data Analysis</div>
+                <div class="chip" onclick="setTopicAndGo('Statistics for Data Science')">Statistics</div>
+                <div class="chip" onclick="setTopicAndGo('Probability Theory')">Probability</div>
+                <div class="chip" onclick="setTopicAndGo('Pandas for Data Manipulation')">Pandas</div>
+                <div class="chip" onclick="setTopicAndGo('NumPy Fundamentals')">NumPy</div>
+                <div class="chip" onclick="setTopicAndGo('Data Visualization Principles')">Data Visualization</div>
+                <div class="chip" onclick="setTopicAndGo('SQL Fundamentals')">SQL</div>
+                <div class="chip" onclick="setTopicAndGo('Database Design and Modeling')">Database Design</div>
+                <div class="chip" onclick="setTopicAndGo('ETL Pipelines')">ETL Pipelines</div>
+                <div class="chip" onclick="setTopicAndGo('Apache Spark')">Apache Spark</div>
+                <div class="chip" onclick="setTopicAndGo('Power BI Dashboarding')">Power BI</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Cloud, DevOps & Architecture</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Cloud Computing Concepts')">Cloud Computing</div>
+                <div class="chip" onclick="setTopicAndGo('AWS Architecture Fundamentals')">AWS</div>
+                <div class="chip" onclick="setTopicAndGo('Microsoft Azure Fundamentals')">Microsoft Azure</div>
+                <div class="chip" onclick="setTopicAndGo('Google Cloud Platform (GCP)')">Google Cloud</div>
+                <div class="chip" onclick="setTopicAndGo('Docker Containerization')">Docker</div>
+                <div class="chip" onclick="setTopicAndGo('Kubernetes Orchestration')">Kubernetes</div>
+                <div class="chip" onclick="setTopicAndGo('Terraform Fundamentals')">Terraform</div>
+                <div class="chip" onclick="setTopicAndGo('CI/CD Pipelines')">CI/CD</div>
+                <div class="chip" onclick="setTopicAndGo('Linux System Administration')">Linux Administration</div>
+                <div class="chip" onclick="setTopicAndGo('System Design Fundamentals')">System Design</div>
+                <div class="chip" onclick="setTopicAndGo('Microservices Architecture')">Microservices</div>
+                <div class="chip" onclick="setTopicAndGo('Site Reliability Engineering (SRE)')">Site Reliability Engineering</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Mobile, Cyber & Blockchain</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Android App Development')">Android Development</div>
+                <div class="chip" onclick="setTopicAndGo('iOS App Development')">iOS Development</div>
+                <div class="chip" onclick="setTopicAndGo('Flutter App Development')">Flutter</div>
+                <div class="chip" onclick="setTopicAndGo('React Native Development')">React Native</div>
+                <div class="chip" onclick="setTopicAndGo('Cybersecurity Essentials')">Cybersecurity</div>
+                <div class="chip" onclick="setTopicAndGo('Ethical Hacking Fundamentals')">Ethical Hacking</div>
+                <div class="chip" onclick="setTopicAndGo('Penetration Testing')">Penetration Testing</div>
+                <div class="chip" onclick="setTopicAndGo('Network Security')">Network Security</div>
+                <div class="chip" onclick="setTopicAndGo('Cryptography Fundamentals')">Cryptography</div>
+                <div class="chip" onclick="setTopicAndGo('Blockchain Fundamentals')">Blockchain</div>
+                <div class="chip" onclick="setTopicAndGo('Web3 Development')">Web3</div>
+                <div class="chip" onclick="setTopicAndGo('Smart Contracts')">Smart Contracts</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Emerging Technologies</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Quantum Computing Fundamentals')">Quantum Computing</div>
+                <div class="chip" onclick="setTopicAndGo('Edge Computing Concepts')">Edge Computing</div>
+                <div class="chip" onclick="setTopicAndGo('Internet of Things (IoT)')">Internet of Things</div>
+                <div class="chip" onclick="setTopicAndGo('AR/VR Development')">AR/VR Development</div>
+                <div class="chip" onclick="setTopicAndGo('Digital Twins Concepts')">Digital Twins</div>
+                <div class="chip" onclick="setTopicAndGo('Autonomous Systems')">Autonomous Systems</div>
+                <div class="chip" onclick="setTopicAndGo('Robotics Fundamentals')">Robotics</div>
+                <div class="chip" onclick="setTopicAndGo('Drone Technology')">Drone Technology</div>
+                <div class="chip" onclick="setTopicAndGo('5G Networks')">5G Networks</div>
+                <div class="chip" onclick="setTopicAndGo('Spatial Computing')">Spatial Computing</div>
+                <div class="chip" onclick="setTopicAndGo('Metaverse Technologies')">Metaverse Technologies</div>
+                <div class="chip" onclick="setTopicAndGo('Bioinformatics Fundamentals')">Bioinformatics</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Science</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Physics Fundamentals')">Physics</div>
+                <div class="chip" onclick="setTopicAndGo('Classical Mechanics')">Mechanics</div>
+                <div class="chip" onclick="setTopicAndGo('Quantum Physics')">Quantum Physics</div>
+                <div class="chip" onclick="setTopicAndGo('Thermodynamics')">Thermodynamics</div>
+                <div class="chip" onclick="setTopicAndGo('Chemistry Fundamentals')">Chemistry</div>
+                <div class="chip" onclick="setTopicAndGo('Organic Chemistry')">Organic Chemistry</div>
+                <div class="chip" onclick="setTopicAndGo('Biology Fundamentals')">Biology</div>
+                <div class="chip" onclick="setTopicAndGo('Genetics')">Genetics</div>
+                <div class="chip" onclick="setTopicAndGo('Microbiology')">Microbiology</div>
+                <div class="chip" onclick="setTopicAndGo('Biotechnology')">Biotechnology</div>
+                <div class="chip" onclick="setTopicAndGo('Astronomy Basics')">Astronomy</div>
+                <div class="chip" onclick="setTopicAndGo('Mathematics Fundamentals')">Mathematics</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Medical & Health Sciences</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Human Anatomy')">Human Anatomy</div>
+                <div class="chip" onclick="setTopicAndGo('Human Physiology')">Human Physiology</div>
+                <div class="chip" onclick="setTopicAndGo('Pathology Fundamentals')">Pathology</div>
+                <div class="chip" onclick="setTopicAndGo('Pharmacology Fundamentals')">Pharmacology</div>
+                <div class="chip" onclick="setTopicAndGo('Biochemistry')">Biochemistry</div>
+                <div class="chip" onclick="setTopicAndGo('Nutrition and Dietetics')">Nutrition</div>
+                <div class="chip" onclick="setTopicAndGo('Public Health')">Public Health</div>
+                <div class="chip" onclick="setTopicAndGo('Nursing Fundamentals')">Nursing Fundamentals</div>
+                <div class="chip" onclick="setTopicAndGo('Clinical Research')">Clinical Research</div>
+                <div class="chip" onclick="setTopicAndGo('Medical Ethics')">Medical Ethics</div>
+                <div class="chip" onclick="setTopicAndGo('Healthcare Management')">Healthcare Management</div>
+                <div class="chip" onclick="setTopicAndGo('Epidemiology')">Epidemiology</div>
+              </div>
+            </div>
+            
+        </div>
+
+        <div class="explore-column">
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Commerce & Finance</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Accounting Principles')">Accounting</div>
+                <div class="chip" onclick="setTopicAndGo('Financial Accounting')">Financial Accounting</div>
+                <div class="chip" onclick="setTopicAndGo('Corporate Accounting')">Corporate Accounting</div>
+                <div class="chip" onclick="setTopicAndGo('Auditing Principles')">Auditing</div>
+                <div class="chip" onclick="setTopicAndGo('Taxation Fundamentals')">Taxation</div>
+                <div class="chip" onclick="setTopicAndGo('Banking Operations')">Banking</div>
+                <div class="chip" onclick="setTopicAndGo('Investment Analysis')">Investment Analysis</div>
+                <div class="chip" onclick="setTopicAndGo('Stock Market Investing')">Stock Market</div>
+                <div class="chip" onclick="setTopicAndGo('Corporate Finance')">Corporate Finance</div>
+                <div class="chip" onclick="setTopicAndGo('Economics Fundamentals')">Economics</div>
+                <div class="chip" onclick="setTopicAndGo('Microeconomics')">Microeconomics</div>
+                <div class="chip" onclick="setTopicAndGo('Macroeconomics')">Macroeconomics</div>
+              </div>
+            </div>
+            
+            <div class="explore-category">
+              <h3 class="explore-category-title">Management & MBA</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Business Management Fundamentals')">Business Management</div>
+                <div class="chip" onclick="setTopicAndGo('Strategic Management')">Strategic Management</div>
+                <div class="chip" onclick="setTopicAndGo('Human Resource Management (HRM)')">Human Resource Management</div>
+                <div class="chip" onclick="setTopicAndGo('Marketing Management')">Marketing Management</div>
+                <div class="chip" onclick="setTopicAndGo('Digital Marketing Strategies')">Digital Marketing</div>
+                <div class="chip" onclick="setTopicAndGo('Operations Management')">Operations Management</div>
+                <div class="chip" onclick="setTopicAndGo('Supply Chain Management')">Supply Chain Management</div>
+                <div class="chip" onclick="setTopicAndGo('Project Management Principles')">Project Management</div>
+                <div class="chip" onclick="setTopicAndGo('Entrepreneurship and Startups')">Entrepreneurship</div>
+                <div class="chip" onclick="setTopicAndGo('Business Analytics')">Business Analytics</div>
+                <div class="chip" onclick="setTopicAndGo('Leadership Skills Development')">Leadership Skills</div>
+                <div class="chip" onclick="setTopicAndGo('International Business')">International Business</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Arts & Humanities</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('World History Fundamentals')">History</div>
+                <div class="chip" onclick="setTopicAndGo('Ancient Indian History')">Ancient Indian History</div>
+                <div class="chip" onclick="setTopicAndGo('Modern Indian History')">Modern Indian History</div>
+                <div class="chip" onclick="setTopicAndGo('Political Science Concepts')">Political Science</div>
+                <div class="chip" onclick="setTopicAndGo('Public Administration')">Public Administration</div>
+                <div class="chip" onclick="setTopicAndGo('Sociology Fundamentals')">Sociology</div>
+                <div class="chip" onclick="setTopicAndGo('Psychology Fundamentals')">Psychology</div>
+                <div class="chip" onclick="setTopicAndGo('Philosophy Concepts')">Philosophy</div>
+                <div class="chip" onclick="setTopicAndGo('Anthropology')">Anthropology</div>
+                <div class="chip" onclick="setTopicAndGo('Geography Fundamentals')">Geography</div>
+                <div class="chip" onclick="setTopicAndGo('International Relations')">International Relations</div>
+                <div class="chip" onclick="setTopicAndGo('Ethics and Moral Philosophy')">Ethics</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Languages & Literature</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('English Literature')">English Literature</div>
+                <div class="chip" onclick="setTopicAndGo('English Grammar and Syntax')">English Grammar</div>
+                <div class="chip" onclick="setTopicAndGo('Effective Communication Skills')">Communication Skills</div>
+                <div class="chip" onclick="setTopicAndGo('Creative Writing Techniques')">Creative Writing</div>
+                <div class="chip" onclick="setTopicAndGo('Journalism Fundamentals')">Journalism</div>
+                <div class="chip" onclick="setTopicAndGo('Professional Content Writing')">Content Writing</div>
+                <div class="chip" onclick="setTopicAndGo('Linguistics Fundamentals')">Linguistics</div>
+                <div class="chip" onclick="setTopicAndGo('Hindi Literature')">Hindi Literature</div>
+                <div class="chip" onclick="setTopicAndGo('Marathi Literature')">Marathi Literature</div>
+                <div class="chip" onclick="setTopicAndGo('Sanskrit Basics')">Sanskrit</div>
+                <div class="chip" onclick="setTopicAndGo('French Language Basics')">French</div>
+                <div class="chip" onclick="setTopicAndGo('German Language Basics')">German</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Law</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Constitutional Law')">Constitutional Law</div>
+                <div class="chip" onclick="setTopicAndGo('Criminal Law')">Criminal Law</div>
+                <div class="chip" onclick="setTopicAndGo('Civil Law Fundamentals')">Civil Law</div>
+                <div class="chip" onclick="setTopicAndGo('Corporate Law')">Corporate Law</div>
+                <div class="chip" onclick="setTopicAndGo('Business Law')">Business Law</div>
+                <div class="chip" onclick="setTopicAndGo('Contract Law')">Contract Law</div>
+                <div class="chip" onclick="setTopicAndGo('Intellectual Property Law (IPR)')">Intellectual Property Law</div>
+                <div class="chip" onclick="setTopicAndGo('Cyber Law and IT Act')">Cyber Law</div>
+                <div class="chip" onclick="setTopicAndGo('International Law')">International Law</div>
+                <div class="chip" onclick="setTopicAndGo('Labour Law')">Labour Law</div>
+                <div class="chip" onclick="setTopicAndGo('Environmental Law')">Environmental Law</div>
+                <div class="chip" onclick="setTopicAndGo('Legal Drafting')">Legal Drafting</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Education & Teaching</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Educational Psychology')">Educational Psychology</div>
+                <div class="chip" onclick="setTopicAndGo('Teaching Methodology and Pedagogy')">Teaching Methodology</div>
+                <div class="chip" onclick="setTopicAndGo('Curriculum Development')">Curriculum Development</div>
+                <div class="chip" onclick="setTopicAndGo('Classroom Management Strategies')">Classroom Management</div>
+                <div class="chip" onclick="setTopicAndGo('Assessment and Evaluation Techniques')">Assessment Techniques</div>
+                <div class="chip" onclick="setTopicAndGo('Special Education Fundamentals')">Special Education</div>
+                <div class="chip" onclick="setTopicAndGo('Educational Technology')">Educational Technology</div>
+                <div class="chip" onclick="setTopicAndGo('Teacher Training Methods')">Teacher Training</div>
+                <div class="chip" onclick="setTopicAndGo('Guidance and Counselling')">Guidance and Counselling</div>
+                <div class="chip" onclick="setTopicAndGo('Early Childhood Education')">Early Childhood</div>
+                <div class="chip" onclick="setTopicAndGo('Higher Education Administration')">Higher Education</div>
+                <div class="chip" onclick="setTopicAndGo('Education Policy and Leadership')">Education Policy</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Design & Creative Arts</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Graphic Design Principles')">Graphic Design</div>
+                <div class="chip" onclick="setTopicAndGo('Visual Communication')">Visual Communication</div>
+                <div class="chip" onclick="setTopicAndGo('Animation Fundamentals')">Animation</div>
+                <div class="chip" onclick="setTopicAndGo('Photography Fundamentals')">Photography</div>
+                <div class="chip" onclick="setTopicAndGo('Film Making Basics')">Film Making</div>
+                <div class="chip" onclick="setTopicAndGo('Video Editing Techniques')">Video Editing</div>
+                <div class="chip" onclick="setTopicAndGo('Music Production Basics')">Music Production</div>
+                <div class="chip" onclick="setTopicAndGo('Fine Arts and Drawing')">Fine Arts</div>
+                <div class="chip" onclick="setTopicAndGo('Fashion Design Fundamentals')">Fashion Design</div>
+                <div class="chip" onclick="setTopicAndGo('Interior Design Basics')">Interior Design</div>
+                <div class="chip" onclick="setTopicAndGo('UI/UX Design Fundamentals')">UI/UX Design</div>
+                <div class="chip" onclick="setTopicAndGo('Figma UI Design')">Figma</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Competitive Exams (India)</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('UPSC Civil Services Exam Preparation')">UPSC Preparation</div>
+                <div class="chip" onclick="setTopicAndGo('MPSC State Services Preparation')">MPSC Preparation</div>
+                <div class="chip" onclick="setTopicAndGo('SSC CGL Exam Preparation')">SSC Exams</div>
+                <div class="chip" onclick="setTopicAndGo('IBPS Bank PO Exam Preparation')">Banking Exams</div>
+                <div class="chip" onclick="setTopicAndGo('RRB Railway Exam Preparation')">Railway Exams</div>
+                <div class="chip" onclick="setTopicAndGo('CAT MBA Entrance Exam Preparation')">CAT Preparation</div>
+                <div class="chip" onclick="setTopicAndGo('GATE Engineering Exam Preparation')">GATE Preparation</div>
+                <div class="chip" onclick="setTopicAndGo('NEET Medical Entrance Preparation')">NEET Preparation</div>
+                <div class="chip" onclick="setTopicAndGo('JEE Engineering Entrance Preparation')">JEE Preparation</div>
+                <div class="chip" onclick="setTopicAndGo('CLAT Law Entrance Preparation')">CLAT Preparation</div>
+                <div class="chip" onclick="setTopicAndGo('GRE Test Preparation')">GRE Preparation</div>
+                <div class="chip" onclick="setTopicAndGo('IELTS Exam Preparation')">IELTS Preparation</div>
+              </div>
+            </div>
+
+            <div class="explore-category">
+              <h3 class="explore-category-title">Professional Certifications</h3>
+              <div class="chips explore-chips">
+                <div class="chip" onclick="setTopicAndGo('Chartered Accountancy (CA) Foundation')">CA Foundation</div>
+                <div class="chip" onclick="setTopicAndGo('Chartered Accountancy (CA) Intermediate')">CA Intermediate</div>
+                <div class="chip" onclick="setTopicAndGo('Chartered Accountancy (CA) Final')">CA Final</div>
+                <div class="chip" onclick="setTopicAndGo('Company Secretary (CS) Executive')">CS Executive</div>
+                <div class="chip" onclick="setTopicAndGo('Company Secretary (CS) Professional')">CS Professional</div>
+                <div class="chip" onclick="setTopicAndGo('Cost and Management Accountancy (CMA)')">CMA</div>
+                <div class="chip" onclick="setTopicAndGo('Chartered Financial Analyst (CFA)')">CFA</div>
+                <div class="chip" onclick="setTopicAndGo('Financial Risk Manager (FRM)')">FRM</div>
+                <div class="chip" onclick="setTopicAndGo('PMP Project Management Certification')">PMP Certification</div>
+                <div class="chip" onclick="setTopicAndGo('Six Sigma Certification Preparation')">Six Sigma</div>
+                <div class="chip" onclick="setTopicAndGo('SAP ERP Training')">SAP Training</div>
+                <div class="chip" onclick="setTopicAndGo('Data Analytics Certification Training')">Data Analytics Certification</div>
+              </div>
+            </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
