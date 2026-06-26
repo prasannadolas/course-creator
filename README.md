@@ -3,8 +3,8 @@
 
 # EduGenesis: Autonomous AI Course Creator 🎓
 
-> **Kaggle "Agents for Good" Track Submission**
-> *Built entirely with Google Antigravity, Google ADK, FastAPI, Supabase & Gemini 2.5 Flash.*
+> **Kaggle "Agents for Good" Track Submission**<br/>
+> *Built entirely with Google Antigravity, Google ADK, FastAPI, Supabase & Gemini 2.5 Flash.*<br/>
 > **website:** [https://ai-course-creator-no1b.onrender.com/](https://ai-course-creator-no1b.onrender.com/)
 
 ## Project Overview
