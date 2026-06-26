@@ -8,6 +8,8 @@
 > **Website:** [https://ai-course-creator-no1b.onrender.com/](https://ai-course-creator-no1b.onrender.com/)
 
 ## Project Overview
+![alt text](diagram_folder/project_overview.png)
+
 
 ### The Real-World Problem
 
@@ -42,13 +44,22 @@ Instructional design is a multi-step workflow that requires different "modes of 
 * **Native Google Search Grounding:** The Curriculum Agent uses Google's native search tool to fact-check syllabus topics against up-to-date real-world data.
 
 ---
+### Archtecture Workflow
+![alt text](diagram_folder/Architecture.png)
+
+### ER-Diagram[how the workflow of each took place]
+![alt text](diagram_folder/Er-diagram.png)
 
 ### The Agent Workforce
 
 1. **Curriculum Architect:** Uses search tools to draft an up-to-date, structured syllabus.
+![alt text](diagram_folder/cirriculam.png)
 2. **Content Professor:** Takes the syllabus and writes highly detailed Markdown lessons for each module.
+![alt text](diagram_folder/content.png)
 3. **Review Agent (The Dean):** Evaluates, refines, and formats the professor's draft for clarity and tone.
+![alt text](diagram_folder/review.png)
 4. **Quiz Agent (Exam Setter):** Reads the finalized lesson and generates targeted multiple-choice quizzes to ensure knowledge retention.
+![alt text](diagram_folder/quiz.png)
 
 ### Project Structure
 
