@@ -47,17 +47,20 @@ Instructional design is a multi-step workflow that requires different "modes of 
 ### Archtecture Workflow
 ![alt text](diagram_folder/Architecture.png)
 
-### ER-Diagram[how the workflow of each took place]
+### ER-Diagram [How the workflow of each took place]
 ![alt text](diagram_folder/Er-diagram.png)
 
 ### The Agent Workforce
 
 1. **Curriculum Architect:** Uses search tools to draft an up-to-date, structured syllabus.
 ![alt text](diagram_folder/cirriculam.png)
+
 2. **Content Professor:** Takes the syllabus and writes highly detailed Markdown lessons for each module.
 ![alt text](diagram_folder/content.png)
+
 3. **Review Agent (The Dean):** Evaluates, refines, and formats the professor's draft for clarity and tone.
 ![alt text](diagram_folder/review.png)
+
 4. **Quiz Agent (Exam Setter):** Reads the finalized lesson and generates targeted multiple-choice quizzes to ensure knowledge retention.
 ![alt text](diagram_folder/quiz.png)
 
@@ -180,11 +183,3 @@ uvicorn server:app --reload
 EduGenesis is optimized for cloud deployment on platforms like Render. Ensure your build command is set to `pip install -r requirements.txt` and your start command is set to `uvicorn server:app --host 0.0.0.0 --port $PORT`. The implementation of the Supabase IPv4 Connection Pooler guarantees stable database connections even during multi-minute agent generation cycles.
 
 ---
-
-### About the Developer
-
-**Prasanna Dolas**
-
-*BSc Information Technology (2023-2026)*
-
-Software Developer | AI & ML | Data & Innovation
