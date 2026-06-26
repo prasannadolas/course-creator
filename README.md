@@ -5,7 +5,7 @@
 
 > **Kaggle "Agents for Good" Track Submission**<br/>
 > *Built entirely with Google Antigravity, Google ADK, FastAPI, Supabase & Gemini 2.5 Flash.*<br/>
-> **website:** [https://ai-course-creator-no1b.onrender.com/](https://ai-course-creator-no1b.onrender.com/)
+> **Website:** [https://ai-course-creator-no1b.onrender.com/](https://ai-course-creator-no1b.onrender.com/)
 
 ## Project Overview
 
@@ -23,7 +23,7 @@ EduGenesis is an autonomous **multi-agent system** designed to democratize educa
 
 ## Core Concept & Value
 
-### Why Agents? (The Core Innovation)
+### Why Agents?
 
 Instructional design is a multi-step workflow that requires different "modes of thinking." EduGenesis leverages a sequential multi-agent architecture to solve the limitations of standard LLMs:
 
@@ -52,7 +52,6 @@ Instructional design is a multi-step workflow that requires different "modes of 
 
 ### Project Structure
 
-### Project Structure
 ```text
 AI-COURSE-CREATOR/
 ├── course_agents/              # AI Agent Definitions
