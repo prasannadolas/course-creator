@@ -1,185 +1,180 @@
-# Autonomous AI Course Creator
 
-> **Using Google ADK, FastAPI & Gemini 2.5 Flash**
+---
+
+# EduGenesis: Autonomous AI Course Creator 🎓
+
+> **Kaggle "Agents for Good" Track Submission**
+> *Built entirely with Google Antigravity, Google ADK, FastAPI, Supabase & Gemini 2.5 Flash.*
+> **website:** [https://ai-course-creator-no1b.onrender.com/](https://ai-course-creator-no1b.onrender.com/)
 
 ## Project Overview
-![Project Overview](diagram_folder/project_overview.png)
 
-### Problem Statement
+### The Real-World Problem
 
-In today's rapidly evolving technological landscape, the demand for upskilling and high-quality educational content has never been higher. However, traditional instructional design remains a significant bottleneck. Creating a comprehensive course is a slow, manual, and resource-intensive process, often requiring teams of subject matter experts, writers, and editors weeks or months to plan, draft, review, and finalize content. This inability to scale content production efficiently leaves vast knowledge gaps unfilled in both corporate and academic settings.
+Access to high-quality, customized education is often a privilege tied to geography and wealth. Private tutoring is expensive, and static online courses rarely match a learner's exact needs or experience level.
 
-### Solution Statement
+While Large Language Models (LLMs) like Gemini or Claude exist, a standard single prompt cannot deliver a comprehensive, properly formatted curriculum in one go. When asked to write an entire course, single models suffer from "persona conflict" and context fatigue—resulting in hallucinations and shallow summaries instead of deep, structured learning.
 
-The **Autonomous AI Course Creator** is designed to solve this content bottleneck by automating the end-to-end instructional design process. It is not merely a text generation tool, but a sophisticated **multi-agent system** that orchestrates a digital workforce of specialized AI agents. By mimicking a human team—with dedicated agents for curriculum planning, technical writing, assessment creation, and quality control critiquing—the system can take a single topic prompt and autonomously generate a high-quality, multi-module course package (including lessons, interactive quizzes, and summaries) in minutes instead of weeks.
+### The Solution: EduGenesis
 
------
+EduGenesis is an autonomous **multi-agent system** designed to democratize education. It breaks the content bottleneck by orchestrating a digital workforce of specialized AI agents. By mimicking a human university faculty—with dedicated agents for curriculum planning, technical writing, quality control, and assessment creation—the platform transforms a simple prompt into a high-quality, multi-module course package in a matter of minutes.
+
+---
 
 ## Core Concept & Value
 
-### Why Agents? (Core Innovation)
+### Why Agents? (The Core Innovation)
 
-Traditional LLM approaches often involve a single prompt like "Write a course on Python," which typically results in shallow, hallucinated, or unstructured content. This project leverages a Multi-Agent Architecture because instructional design is a multi-step workflow that requires different "modes of thinking."
+Instructional design is a multi-step workflow that requires different "modes of thinking." EduGenesis leverages a sequential multi-agent architecture to solve the limitations of standard LLMs:
 
-  * **Separation of Concerns:** Just as a university has a separate Professor, Dean, and Exam Board, this system assigns distinct roles to different agents. This ensures that the entity creating the lesson is not the same one grading it, reducing bias and improving quality.
-  * **Iterative Refinement:** The output of one agent (e.g., the Syllabus) becomes the input for the next (e.g., the Content Writer). This chaining allows for deeper context retention and more coherent long-form content generation.
-  * **Scalability:** This architecture allows for "Modular Generation." Instead of hitting token limits by generating a whole book at once, the system loops through modules, generating deep-dive content without losing quality.
+* **Separation of Concerns:** Just as a university has a separate Professor, Dean, and Exam Board, this system assigns distinct roles to different agents. This ensures the entity creating the lesson is not the same one grading it.
+* **Iterative Refinement:** The output of one agent (e.g., the Syllabus) becomes the structured input for the next (e.g., the Content Writer).
+* **Agentic Chunking (Bypassing Token Limits):** Instead of generating a whole book at once, the system loops through individual modules. This prevents context fatigue, generating deep-dive content without losing quality.
 
 ### Key Features
 
-  * **Sequential Multi-Agent Workflow:** Implements a linear pipeline where a Curriculum Architect, Content Professor, Reviewer (Dean), and Examiner work in a strict sequence to produce high-quality outputs.
-  * **Real-Time SSE Streaming:** Utilizes Server-Sent Events (SSE) via FastAPI to stream agent activities, pipeline status, and generated markdown directly to the frontend in real-time.
-  * **Interactive MCQ Quizzes:** A custom frontend parser dynamically transforms raw AI markdown output into fully interactive Multiple Choice Question blocks with instant validation and feedback.
-  * **Free-Tier Resiliency:** Built-in error handling and pipeline throttling (`asyncio.sleep`) gracefully catch `429 Rate Limit` and `503 Server Overloaded` errors, ensuring successful execution even on Google's free tier.
-  * **Native Google Search Grounding:** The Curriculum Agent is equipped with Google's native search tool, enabling it to fact-check syllabus topics against real-time trends and data.
-  * **Dual Interface (Web & CLI):**
-      * *FastAPI Web App:* A polished, responsive HTML/CSS/JS interface for end-users to generate and export professional Markdown courses.
-      * *Developer CLI:* A robust command-line tool for debugging and observing agent "thought processes."
+* **Sequential Multi-Agent Workflow:** A strict linear pipeline utilizing a Curriculum Architect, Content Professor, Reviewer (Dean), and Exam Setter.
+* **Real-Time SSE Streaming:** Utilizes Server-Sent Events (SSE) via FastAPI to stream agent state changes, pipeline progress, and markdown directly to the frontend in real-time.
+* **Interactive Assessments:** A custom frontend parser dynamically transforms raw AI markdown into fully interactive Multiple Choice Quizzes with instant validation.
+* **Cloud-Native Persistence:** Integrates with a **Supabase PostgreSQL** database using an IPv4 Connection Pooler, seamlessly saving generated courses to the user's history ("My Courses" tab).
+* **Course Catalog (Explore Topics):** Users can browse and select from pre-defined categories like Tech, AI, Science, Arts, and Commerce to instantly generate tailored learning paths.
+* **Export to PDF:** Instantly download generated markdown courses as formatted, local PDF files.
+* **Native Google Search Grounding:** The Curriculum Agent uses Google's native search tool to fact-check syllabus topics against up-to-date real-world data.
 
------
+---
 
-## Architecture
+### The Agent Workforce
 
-## Architectural Diagram
-![Architecture Diagram](diagram_folder/Architecture.png) 
+1. **Curriculum Architect:** Uses search tools to draft an up-to-date, structured syllabus.
+2. **Content Professor:** Takes the syllabus and writes highly detailed Markdown lessons for each module.
+3. **Review Agent (The Dean):** Evaluates, refines, and formats the professor's draft for clarity and tone.
+4. **Quiz Agent (Exam Setter):** Reads the finalized lesson and generates targeted multiple-choice quizzes to ensure knowledge retention.
 
-### Design Philosophy
-
-The architecture of the Autonomous AI Course Creator is built on the principles of Modularity, Orchestration, and Reliability.
-
-  * **Agentic Modularity:** Each agent is a self-contained unit with a specific "persona" and "toolset." 
-  * **Centralized Orchestration:** Rather than agents talking chaotically to each other, a central Runner (powered by Google ADK) manages the state and flow in an asynchronous FastAPI backend.
-  * **Stateless Execution with State Injection:** While the application uses `InMemorySessionService` for speed during a session, the architecture is designed to be stateless between runs. 
-
-### High-Level Component Breakdown
-
-**1. The Orchestrator (FastAPI Server)**
-The "brain" of the operation. It initializes the session, injects the user's prompt, and yields SSE events to the frontend. It manages the Turbo Modular Loop, iterating through the syllabus one module at a time.
-
-**2. The Agent Workforce**
-  * **Curriculum Agent:** Uses Google Search Grounding to research the topic and outputs a structured JSON-like list of modules.
-  * **Content Agent (Professor):** Takes a specific module title and writes a deep-dive lesson with code examples.
-  * **Review Agent (The Dean):** Acts as a quality gate. It rewrites the Professor's draft for clarity, formatting, and tone.
-  * **Quiz Agent (Examiner):** Reads the final lesson and generates an assessment.
-
-**3. The Presentation Layer**
-  * **Vanilla JS/HTML/CSS Frontend:** A lightweight, lightning-fast client that parses markdown, renders interactive UI elements, and handles file exports without heavy frontend frameworks.
-
- ![ER Diagram](diagram_folder/Er-diagram.png)
+### Project Structure
 
 ### Project Structure
 ```text
 AI-COURSE-CREATOR/
-├── course_agents/          # AI Agent Definitions
-│   ├── content_agent.py    # Professor: Writes detailed lessons
-│   ├── curriculum_agent.py # Architect: Plans the syllabus structure
-│   ├── quiz_agent.py       # Examiner: Generates assessments
-│   └── review_agent.py     # Dean: Critiques and polishes content
+├── course_agents/              # AI Agent Definitions
+│   ├── content_agent.py        # Professor: Writes detailed lessons
+│   ├── curriculum_agent.py     # Architect: Plans the syllabus structure
+│   ├── quiz_agent.py           # Examiner: Generates assessments
+│   └── review_agent.py         # Dean: Critiques and polishes content
 │
-├── static/                 # Frontend Assets
-│   └── ai_course_creator.html  # Main interactive web UI
+├── course_outputs/             # Local storage for generated markdown/PDF courses
+├── diagram_folder/             # Architecture diagrams and README assets
 │
-├── tools/                  # Helper Tools
-│   ├── file_writer_tool.py # Handles file saving operations
-│   └── search_tool.py      # External search utility
+├── static/                     # Frontend Assets & Web UI
+│   ├── partials/               # Reusable HTML components
+│   ├── ai_course_creator.html  # Main course generation dashboard
+│   ├── explore-topics.js/css   # Interactive course catalog logic & styling
+│   ├── login.html              # User authentication UI
+│   ├── my-courses.js/css       # Saved course history logic & styling
+│   ├── register.html           # User registration UI
+│   ├── script.js               # Core SSE streaming and frontend logic
+│   └── style.css               # Global application styling
 │
-├── utils/                  # Configuration & Utilities
-│   ├── gemini_client.py    # Gemini model wrapper (2.5-flash / 2.0-flash)
-│   └── logger.py           # System logging setup
+├── tools/                      # External Tools for Agents
+│   ├── file_writer_tool.py     # Saves agent outputs to local files
+│   └── search_tool.py          # Google Search Grounding for syllabus planning
 │
-├── .env                    # API Keys (Excluded from git)
-├── .gitignore              # Git ignore rules
-├── config.py               # Central config (Model selection)
-├── requirements.txt        # Python dependencies
-├── cli_runner.py           # CLI entry point (Developer Mode)
-└── server.py               # FastAPI Backend & SSE Pipeline Orchestrator
-```
+├── utils/                      # Helper Utilities
+│   ├── gemini_client.py        # Gemini API connection wrapper
+│   └── logger.py               # System activity and error logging
+│
+├── .env                        # Environment variables (API Keys, DB URLs)
+├── .gitignore                  # Git tracking exclusions
+├── check_models.py             # Utility to verify Google API access
+├── cli_runner.py               # Developer CLI for testing agents locally
+├── config.py                   # Central system configuration
+├── database.py                 # Supabase PostgreSQL / SQLAlchemy ORM setup
+├── orchestrai.db               # Local SQLite database (Dev environment fallback)
+├── requirements.txt            # Python package dependencies
+└── server.py                   # FastAPI Backend & SSE Pipeline Orchestrator
 
------
+---
 
-## Workflow
-![Workflow Diagram](diagram_folder/Workflow.png)
+## Tech Stack & Tools
 
-The system follows a structured, automated multi-agent workflow:
+* **AI & Orchestration:** Google Agent Development Kit (ADK), Google Gemini API (2.5-Flash).
+* **Backend:** Python, FastAPI, Uvicorn, SSE-Starlette.
+* **Database & Cloud:** Supabase (PostgreSQL), Render (Hosting).
+* **Development Environment:** Google Antigravity.
 
-1.  **Initialization:** A user submits a topic prompt via the Web UI.
-2.  **Planning Phase:** The Curriculum Architect generates a syllabus outline. The frontend renders this structure dynamically.
-3.  **Modular Execution Loop:** The FastAPI server orchestrates the processing of each module:
-      * *Drafting:* The Content Professor writes a detailed first draft.
-      * *Critique & Polish:* The Reviewer takes the draft and produces a "Final Polish" version.
-      * *Assessment:* The Examiner reads the final lesson and generates a quiz.
-4.  **UI Parsing:** The frontend intercepts the text stream, converting plain text lessons into readable cards and raw quiz text into interactive MCQ buttons.
-5.  **Finalization:** The user can instantly download the entire curated course as a formatted `.md` file.
+---
 
------
-
-## Essential Tools and Utilities
-
-**Core AI & Orchestration**
-  * **Google Gemini API (Model: gemini-2.5-flash):** The central "brain" chosen for its high-speed inference.
-  * **Google Agent Development Kit (ADK):** The foundational framework for building and managing the multi-agent system.
-
-**Backend & Web Delivery**
-  * **FastAPI & Uvicorn:** Provides a high-performance asynchronous backend.
-  * **SSE-Starlette:** Powers the Server-Sent Events for real-time frontend updates without websockets.
-
-**DevOps & Security**
-  * **python-dotenv:** Ensures secure management of API keys.
-
------
-
-## Installation
+## Local Installation & Setup
 
 ### Prerequisites
 
-  * Python 3.10+
-  * Google AI Studio API Key
-  * Git
+* Python 3.10+
+* Google Gemini API Key
+* Supabase PostgreSQL Database URL
 
 ### Step-by-Step Setup
 
 **1. Clone the Repository**
+
 ```bash
-git clone [https://github.com/prasannadolas/ai-course-creator](https://github.com/prasannadolas/ai-course-creator)
+git clone https://github.com/prasannadolas/course-creator.git
 cd ai-course-creator
+
 ```
 
-**2. Set Up Virtual Environment**
-*Windows:*
-```bash
+**2. Set Up & Activate Virtual Environment**
+*Windows (PowerShell):*
+
+```powershell
 python -m venv venv
-.\venv\Scripts\activate
+.\venv\Scripts\Activate
+
 ```
+
 *macOS/Linux:*
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
+
 ```
 
 **3. Install Dependencies**
+
 ```bash
 pip install -r requirements.txt
+
 ```
 
-**4. Configure Environment**
-Create a `.env` file in the root directory and add your Google API key:
+**4. Configure Environment Variables**
+Create a `.env` file in the root directory and add your keys:
+
 ```text
-GOOGLE_API_KEY=your_actual_google_api_key
+GEMINI_API_KEY=your_google_api_key_here
+DATABASE_URL=your_supabase_ipv4_connection_pooler_url_here
+
 ```
 
-### Running the Application
+**5. Run the FastAPI Server**
 
-**Run the FastAPI Server:**
 ```bash
 uvicorn server:app --reload
+
 ```
 
-*Access the interactive Course Creator UI at `http://127.0.0.1:8000`*
+*Once booted, access the interactive Course Creator UI at `[http://127.0.0.1:8000](http://127.0.0.1:8000)`.*
 
------
+---
 
-## Conclusion & Value
+## Deployment
 
-The **Autonomous AI Course Creator** proves that complex, knowledge-intensive tasks like instructional design can be effectively automated through a sophisticated multi-agent system architecture. By grounding the AI with real-time search data and implementing adversarial feedback loops, we have built a system that balances the speed of AI with the quality control of human oversight.
+EduGenesis is optimized for cloud deployment on platforms like Render. Ensure your build command is set to `pip install -r requirements.txt` and your start command is set to `uvicorn server:app --host 0.0.0.0 --port $PORT`. The implementation of the Supabase IPv4 Connection Pooler guarantees stable database connections even during multi-minute agent generation cycles.
 
-For Learning & Development (L&D) teams, educators, and EdTech platforms, this tool transforms content creation from a slow, expensive bottleneck into a scalable utility. It offers a significant acceleration in speed-to-market and democratizes access to rapid, high-quality curriculum development.
+---
+
+### About the Developer
+
+**Prasanna Dolas**
+
+*BSc Information Technology (2023-2026)*
+
+Software Developer | AI & ML | Data & Innovation
