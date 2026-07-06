@@ -22,5 +22,6 @@ Thumbs.db
 # IDE and editor files
 # VS Code
 .vscode/
+
 # Intellij/PyCharm
 .idea/
