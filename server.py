@@ -30,7 +30,6 @@ from course_agents.curriculum_agent import curriculum_agent
 from course_agents.content_agent import content_agent
 from course_agents.review_agent import review_agent
 from course_agents.quiz_agent import quiz_agent
-from course_agents.visualizer_agent import visualizer_agent 
 
 # Password hashing setup
 SECRET_KEY = JWT_SECRET_KEY
@@ -345,35 +344,3 @@ def save_course(course: CourseCreate, db: Session = Depends(get_db), current_use
     db.refresh(new_course)
     
     return {"ok": True, "course_id": new_course.id}
-    
-@app.get("/api/visualize")
-async def generate_visualization(concept: str, current_user: User = Depends(get_current_user)):
-    """Lazily generates an interactive HTML/JS sandbox for a specific concept."""
-    try:
-        session_svc = InMemorySessionService()
-        
-        # We recycle your existing content_agent but give it a strict coding prompt
-        runner = Runner(agent=visualizer_agent, session_service=session_svc, app_name="course_creator")        
-        vis_prompt = (
-            f"You are an expert creative web developer. The user needs to understand the concept: '{concept}'. "
-            "Write a standalone HTML snippet containing embedded CSS and JavaScript to visually and interactively explain this concept. "
-            "Use HTML5 Canvas, SVG, or interactive DOM elements. Keep it beautiful, modern, and educational. "
-            "CRITICAL RULES: \n"
-            "1. Return ONLY the raw, executable HTML code.\n"
-            "2. Do NOT wrap the response in markdown blocks (e.g., no ```html). Just the code.\n"
-            "3. Ensure the styling looks good inside a 800x600 container with a light #f5f4f0 background."
-        )
-        
-        raw_code = ""
-        async for event in runner.run_async(session_id=f"vis_{concept}", user_id=str(current_user.id), new_message=wrap_message(vis_prompt)):
-            if event.is_final_response():
-                raw_code = extract_text(event) or ""
-                
-        # Failsafe: Strip markdown tags if the AI disobeys rule 2
-        clean_code = raw_code.replace("```html", "").replace("```javascript", "").replace("```", "").strip()
-        
-        return {"ok": True, "html": clean_code}
-        
-    except Exception as e:
-        print(f"Sandbox generation failed: {e}")
-        return {"ok": False, "error": "Failed to generate sandbox."}
