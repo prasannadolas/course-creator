@@ -1,15 +1,3 @@
-/* ════════════════════════════════════════════════════════════════════════
-   MY COURSES + COURSE READER MODAL STYLES
-   Markup:  partials/my-courses-modal.html
-   Logic:   js/my-courses.js
-   Depends on shared tokens/base classes from style.css: CSS custom
-   properties (--accent, --border, --radius-*, etc.) and the generic
-   .modal-overlay / .modal-card / .modal-header / .modal-title / .modal-close
-   rules, which stay in style.css since every modal in the app uses them.
-   ════════════════════════════════════════════════════════════════════════ */
-
-/* ── HISTORY MODAL STYLES (my-courses-grid cards) ── */
-/* ── HISTORY MODAL STYLES ── */
 .history-card {
   position: relative; /* CRITICAL: Keeps the button inside the card */
   border: 1px solid var(--border);

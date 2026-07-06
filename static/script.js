@@ -10,7 +10,6 @@ let eventSource = null;
 const API = ""; 
 window._fullCourseContent = '';
 
-// ── AUTHENTICATION & HISTORY LOGIC ─────────────────────────────────────────
 // ── AUTHENTICATION & HEADER LOGIC ─────────────────────────────────────────
 function checkAuthUI() {
   const token = localStorage.getItem("orchestrai_token");
@@ -124,9 +123,6 @@ window.onpageshow = function(event) {
 if (window.location.pathname === '/login' && localStorage.getItem("orchestrai_token")) {
     window.location.href = "/";
 }
-
-
-
 
 
 // Check UI on page load
@@ -307,8 +303,7 @@ function startGeneration(forceLast = false) {
     showLoginModal(); // Pop up the container!
     return; // Stop the generation process entirely
   }
-  // -----------------------------------
-
+  
   if (isRunning) return;
   dismissError();
 

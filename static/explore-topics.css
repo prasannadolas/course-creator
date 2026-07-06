@@ -1,18 +1,3 @@
-/* ════════════════════════════════════════════════════════════════════════
-   EXPLORE TOPICS LIBRARY MODAL STYLES
-   Markup:  partials/explore-topics-modal.html
-   Logic:   js/explore-topics.js
-   Depends on shared tokens/base classes from style.css: CSS custom
-   properties, the generic .modal-overlay/.modal-card/.modal-header rules,
-   AND the base .chip/.chips classes (those stay in style.css because the
-   home panel's "Popular topics" chips use them too — this file only
-   contains the .explore-chips .chip override for the modal's button grid).
-   ════════════════════════════════════════════════════════════════════════ */
-
-/* ─────────────────────────────────────────────────────────
-   EXPLORE TOPICS LIBRARY MODAL (SPLIT DIRECTORY + BUTTON GRID)
-───────────────────────────────────────────────────────── */
-
 #explore-modal .modal-card {
   width: 95%;
   max-width: 1400px;

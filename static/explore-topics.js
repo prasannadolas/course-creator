@@ -1,13 +1,3 @@
-// ════════════════════════════════════════════════════════════════════════
-// EXPLORE TOPICS — modal open/close, search filter, topic selection
-// Markup lives in: partials/explore-topics-modal.html
-// Depends on globals from script.js: $(id), startGeneration()
-// Note: setTopicAndGo() is also called by the "Popular topics" chips on
-// the home panel (panel-home), not just from inside this modal — kept
-// here since it's the topic-selection entry point, but it's shared.
-// ════════════════════════════════════════════════════════════════════════
-
-// ── EXPLORE TOPICS LIBRARY MODAL LOGIC ──────────────────────────────────────
 
 function openExploreModal() {
   const modal = $('explore-modal');

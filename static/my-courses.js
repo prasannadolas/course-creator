@@ -1,15 +1,3 @@
-// ════════════════════════════════════════════════════════════════════════
-// MY COURSES — saved-course grid, search/filter, and Course Reader modal
-// Markup lives in: partials/my-courses-modal.html
-// Depends on globals from script.js: $(id), escapeHtml(), marked,
-// generatePDFHTML(), executePDFDownload()
-//
-// Cleanup note: the original script.js had a duplicate, dead copy of
-// viewCloudCourse() (it called an undefined closeHistorySidebar() and was
-// silently overridden by the second declaration below it). Only the live,
-// working version is kept here.
-// ════════════════════════════════════════════════════════════════════════
-
 // ── MY COURSES GRID MODAL LOGIC ────────────────────────────────────────────
 async function openMyCoursesModal() {
   const modal = $('my-courses-modal');

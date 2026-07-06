@@ -644,7 +644,6 @@ button, input, textarea, select { font: inherit; }
 .modal-work-list li { font-size: 14px; color: var(--text-secondary); padding-left: 20px; position: relative; margin-bottom: 8px; }
 .modal-work-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
 
-/* Markdown Content Styling inside Lessons */
 .lesson-card-body h1, .lesson-card-body h2, .lesson-card-body h3, .lesson-card-body h4 {
   color: var(--text-primary); margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 700; line-height: 1.3;
 }

@@ -68,7 +68,6 @@
       </div>
     </div>
 
-<!-- Explore Topics modal injected here at runtime — see partials/explore-topics-modal.html -->
 <div id="explore-topics-mount"></div>
 
 
@@ -327,7 +326,6 @@
   </main>
 </div>
 
-<!-- My Courses + Course Reader modals injected here at runtime — see partials/my-courses-modal.html -->
 <div id="my-courses-mount"></div>
 
 <div class="modal-overlay" id="login-required-modal" onclick="closeLoginModal(event)">
@@ -388,10 +386,6 @@
 <script src="/static/my-courses.js"></script>
 
 <script>
-  // Loads the Explore Topics and My Courses modal markup into their mount
-  // points. Both fetches run in parallel; the page's own scripts above are
-  // already loaded by the time this runs, so the onclick handlers in the
-  // injected markup resolve fine the moment a user clicks.
   (function loadComponents() {
     const mounts = [
       ['explore-topics-mount', '/static/partials/explore-topics-modal.html'],
