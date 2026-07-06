@@ -1,7 +1,4 @@
 
----
-
-```markdown
 # EduGenesis: Autonomous AI Course Creator
 
 > **Kaggle "Agents for Good" Track Submission**  
