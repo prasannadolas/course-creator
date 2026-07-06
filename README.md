@@ -64,7 +64,8 @@ Instructional design is a multi-step workflow that requires different "modes of 
 4. **Quiz Agent (Exam Setter):** Reads the finalized lesson and generates targeted multiple-choice quizzes to ensure knowledge retention.
 ![alt text](diagram_folder/quiz.png)
 
-```markdown
+
+
 ### Project Structure
 
 ```text
@@ -75,6 +76,7 @@ AI-COURSE-CREATOR/
 │   ├── quiz_agent.py           # Examiner: Generates assessments
 │   └── review_agent.py         # Dean: Critiques and polishes content
 │
+├── course_outputs/             # Local storage for generated markdown/PDF courses
 ├── diagram_folder/             # Architecture diagrams and README assets
 │
 ├── static/                     # Frontend Assets & Web UI
@@ -178,9 +180,3 @@ uvicorn server:app --reload
 *Once booted, access the interactive Course Creator UI at `http://127.0.0.1:8000`.*
 
 ```
-
-## Deployment
-
-EduGenesis is optimized for cloud deployment on platforms like Render. Ensure your build command is set to `pip install -r requirements.txt` and your start command is set to `uvicorn server:app --host 0.0.0.0 --port $PORT`. The implementation of the Supabase IPv4 Connection Pooler guarantees stable database connections even during multi-minute agent generation cycles.
-
----
