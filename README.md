@@ -1,7 +1,7 @@
 
 ---
 
-# EduGenesis: Autonomous AI Course Creator 🎓
+# EduGenesis: Autonomous AI Course Creator
 
 > **Kaggle "Agents for Good" Track Submission**<br/>
 > *Built entirely with Google Antigravity, Google ADK, FastAPI, Supabase & Gemini 2.5 Flash.*<br/>
@@ -64,6 +64,7 @@ Instructional design is a multi-step workflow that requires different "modes of 
 4. **Quiz Agent (Exam Setter):** Reads the finalized lesson and generates targeted multiple-choice quizzes to ensure knowledge retention.
 ![alt text](diagram_folder/quiz.png)
 
+```markdown
 ### Project Structure
 
 ```text
@@ -74,7 +75,6 @@ AI-COURSE-CREATOR/
 │   ├── quiz_agent.py           # Examiner: Generates assessments
 │   └── review_agent.py         # Dean: Critiques and polishes content
 │
-├── course_outputs/             # Local storage for generated markdown/PDF courses
 ├── diagram_folder/             # Architecture diagrams and README assets
 │
 ├── static/                     # Frontend Assets & Web UI
@@ -97,13 +97,12 @@ AI-COURSE-CREATOR/
 │
 ├── .env                        # Environment variables (API Keys, DB URLs)
 ├── .gitignore                  # Git tracking exclusions
-├── check_models.py             # Utility to verify Google API access
-├── cli_runner.py               # Developer CLI for testing agents locally
 ├── config.py                   # Central system configuration
 ├── database.py                 # Supabase PostgreSQL / SQLAlchemy ORM setup
-├── orchestrai.db               # Local SQLite database (Dev environment fallback)
 ├── requirements.txt            # Python package dependencies
 └── server.py                   # FastAPI Backend & SSE Pipeline Orchestrator
+
+```
 
 ---
 
@@ -129,12 +128,13 @@ AI-COURSE-CREATOR/
 **1. Clone the Repository**
 
 ```bash
-git clone https://github.com/prasannadolas/course-creator.git
-cd ai-course-creator
+git clone [https://github.com/prasannadolas/course-creator.git](https://github.com/prasannadolas/course-creator.git)
+cd course-creator
 
 ```
 
 **2. Set Up & Activate Virtual Environment**
+
 *Windows (PowerShell):*
 
 ```powershell
@@ -159,6 +159,7 @@ pip install -r requirements.txt
 ```
 
 **4. Configure Environment Variables**
+
 Create a `.env` file in the root directory and add your keys:
 
 ```text
@@ -174,9 +175,9 @@ uvicorn server:app --reload
 
 ```
 
-*Once booted, access the interactive Course Creator UI at `[http://127.0.0.1:8000](http://127.0.0.1:8000)`.*
+*Once booted, access the interactive Course Creator UI at `http://127.0.0.1:8000`.*
 
----
+```
 
 ## Deployment
 
