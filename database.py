@@ -5,19 +5,15 @@ import datetime
 
 # ── 1. SUPABASE CONNECTION ──
 if os.environ.get("RENDER"):
-    # PRODUCTION (Render): Using the IPv4 Connection Pooler for deployment
-    # ⚠️ IMPORTANT: If Render crashes, you must replace the URL below with the EXACT "Connection Pooler" URI from your Supabase Dashboard!
     DATABASE_URL = "postgresql://postgres.ouscmjufewdqqfgkqewm:EduGenesis1234567891@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
 else:
-    # LOCAL (VS Code): Using the Direct Connection to avoid the tenant bug locally
     DATABASE_URL = "postgresql://postgres:EduGenesis1234567891@db.ouscmjufewdqqfgkqewm.supabase.co:5432/postgres"
 
 # ── 2. ENGINE CONFIGURATION ──
-# We removed the SQLite fallback entirely. Your app will strictly use Supabase now!
 engine = create_engine(
     DATABASE_URL,
-    pool_pre_ping=True,   # Checks if connection is alive before trying to save
-    pool_recycle=300      # Refreshes the connection every 5 minutes
+    pool_pre_ping=True,  
+    pool_recycle=300   
 )
 print("🚀 Connected to Cloud Database (Supabase)")
 
@@ -45,7 +41,6 @@ class Course(Base):
 
     owner = relationship("User", back_populates="courses")
 
-# Create the tables in the Supabase cloud automatically
 Base.metadata.create_all(bind=engine)
 
 def get_db():
