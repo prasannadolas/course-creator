@@ -11,7 +11,6 @@ def save_course_to_file(topic: str, content: str):
     Returns:
         str: A success message indicating where the file was saved.
     """
-    # Create a safe filename (replace spaces with underscores)
     safe_filename = topic.replace(" ", "_").replace("/", "-")
     filename = f"{safe_filename}_Course.md"
     
