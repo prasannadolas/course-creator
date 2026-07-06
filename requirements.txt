@@ -16,4 +16,3 @@ pyjwt
 python-multipart
 Deprecated
 psycopg2-binary
-
