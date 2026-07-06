@@ -12,9 +12,10 @@ content_agent = LlmAgent(
     
     YOUR GOAL:
     Write the detailed educational content for the course.
-    
+
     CONTEXT:
     You will receive a Syllabus from the previous agent in your history.
+
     
     ACTION:
     - Go through EACH module in the syllabus.
