@@ -194,6 +194,3 @@ EduGenesis is optimized for cloud deployment on platforms like **Render**. Ensur
 
 The implementation of the Supabase IPv4 Connection Pooler guarantees highly stable, continuous database connections even during multi-minute, complex agent generation cycles.
 
-```
-
-```
