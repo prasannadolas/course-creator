@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduGenesis| Forging Knowledge Through Autonomous Agents.</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a6b4a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 4 C 6 4 4 8 4 11.5 C 4 13.5 5.5 14.5 5.5 16 C 5.5 18 7.5 19 10 19 L 14 19 C 16.5 19 18.5 18 18.5 16 C 18.5 14.5 20 13.5 20 11.5 C 20 8 18 4 12 4 Z' /><path d='M12 4 V 6' /><path d='M13.5 7 L 9.5 12 H 12.5 L 11 17 L 15.5 11 H 12.5 Z' fill='%231a6b4a' stroke='none'/></svg>">  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css?v=4">  
+  <link rel="stylesheet" href="/static/explore-topics.css?v=1">
+  <link rel="stylesheet" href="/static/my-courses.css?v=1">
+</head>
+<body>
+<div class="app">
+  <main class="main">
+    
+    <div class="topbar">
+      <div class="topbar-left" style="cursor: pointer;" onclick="window.location.reload();" title="EduGenesis Home">
+        <div class="brand-icon">
+         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 4 C 6 4 4 8 4 11.5 C 4 13.5 5.5 14.5 5.5 16 C 5.5 18 7.5 19 10 19 L 14 19 C 16.5 19 18.5 18 18.5 16 C 18.5 14.5 20 13.5 20 11.5 C 20 8 18 4 12 4 Z" />
+            <path d="M12 4 V 6" />
+            <path d="M13.5 7 L 9.5 12 H 12.5 L 11 17 L 15.5 11 H 12.5 Z" fill="currentColor" stroke="none" />
+          </svg>
+        </div>
+        <span class="topbar-title" id="topbar-title">EduGenesis</span>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="btn btn-secondary" id="nav-login-btn" onclick="window.location.href='/login'">Sign in</button>
+        <button class="btn btn-primary" id="nav-register-btn" onclick="window.location.href='/register'">Sign up for free</button>
+        
+        <div id="user-menu" style="display: none; align-items: center; gap: 12px; position: relative;">
+          <button class="btn btn-secondary" style="padding: 8px 16px;" onclick="openExploreModal()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+            </svg>
+            Explore Topics
+          </button>
+          
+          <button class="btn btn-primary" style="padding: 8px 16px;" onclick="openMyCoursesModal()">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+          </svg>
+          My Courses
+        </button>
+
+          <button class="profile-pill" onclick="toggleHeaderUserPopup()" style="background: var(--surface); border: 1px solid var(--border); padding: 4px 12px 4px 4px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s;">
+            <div class="avatar" id="header-avatar" style="width: 28px; height: 28px; font-size: 12px; margin: 0;">U</div>
+            <span id="header-user-name" style="font-weight: 600; font-size: 14px; color: var(--text-primary);">User</span>
+          </button>
+
+         <div id="header-user-popup" style="display: none; position: absolute; top: calc(100% + 12px); right: 0; width: 260px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-card); z-index: 100;">
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 15px;" id="popup-header-name">User Name</div>
+          <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px; word-break: break-all;" id="popup-header-email">user@email.com</div>
+          
+          <button class="popup-signout-btn" onclick="confirmLogout()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+            </svg>
+            Sign Out
+          </button>
+        </div>
+
+        </div>
+      </div>
+    </div>
+
+<div id="explore-topics-mount"></div>
+
+
+    <div class="content">
+      
+      <div class="panel active" id="panel-home">
+        <div class="create-hero">
+          <div class="hero-sparkles">
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+          </div>
+          <h1 class="hero-title">Build courses with <em>Agentic Loops</em></h1>
+         <p class="hero-sub">Describe a topic and a four-stage autonomous agent pipeline will synthesize a complete curriculum.</p>
+
+          <div class="create-card" id="create-card">
+            <textarea class="create-textarea" id="topic-input" rows="4" maxlength="180" placeholder="Describe the course you would like to create..."></textarea>
+            <div class="create-actions">
+              <div class="create-actions-left">
+                <select class="audience-select" id="audience-select">
+                  <option value="Beginners">For Beginners</option>
+                  <option value="Intermediate">For Intermediate</option>
+                  <option value="Advanced">For Advanced</option>
+                </select>
+              </div>
+              <div class="create-actions-right">
+                <button class="submit-btn" id="submit-btn" onclick="startGeneration()" aria-label="Generate course">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="quick-topics">
+            <div class="quick-topics-label">Popular topics</div>
+            <div class="chips">
+              <div class="chip" onclick="setTopicAndGo('Machine Learning Fundamentals')">Machine Learning</div>
+              <div class="chip" onclick="setTopicAndGo('Full-Stack MERN Development')">MERN Stack</div>
+              <div class="chip" onclick="setTopicAndGo('Introduction to LLMs and RAG')">LLMs &amp; RAG</div>
+              <div class="chip" onclick="setTopicAndGo('Building Agentic Workflows')">Agentic Workflows</div>
+              <div class="chip" onclick="setTopicAndGo('Blockchain Fundamentals')">Blockchain</div>
+              <div class="chip" onclick="setTopicAndGo('FastAPI for Backend Development')">FastAPI</div>
+              <div class="chip" onclick="setTopicAndGo('Data Science Foundations')">Data Science</div>
+              <div class="chip" onclick="setTopicAndGo('Cybersecurity Essentials')">Cybersecurity</div>
+              <div class="chip" onclick="setTopicAndGo('AWS Architecture Fundamentals')">AWS Architecture</div>
+              <div class="chip" onclick="setTopicAndGo('Prompt Engineering for AI')">Prompt Engineering</div>
+              <div class="chip" onclick="setTopicAndGo('Generative AI Applications')">Generative AI</div>
+              <div class="chip" onclick="setTopicAndGo('Natural Language Processing')">NLP</div>
+              <div class="chip" onclick="setTopicAndGo('Computer Vision Fundamentals')">Computer Vision</div>
+              <div class="chip" onclick="setTopicAndGo('Advanced Cloud Computing')">Cloud Computing</div>
+              <div class="chip" onclick="setTopicAndGo('DevOps, Docker and Kubernetes')">DevOps</div>
+              <div class="chip" onclick="setTopicAndGo('RestAPI for Backend Development')">RestAPI</div>
+              <div class="chip" onclick="setTopicAndGo('Mobile App Development')">Mobile Development</div>
+              <div class="chip" onclick="setTopicAndGo('Android App Development')">Android</div>
+              <div class="chip" onclick="setTopicAndGo('Flutter App Development')">Flutter</div>
+              <div class="chip" onclick="setTopicAndGo('UI/UX Design Fundamentals')">UI/UX Design</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hidden-compat">
+          <button id="demo-fill-btn" type="button">Sample Topic</button>
+          <button id="clear-btn" type="button" onclick="resetAll()">Clear</button>
+          <select id="format-select">
+            <option value="course" selected>Course</option>
+            <option value="bootcamp">Bootcamp</option>
+            <option value="roadmap">Roadmap</option>
+            <option value="workshop">Workshop</option>
+          </select>
+          <span id="char-counter"></span>
+          <div class="status-chip status-ready" id="home-status">Ready to generate</div>
+        </div>
+
+        <div class="error-banner" id="error-banner" role="alert" aria-live="polite">
+          <div class="error-copy">
+            <div class="error-title" id="error-title">Something went wrong</div>
+            <div class="error-sub" id="error-sub">Please try again.</div>
+          </div>
+          <div class="error-actions">
+            <button class="btn btn-secondary" onclick="dismissError()">Dismiss</button>
+            <button class="btn btn-primary" onclick="retryLast()">Retry</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-pipeline">
+        <div class="pipeline-header">
+          <button class="pipeline-back" onclick="showPanel('home')" aria-label="Back to home">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+          </button>
+          <div class="pipeline-title-block">
+            <div class="pipeline-course-title" id="pipeline-course-title">Generating course…</div>
+            <div class="pipeline-subtitle" id="pipeline-subtitle">Multi-agent pipeline running</div>
+            <div class="pipeline-meta">
+              <span class="meta-badge" id="meta-audience">Audience: Beginners</span>
+              <span class="meta-badge" id="meta-format">Format: Course</span>
+              <span class="meta-badge" id="meta-mode">Mode: Live Pipeline</span>
+            </div>
+          </div>
+          <div class="pipeline-badge running" id="pipeline-badge">
+            <div class="pulse-dot" id="pulse-dot"></div>
+            <span id="badge-text">Running</span>
+          </div>
+        </div>
+
+        <div class="global-progress">
+          <div class="global-progress-info">
+            <div class="global-progress-label" id="progress-label">Connecting to backend agents...</div>
+            <div class="global-progress-bar"><div class="global-progress-fill" id="progress-fill" style="width:0%"></div></div>
+          </div>
+          <div class="global-progress-pct" id="progress-pct">0%</div>
+        </div>
+
+        <div class="stages-row">
+          <div class="stage-card pending" id="stage-0">
+            <div class="stage-indicator pending-ind" id="stage-ind-0">1</div>
+            <div class="stage-name">Curriculum Agent</div>
+            <div class="stage-desc">Designing syllabus with guided research</div>
+          </div>
+          <div class="stage-card pending" id="stage-1">
+            <div class="stage-indicator pending-ind" id="stage-ind-1">2</div>
+            <div class="stage-name">Content Agent</div>
+            <div class="stage-desc">Writing structured lesson content</div>
+          </div>
+          <div class="stage-card pending" id="stage-2">
+            <div class="stage-indicator pending-ind" id="stage-ind-2">3</div>
+            <div class="stage-name">Review Agent</div>
+            <div class="stage-desc">Reviewing and polishing lessons</div>
+          </div>
+          <div class="stage-card pending" id="stage-3">
+            <div class="stage-indicator pending-ind" id="stage-ind-3">4</div>
+            <div class="stage-name">Quiz Agent</div>
+            <div class="stage-desc">Crafting quizzes and assessments</div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="tabs" role="tablist" aria-label="Course views">
+            <button class="tab-btn active" onclick="setView('overview')">Overview</button>
+            <button class="tab-btn" onclick="setView('syllabus')">Syllabus</button>
+            <button class="tab-btn" onclick="setView('lessons')">Lessons</button>
+            <button class="tab-btn" onclick="setView('quizzes')">Quizzes</button>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-secondary" id="regenerate-btn" onclick="regenerateCourse()">Regenerate</button>
+            <button class="btn btn-secondary" id="download-btn" onclick="downloadPDF()">Download PDF</button>
+            <button class="btn btn-danger" id="stop-btn" onclick="stopGeneration()" disabled>Stop</button>
+          </div>
+        </div>
+
+        <div id="view-overview" class="view active">
+          <div class="overview-grid">
+            <div class="summary-card">
+              <div class="summary-value" id="summary-modules">0</div>
+              <div class="summary-label">Modules</div>
+              <div class="summary-note">Generated based on the topic and audience.</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value" id="summary-duration">0h</div>
+              <div class="summary-label">Estimated duration</div>
+              <div class="summary-note">Useful as a quick preview metric.</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value" id="summary-quizzes">0</div>
+              <div class="summary-label">Quizzes</div>
+              <div class="summary-note">One quiz per module in the workflow.</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value" id="summary-status">0%</div>
+              <div class="summary-label">Completion</div>
+              <div class="summary-note">Updates live during generation.</div>
+            </div>
+          </div>
+
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12 2l2.39 6.95H21l-5.7 4.13L17.7 20 12 15.87 6.3 20l2.4-6.92L3 8.95h6.61L12 2z"/></svg>
+            </div>
+            <div class="empty-title">No generated content yet</div>
+            <div class="empty-copy">Enter a topic and start generation to fill the syllabus, lessons, and quiz panels.</div>
+            <button class="btn btn-primary" onclick="document.getElementById('topic-input').focus()">Start here</button>
+          </div>
+        </div>
+
+        <div id="view-syllabus" class="view">
+          <div class="section-title">Structure</div>
+          <div class="course-card">
+            <div class="course-card-head">
+              <div>
+                <div class="course-card-title">Syllabus outline</div>
+                <div class="course-card-sub">Clear module hierarchy for the topic.</div>
+              </div>
+            </div>
+            <div id="syllabus-col"></div>
+          </div>
+        </div>
+
+        <div id="view-lessons" class="view">
+          <div class="section-title">Final Lessons</div>
+          <div id="lessons-col"></div>
+        </div>
+
+        <div id="view-quizzes" class="view">
+          <div class="section-title">Quizzes</div>
+          <div id="quizzes-col"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      <div class="footer-container">
+        
+        <div class="footer-col">
+          <div class="footer-brand">EduGenesis</div>
+          <p class="footer-desc">An autonomous multi-agent pipeline designed to instantly generate comprehensive educational content and structured curriculums.</p>
+          <div class="footer-credit">Built by <strong>Prasanna Dolas</strong></div>
+        </div>
+
+        <div class="footer-col">
+          <h3 class="footer-heading">Meet the Agents</h3>
+          <ul class="footer-list">
+            <li><button class="footer-link" onclick="openAgentModal('curriculum')">Curriculum Agent</button></li>
+            <li><button class="footer-link" onclick="openAgentModal('professor')">Content Agent</button></li>
+            <li><button class="footer-link" onclick="openAgentModal('dean')">Review Agent</button></li>
+            <li><button class="footer-link" onclick="openAgentModal('exam')">Quiz Agent</button></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h3 class="footer-heading">Connect</h3>
+          <ul class="footer-list">
+            <li>
+              <a href="https://www.linkedin.com/in/prasanna-dolas-b872aa328/" class="footer-link" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                LinkedIn
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/prasannadolas" class="footer-link" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+              </a>
+            </li>
+            <li>
+              <a href="https://leetcode.com/u/prasannadolas/" class="footer-link" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.939 5.939 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114l5.7-5.541a1.377 1.377 0 0 0-.03-1.957 1.373 1.373 0 0 0-1.317-.178zm5.72 11.232a1.374 1.374 0 0 0-.961.438l-4.102 4.103a1.377 1.377 0 0 0 0 1.952 1.377 1.377 0 0 0 1.951 0l4.102-4.103a1.377 1.377 0 0 0 0-1.952 1.374 1.374 0 0 0-.99-.438z"/></svg>
+                LeetCode
+              </a>
+            </li>
+          </ul>    
+        </div>
+        
+      </div>
+    </footer>
+    
+  </main>
+</div>
+
+<div id="my-courses-mount"></div>
+
+<div class="modal-overlay" id="login-required-modal" onclick="closeLoginModal(event)">
+  <div class="modal-card" style="max-width: 400px; text-align: center;" onclick="event.stopPropagation()">
+    <div class="modal-header" style="justify-content: center; margin-bottom: 8px;">
+      <h2 class="modal-title">Sign in Required</h2>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom: 24px; color: var(--text-secondary); line-height: 1.5;">To generate and save custom AI courses,<br>Please sign in or create a free account.</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 15px;" onclick="window.location.href='/register'">Create a free account</button>
+        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="window.location.href='/login'">Sign in</button>
+        <button class="btn" style="width: 100%; justify-content: center; border: none; background: transparent; color: var(--text-muted);" onclick="closeLoginModal()">Maybe later</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="logout-confirm-modal">
+  <div class="modal-card" style="max-width: 350px;">
+    <h2 class="modal-title" style="font-size: 20px; margin-bottom: 12px;">Sign out?</h2>
+    <p style="margin-bottom: 24px;">Are you sure you want to sign out? Your session will end.</p>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn" style="flex: 1;" onclick="closeLogoutModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="visualizer-modal" onclick="closeVisualizerSandbox(event)">
+  <div class="modal-card" style="max-width: 900px; width: 95%; height: 80vh; display: flex; flex-direction: column; padding: 0;" onclick="event.stopPropagation()">
+    
+    <div class="modal-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border); margin: 0; background: var(--surface); border-radius: var(--radius-xl) var(--radius-xl) 0 0;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <h2 class="modal-title" id="visualizer-title" style="font-size: 20px;">Interactive Sandbox</h2>
+      </div>
+      <button class="modal-close" onclick="closeVisualizerSandbox()">&times;</button>
+    </div>
+
+    <div class="modal-body" id="visualizer-content" style="flex: 1; background: var(--bg); border-radius: 0 0 var(--radius-xl) var(--radius-xl); overflow: hidden; position: relative;">
+      </div>
+    
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="/static/script.js"></script>
+<script src="/static/explore-topics.js"></script>
+<script src="/static/my-courses.js"></script>
+
+<script>
+  (function loadComponents() {
+    const mounts = [
+      ['explore-topics-mount', '/static/partials/explore-topics-modal.html'],
+      ['my-courses-mount', '/static/partials/my-courses-modal.html']
+    ];
+
+    mounts.forEach(([mountId, url]) => {
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to load ' + url);
+          return res.text();
+        })
+        .then(html => {
+          const mount = document.getElementById(mountId);
+          if (mount) mount.outerHTML = html;
+        })
+        .catch(err => console.error('Component load failed:', err));
+    });
+  })();
+</script>
+</body>
+</html>
