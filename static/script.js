@@ -7,24 +7,24 @@ let lastTopic = '';
 let lastAudience = 'Beginners';
 let lastFormat = 'Course';
 let eventSource = null;
-const API = ""; 
+const API = window.API_BASE_URL || "https://ai-course-creator-no1b.onrender.com";
 window._fullCourseContent = '';
 
 // ── AUTHENTICATION & HEADER LOGIC ─────────────────────────────────────────
 function checkAuthUI() {
   const token = localStorage.getItem("orchestrai_token");
   const userStr = localStorage.getItem("orchestrai_user");
-  
+
   if (token && userStr) {
     const user = JSON.parse(userStr);
-    
+
     // Hide auth buttons
     if ($('nav-login-btn')) $('nav-login-btn').style.display = 'none';
     if ($('nav-register-btn')) $('nav-register-btn').style.display = 'none';
-    
+
     // Show the user menu (My Courses + Profile Pill)
     if ($('user-menu')) $('user-menu').style.display = 'flex';
-    
+
     // Set Profile Details in the Pill
     if ($('header-user-name')) $('header-user-name').textContent = user.full_name.split(' ')[0];
     if ($('header-avatar')) {
@@ -40,7 +40,7 @@ function checkAuthUI() {
     // Show auth buttons when logged out
     if ($('nav-login-btn')) $('nav-login-btn').style.display = 'inline-flex';
     if ($('nav-register-btn')) $('nav-register-btn').style.display = 'inline-flex';
-    
+
     // Hide the user menu and popup
     if ($('user-menu')) $('user-menu').style.display = 'none';
     if ($('header-user-popup')) $('header-user-popup').style.display = 'none';
@@ -65,6 +65,7 @@ document.addEventListener('click', function(event) {
         popup.style.display = 'none';
     }
 });
+
 // ── LOGIN MODAL LOGIC ──────────────────────────────────────────────────────
 function showLoginModal() {
   const modal = $('login-required-modal');
@@ -77,7 +78,6 @@ function closeLoginModal(event) {
   if (modal) modal.classList.remove('active');
 }
 
-// ── LOGOUT LOGIC ───────────────────────────────────────────────────────────
 // ── LOGOUT LOGIC ───────────────────────────────────────────────────────────
 function confirmLogout() {
   // Hide the profile popup menu if it's open
@@ -95,20 +95,11 @@ function closeLogoutModal() {
   if (modal) modal.classList.remove('active');
 }
 
-async function handleLogout() {
-  closeLogoutModal(); 
-  
-  const token = localStorage.getItem("orchestrai_token");
-  if (token) {
-    await fetch(`${API}/auth/logout`, {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${token}` }
-    }).catch(() => {});
-  }
+function handleLogout() {
+  closeLogoutModal();
   localStorage.removeItem("orchestrai_token");
   localStorage.removeItem("orchestrai_user");
-  
-  window.location.href = "/"; 
+  window.location.href = "/";
 }
 
 // Force refresh when navigating back
@@ -168,7 +159,7 @@ function setView(view) {
   const buttons = Array.from(document.querySelectorAll('.tab-btn'));
   const indexMap = { overview: 0, syllabus: 1, lessons: 2, quizzes: 3 };
   if (buttons[indexMap[view]]) buttons[indexMap[view]].classList.add('active');
-  
+
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   $("view-" + view).classList.add('active');
 }
@@ -203,13 +194,13 @@ function showError(title, sub) {
   $("pipeline-badge").className = 'pipeline-badge error';
   $("badge-text").textContent = 'Error';
   $("pulse-dot").style.display = 'none';
-  
+
   const homeStatus = $("home-status");
   if (homeStatus) {
       homeStatus.className = 'status-chip status-error';
       homeStatus.textContent = 'Generation interrupted';
   }
-  
+
   setProgress(0, 'Generation failed');
   isRunning = false;
   stopRequested = false;
@@ -249,13 +240,13 @@ function resetAll() {
   $("summary-modules").textContent = '0';
   $("summary-duration").textContent = '0h';
   $("summary-quizzes").textContent = '0';
-  
+
   const homeStatus = $("home-status");
   if (homeStatus) {
       homeStatus.className = 'status-chip status-ready';
       homeStatus.textContent = 'Ready to generate';
   }
-  
+
   resetPipelineUI();
   showPanel('home');
 }
@@ -277,19 +268,19 @@ function resetPipelineUI() {
 function setButtonsState(running) {
   const submitBtn = $("submit-btn");
   if (submitBtn) submitBtn.disabled = running;
-  
+
   const demoFillBtn = $("demo-fill-btn");
   if (demoFillBtn) demoFillBtn.disabled = running;
-  
+
   const clearBtn = $("clear-btn");
   if (clearBtn) clearBtn.disabled = running;
-  
+
   const stopBtn = $("stop-btn");
   if (stopBtn) stopBtn.disabled = !running;
-  
+
   const regenBtn = $("regenerate-btn");
   if (regenBtn) regenBtn.disabled = running;
-  
+
   const downloadBtn = $("download-btn");
   if (downloadBtn) downloadBtn.disabled = running && !window._fullCourseContent;
 }
@@ -303,7 +294,7 @@ function startGeneration(forceLast = false) {
     showLoginModal(); // Pop up the container!
     return; // Stop the generation process entirely
   }
-  
+
   if (isRunning) return;
   dismissError();
 
@@ -349,15 +340,15 @@ function startGeneration(forceLast = false) {
   $("lessons-col").innerHTML = '';
   $("quizzes-col").innerHTML = '';
   $("empty-state").style.display = 'none';
-  
+
   const homeStatus = $("home-status");
   if (homeStatus) {
       homeStatus.className = 'status-chip status-working';
       homeStatus.textContent = 'Generating course...';
   }
-  
+
   window._fullCourseContent = "";
-  
+
 // Reset overview stats
   $("summary-modules").textContent = '0';
   $("summary-quizzes").textContent = '0';
@@ -378,7 +369,7 @@ function startGeneration(forceLast = false) {
   if (eventSource) eventSource.close();
 
   // Connect to FastAPI SSE endpoint
-  const url = `/generate?topic=${encodeURIComponent(topicInput)}&audience=${encodeURIComponent(audience)}`;
+  const url = `${API}/generate?topic=${encodeURIComponent(topicInput)}&audience=${encodeURIComponent(audience)}`;
   eventSource = new EventSource(url);
 
   // Attach event listeners
@@ -404,12 +395,12 @@ function startGeneration(forceLast = false) {
       let currentQuizzes = parseInt($("summary-quizzes").textContent) || 0;
       $("summary-quizzes").textContent = String(currentQuizzes + 1);
   });
-  
+
   eventSource.addEventListener('done', e => { 
     handleDone(JSON.parse(e.data)); 
     eventSource.close(); 
   });
-  
+
   eventSource.onerror = () => { 
     const currentLabel = $("progress-label").textContent;
     if (!currentLabel.includes('❌') && !stopRequested) {
@@ -423,19 +414,19 @@ function startGeneration(forceLast = false) {
 function stopGeneration() {
   if (!isRunning) return;
   stopRequested = true;
-  
+
   if (eventSource) {
       eventSource.close();
   }
 
   $("progress-label").textContent = 'Stopping generation...';
-  
+
   const homeStatus = $("home-status");
   if (homeStatus) {
       homeStatus.className = 'status-chip status-working';
       homeStatus.textContent = 'Stopping...';
   }
-  
+
   handleStopped();
 }
 
@@ -456,7 +447,7 @@ function handleStopped() {
   $("badge-text").textContent = 'Stopped';
   $("pulse-dot").style.display = 'none';
   $("progress-label").textContent = 'Generation stopped';
-  
+
   const homeStatus = $("home-status");
   if (homeStatus) {
       homeStatus.className = 'status-chip status-ready';
@@ -473,23 +464,23 @@ function handleStage(d) {
 
 function handleProgress(d) {
   setProgress(d.pct, d.label);
-  
+
   // ── UNLOCK UI & SAVE PARTIAL COURSE ON ERROR ──
   if (d.label.includes('❌')) {
     isRunning = false;
     setButtonsState(false); 
-    
+
     $("pipeline-badge").className = 'pipeline-badge error';
     $("badge-text").textContent = 'Error';
     $("pulse-dot").style.display = 'none';
-    
+
     if (eventSource) {
         eventSource.close();
     }
 
     // NEW: If we managed to generate at least the syllabus or 1 module, save it!
     if (window._fullCourseContent && window._fullCourseContent.trim().length > 50) {
-        fetch('/api/save_course', {
+        fetch(`${API}/api/save_course`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -518,7 +509,7 @@ function handleSyllabus(d) {
   const col = $("syllabus-col");
   col.innerHTML = '';
   const lines = d.text.split('\n').filter(l => l.trim());
-  
+
   lines.forEach((line, i) => {
     const cleanLine = line.replace(/\*\*/g, '').replace(/#/g, '').trim();
     col.innerHTML += `
@@ -570,7 +561,7 @@ function handleLessonDone(d) {
   if (body) {
     let htmlContent = renderMarkdownLite(d.content);
     body.innerHTML = htmlContent;
-    
+
     const card = $("lesson-" + d.index);
     if(card && !card.querySelector('.lesson-expand-btn')) {
       card.innerHTML += `<button class="lesson-expand-btn" onclick="toggleExpand(this)">Show full lesson ↓</button>`;
@@ -600,7 +591,7 @@ function handleQuizDone(d) {
             <strong>${opt.letter.toUpperCase()})</strong> ${escapeHtml(opt.text)}
         </button>`;
       });
-      
+
       htmlQuiz += `<div class="mcq-feedback"></div>`;
       htmlQuiz += `</div>`;
     });
@@ -620,13 +611,13 @@ function handleQuizDone(d) {
 function handleDone(d) {
   setBadge(false);
   window._fullCourseContent = d.full_content; 
-  
+
   $("empty-state").style.display = 'none';
   $("summary-status").textContent = '100%';
   setButtonsState(false);
   isRunning = false;
 
-  fetch('/api/save_course', {
+  fetch(`${API}/api/save_course`, {
       method: 'POST',
       headers: { 
           'Content-Type': 'application/json',
@@ -739,7 +730,7 @@ function toggleExpand(btn) {
 function renderMarkdownLite(md) {
   // 1. Intercept [VISUALIZE: Concept] tags and convert them into HTML buttons
   const visualizerRegex = /\[VISUALIZE:\s*([^\]]+)\]/g;
-  
+
   const processedMd = md.replace(visualizerRegex, (match, conceptName) => {
     // We use a specific class 'visualizer-pill' that we will style in CSS in Step 4
     return `<button class="visualizer-pill" onclick="openVisualizerSandbox('${escapeHtml(conceptName)}')">
@@ -815,7 +806,7 @@ function generatePDFHTML(topic, rawContent) {
 <title>${escapeHtml(cleanTopic)} - Course PDF</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap');
-  
+
   /* PERFECT PAGE PADDING & MARGINS */
   @page { size: A4; margin: 25mm 20mm; }
   body { 
@@ -860,7 +851,7 @@ function generatePDFHTML(topic, rawContent) {
 
   /* PAGE 3+: CONTENT TYPOGRAPHY */
   p { margin-bottom: 16px; text-align: justify; hyphens: auto; }
-  
+
   /* FORCED PAGE BREAKS FOR MODULES */
   h1 { 
     page-break-before: always; 
@@ -934,7 +925,7 @@ function downloadPDF() {
 
   const rawTopic = ($("pipeline-course-title") ? $("pipeline-course-title").textContent : 'Course').trim();
   const safeFilename = rawTopic.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_course.pdf';
-  
+
   const htmlContent = generatePDFHTML(rawTopic, window._fullCourseContent);
   executePDFDownload(htmlContent, safeFilename, dlBtn, originalText);
 }
@@ -1007,6 +998,7 @@ function showSavedBanner(customText) {
   setTimeout(() => { banner.style.opacity='0'; banner.style.transform='translateY(10px)'; }, 3500);
   setTimeout(() => banner.remove(), 4000);
 }
+
 // ── RESTORE SAVED COURSE ───────────────────────────────────────────────────
 function restoreSavedCourse() {
   const saved = loadFromStorage();
@@ -1136,10 +1128,10 @@ function openAgentModal(agentKey) {
     `;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
   }
-  
+
   $('modal-agent-name').textContent = data.name;
   $('modal-agent-desc').textContent = data.desc;
-  
+
   const ul = $('modal-agent-work');
   ul.innerHTML = '';
   data.work.forEach(item => {
@@ -1147,7 +1139,7 @@ function openAgentModal(agentKey) {
     li.textContent = item;
     ul.appendChild(li);
   });
-  
+
   setTimeout(() => {
     $('agent-modal').classList.add('active');
   }, 10);
@@ -1180,7 +1172,7 @@ async function openVisualizerSandbox(conceptName) {
 
   $('visualizer-title').textContent = conceptName;
   const contentContainer = $('visualizer-content');
-  
+
   // 1. Show Loading State
   contentContainer.innerHTML = `
     <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color: var(--text-muted); text-align:center; padding: 40px;">
@@ -1197,7 +1189,7 @@ async function openVisualizerSandbox(conceptName) {
 
   // 2. LAZY LOAD: Fetch the code from the backend only when clicked
   try {
-    const res = await fetch(`/api/visualize?concept=${encodeURIComponent(conceptName)}`, {
+    const res = await fetch(`${API}/api/visualize?concept=${encodeURIComponent(conceptName)}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem("orchestrai_token")}` }
     });
     const data = await res.json();
@@ -1205,7 +1197,7 @@ async function openVisualizerSandbox(conceptName) {
     if (data.ok) {
       // Inject the raw HTML
       contentContainer.innerHTML = data.html;
-      
+
       // 3. SECURE EXECUTION: Browsers block <script> tags injected via innerHTML. 
       // We must manually extract and re-append them to force execution!
       Array.from(contentContainer.querySelectorAll("script")).forEach(oldScript => {
