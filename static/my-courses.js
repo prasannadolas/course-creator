@@ -1,4 +1,5 @@
 // ── MY COURSES GRID MODAL LOGIC ────────────────────────────────────────────
+const COURSES_API = window.API_BASE_URL || "https://ai-course-creator-no1b.onrender.com";
 async function openMyCoursesModal() {
   const modal = $('my-courses-modal');
   if (modal) modal.classList.add('active');
@@ -8,7 +9,7 @@ async function openMyCoursesModal() {
   grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding: 40px; color: var(--text-muted);">Fetching your courses...</div>';
 
   try {
-    const res = await fetch('/api/history', {
+    const res = await fetch(`${COURSES_API}/api/history`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem("orchestrai_token")}` }
     });
     const data = await res.json();
@@ -174,7 +175,7 @@ async function deleteCloudCourse(courseId, event) {
   }
 
   try {
-    const res = await fetch('/api/history/' + courseId, {
+    const res = await fetch(`${COURSES_API}/api/history/${courseId}`, {
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem("orchestrai_token") }
     });
